@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyA9YdrrIcLsLBAt6McABK6lbnS0MInfKFo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>786696478134</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.jadrdev.gasolinerascan</string>
+	<key>PROJECT_ID</key>
+	<string>gasolineras-can</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gasolineras-can.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:786696478134:ios:ec54e7ed0cb990db0eb517</string>
+</dict>
+</plist>
