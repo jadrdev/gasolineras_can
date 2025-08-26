@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.jadrdev.gasolinerascan</string>
+	<string>com.example.gasolinerasCan</string>
 	<key>PROJECT_ID</key>
 	<string>gasolineras-can</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:786696478134:ios:ec54e7ed0cb990db0eb517</string>
+	<string>1:786696478134:ios:2184c382f189bdc90eb517</string>
 </dict>
 </plist>

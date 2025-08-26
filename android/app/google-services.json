@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "786696478134",
+    "project_id": "gasolineras-can",
+    "storage_bucket": "gasolineras-can.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786696478134:android:94468d950b998d3d0eb517",
+        "android_client_info": {
+          "package_name": "com.example.gasolineras_can"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXYu2M6eXVMZpYvlfqG1iSg3u_4IEPDnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786696478134:android:3a25e850c24a2af30eb517",
+        "android_client_info": {
+          "package_name": "com.jadrdev.gasolinera"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXYu2M6eXVMZpYvlfqG1iSg3u_4IEPDnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
