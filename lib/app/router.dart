@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/auth/presentacion.dart';
-import 'package:gasolineras_can/features/gasolineras/presentacion.dart';
+import 'package:gasolineras_can/features/gasolineras/presentacion/gas_station_list_page.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
@@ -39,7 +38,13 @@ GoRouter createRouter(AuthBloc authBloc) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const GasStationListPage(
+          lat: 28.463629,
+          lng: -16.251846,
+        ),
+      )
     ],
   );
 }
