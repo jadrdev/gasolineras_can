@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class GasStation {
   final int id;
   final String nombre;
@@ -7,6 +9,7 @@ class GasStation {
   final String marca;
   final double? gasolina95;
   final double? diesel;
+  double? distancia; // ✅ Nuevo campo
 
   GasStation({
     required this.id,
@@ -17,6 +20,7 @@ class GasStation {
     required this.marca,
     this.gasolina95,
     this.diesel,
+    this.distancia,
   });
 
   factory GasStation.fromJson(Map<String, dynamic> json) {
@@ -35,4 +39,18 @@ class GasStation {
           : null,
     );
   }
+
+  void calcularDistancia(double userLat, double userLng) {
+    const R = 6371; // km
+    final dLat = _deg2rad(latitud - userLat);
+    final dLng = _deg2rad(longitud - userLng);
+    final a = (sin(dLat/2) * sin(dLat/2)) +
+              cos(_deg2rad(userLat)) * cos(_deg2rad(latitud)) *
+              (sin(dLng/2) * sin(dLng/2));
+    final c = 2 * atan2(sqrt(a), sqrt(1-a));
+    distancia = R * c;
+  }
+
+  double _deg2rad(double deg) => deg * pi / 180;
 }
+

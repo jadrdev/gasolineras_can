@@ -28,6 +28,16 @@ class GasStationError extends GasStationState {
   GasStationError(this.message);
 }
 
+class GasStationLoadError extends GasStationEvent {
+  final String message;
+  GasStationLoadError(this.message);
+}
+
+class LoadStationsWithDistance extends GasStationEvent {
+  final List<GasStation> estaciones;
+  LoadStationsWithDistance(this.estaciones);
+}
+
 // BLoC
 class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
   final GasStationRepository repository;
@@ -37,10 +47,22 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
       emit(GasStationLoading());
       try {
         final stations = await repository.fetchStations(event.lat, event.lng);
+
+        // Calculamos distancia para cada estación
+        for (var e in stations) {
+          e.calcularDistancia(event.lat, event.lng);
+        }
+
         emit(GasStationLoaded(stations));
       } catch (e) {
         emit(GasStationError(e.toString()));
       }
     });
+
+    // Handler del nuevo evento
+    on<LoadStationsWithDistance>((event, emit) {
+      emit(GasStationLoaded(event.estaciones));
+    });
   }
 }
+

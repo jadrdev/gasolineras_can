@@ -40,10 +40,7 @@ GoRouter createRouter(AuthBloc authBloc) {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const GasStationListPage(
-          lat: 28.463629,
-          lng: -16.251846,
-        ),
+        builder: (context, state) => const GasStationListPage(),
       )
     ],
   );
