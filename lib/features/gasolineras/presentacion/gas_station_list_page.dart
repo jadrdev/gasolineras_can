@@ -5,6 +5,7 @@ import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart'
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum SortBy { precio, distancia }
 
@@ -24,6 +25,7 @@ SortBy _sortBy = SortBy.precio;
   void initState() {
     super.initState();
     bloc = GasStationBloc(GasStationRepository());
+    _loadSortPreference(); // 🔹 Cargamos la preferencia
     _loadStations(); // cargar al inicio
   }
 
@@ -46,6 +48,33 @@ Future<void> _loadStations() async {
       bloc.add(GasStationLoadError(e.toString()));
     }
   }
+
+  /// 🔹 Guardar preferencia en local
+  Future<void> _saveSortPreference(SortBy value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("sortBy", value.name); // Guardamos como string
+  }
+
+  /// 🔹 Cargar preferencia en local
+  Future<void> _loadSortPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString("sortBy");
+    if (saved != null) {
+      setState(() {
+        _sortBy = SortBy.values.firstWhere(
+          (e) => e.name == saved,
+          orElse: () => SortBy.precio,
+        );
+      });
+    }
+  }
+
+    void _onSortChanged(SortBy value) {
+    setState(() {
+      _sortBy = value;
+    });
+    _saveSortPreference(value); // 🔹 Guardamos al cambiar
+  }
   
   @override
   void dispose() {
@@ -58,38 +87,59 @@ Future<void> _loadStations() async {
     return BlocProvider.value(
       value: bloc,
       child: Scaffold(
-        appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+                appBar: AppBar(
+          title: Row(
             children: [
-              const Text("Gasolineras de Canarias"),
-              Text(
+              Icon(
                 _sortBy == SortBy.precio
-                    ? "Ordenado por precio"
-                    : "Ordenado por distancia",
-                style: const TextStyle(fontSize: 13, color: Colors.white70),
+                    ? Icons
+                          .local_gas_station // precio → surtidor
+                    : Icons.location_on, // distancia → pin
+                size: 20,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Gasolineras de Canarias"),
+                  Text(
+                    _sortBy == SortBy.precio
+                        ? "Ordenado por precio"
+                        : "Ordenado por distancia",
+                    style: const TextStyle(fontSize: 13, color: Colors.white70),
+                  ),
+                ],
               ),
             ],
           ),
-          actions: [
+            actions: [
             PopupMenuButton<SortBy>(
+              initialValue: _sortBy,
+              onSelected: _onSortChanged, // 🔹 Llamamos al método que guarda
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: SortBy.precio,
+                  child: Row(
+                    children: [
+                      Icon(Icons.local_gas_station, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text("Ordenar por precio"),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: SortBy.distancia,
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_on, color: Colors.green),
+                      SizedBox(width: 8),
+                      Text("Ordenar por distancia"),
+                    ],
+                  ),
+                ),
+              ],
               icon: const Icon(Icons.sort),
-              onSelected: (value) {
-                setState(() {
-                  _sortBy = value;
-                });
-              },
-              itemBuilder:
-                  (context) => [
-                    const PopupMenuItem(
-                      value: SortBy.precio,
-                      child: Text('Ordenar por precio'),
-                    ),
-                    const PopupMenuItem(
-                      value: SortBy.distancia,
-                      child: Text('Ordenar por distancia'),
-                    ),
-                  ],
             ),
             IconButton(
               icon: const Icon(Icons.logout),
