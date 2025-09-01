@@ -59,7 +59,18 @@ Future<void> _loadStations() async {
       value: bloc,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Gasolineras de Canarias"),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Gasolineras de Canarias"),
+              Text(
+                _sortBy == SortBy.precio
+                    ? "Ordenado por precio"
+                    : "Ordenado por distancia",
+                style: const TextStyle(fontSize: 13, color: Colors.white70),
+              ),
+            ],
+          ),
           actions: [
             PopupMenuButton<SortBy>(
               icon: const Icon(Icons.sort),
