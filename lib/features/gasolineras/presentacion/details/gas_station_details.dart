@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
@@ -25,7 +26,6 @@ class GasStationDetailPage extends StatefulWidget {
 
 class _GasStationDetailPageState extends State<GasStationDetailPage> {
   late LatLng _userPosition;
-  GoogleMapController? _mapController;
   bool _loadingLocation = true;
 
   // 🔹 Aquí guardaremos los puntos de la ruta
@@ -50,11 +50,31 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
       setState(() {
         _loadingLocation = false;
       });
+    } on LocationPermissionException catch (e) {
+      setState(() => _loadingLocation = false);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Configuración',
+              onPressed: () {
+                // Abrir configuración de la app
+                Geolocator.openAppSettings();
+              },
+            ),
+          ),
+        );
+      }
     } catch (e) {
       setState(() => _loadingLocation = false);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al obtener la ubicación: $e')),
+          SnackBar(
+            content: Text('Error inesperado al obtener la ubicación: $e'),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
