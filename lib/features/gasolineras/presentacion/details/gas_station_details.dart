@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gasolineras_can/core/location.dart';
+import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
@@ -61,7 +62,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
 
   Future<void> _fetchRoute() async {
     final url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${_userPosition.latitude},${_userPosition.longitude}&destination=${widget.station.latitud},${widget.station.longitud}&mode=driving&key=AIzaSyDoMdUvvKsGW95CrI1uXcjaN6l3c__g_m0';
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${_userPosition.latitude},${_userPosition.longitude}&destination=${widget.station.latitud},${widget.station.longitud}&mode=driving&key=${AppConfig.googleMapsApiKey}';
 
     final res = await http.get(Uri.parse(url));
 
