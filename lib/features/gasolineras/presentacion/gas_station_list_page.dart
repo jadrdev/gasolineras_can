@@ -5,6 +5,8 @@ import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart'
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
+import 'package:gasolineras_can/features/favoritos/presentacion.dart';
+import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum SortBy { precio, distancia }
@@ -19,12 +21,14 @@ class GasStationListPage extends StatefulWidget {
 
 class _GasStationListPageState extends State<GasStationListPage> {
 late GasStationBloc bloc;
+late FavoriteRepository favoriteRepository;
 SortBy _sortBy = SortBy.precio;
 
   @override
   void initState() {
     super.initState();
     bloc = GasStationBloc(GasStationRepository());
+    favoriteRepository = FavoriteRepository();
     _loadSortPreference(); // 🔹 Cargamos la preferencia
     _loadStations(); // cargar al inicio
   }
@@ -203,12 +207,23 @@ Future<void> _loadStations() async {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              e.nombre,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    e.nombre,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                FavoriteWidget(
+                                  station: e, 
+                                  repository: favoriteRepository,
+                                ),
+                              ],
                             ),
                             Text(e.direccion),
                             Text("Marca: ${e.marca}"),
