@@ -7,6 +7,7 @@ import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
+import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum SortBy { precio, distancia }
@@ -177,71 +178,99 @@ Future<void> _loadStations() async {
                 );
 
               } else if (state is GasStationLoaded) {
-              final estaciones = List<GasStation>.from(state.stations);
+                final estaciones = List<GasStation>.from(state.stations);
 
-                if (_sortBy == SortBy.precio) {
-                  estaciones.sort((a, b) {
-                    final aPrice = a.gasolina95 ?? double.infinity;
-                    final bPrice = b.gasolina95 ?? double.infinity;
-                    return aPrice.compareTo(bPrice);
-                  });
-                } else {
-                  estaciones.sort((a, b) {
-                    final aDist = a.distancia ?? double.infinity;
-                    final bDist = b.distancia ?? double.infinity;
-                    return aDist.compareTo(bDist);
-                  });
-                }
-                return ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: estaciones.length,
-                  itemBuilder: (context, index) {
-                    final e = estaciones[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    e.nombre,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                return StreamBuilder<List<String>>(
+                  stream: favoriteRepository.favoritesStream(),
+                  builder: (context, snapshot) {
+                    final favorites = snapshot.data ?? [];
+
+                    // Ordenar por precio o distancia como antes
+                    if (_sortBy == SortBy.precio) {
+                      estaciones.sort((a, b) {
+                        final aPrice = a.gasolina95 ?? double.infinity;
+                        final bPrice = b.gasolina95 ?? double.infinity;
+                        return aPrice.compareTo(bPrice);
+                      });
+                    } else {
+                      estaciones.sort((a, b) {
+                        final aDist = a.distancia ?? double.infinity;
+                        final bDist = b.distancia ?? double.infinity;
+                        return aDist.compareTo(bDist);
+                      });
+                    }
+
+                    return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: estaciones.length,
+                      itemBuilder: (context, index) {
+                        final e = estaciones[index];
+                        final isFavorite = favorites.contains(e.id.toString());
+
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GasStationDetailPage(
+                                  station: e,
+                                  favoriteRepository: favoriteRepository,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            color: isFavorite
+                                ? Colors.yellow[50]
+                                : null, // 🔹 fondo distinto si es favorito
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          e.nombre,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      FavoriteWidget(
+                                        station: e,
+                                        repository: favoriteRepository,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                FavoriteWidget(
-                                  station: e, 
-                                  repository: favoriteRepository,
-                                ),
-                              ],
+                                  Text(e.direccion),
+                                  Text("Marca: ${e.marca}"),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "Gasolina 95: ${e.gasolina95?.toStringAsFixed(2) ?? "-"} €",
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(e.direccion),
-                            Text("Marca: ${e.marca}"),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "Gasolina 95: ${e.gasolina95?.toStringAsFixed(2) ?? "-"} €",
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     );
                   },
                 );

@@ -27,7 +27,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
+<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
