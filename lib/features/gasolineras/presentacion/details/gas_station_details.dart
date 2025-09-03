@@ -9,6 +9,7 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
+import 'package:gasolineras_can/core/directions_service.dart';
 
 class GasStationDetailPage extends StatefulWidget {
   final GasStation station;
@@ -34,6 +35,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
   @override
   void initState() {
     super.initState();
+    directionsService = DirectionsService(AppConfig.googleMapsApiKey);
     _initPositions();
   }
 
@@ -76,26 +78,6 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
             duration: const Duration(seconds: 5),
           ),
         );
-      }
-    }
-  }
-
-  Future<void> _fetchRoute() async {
-    final url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${_userPosition.latitude},${_userPosition.longitude}&destination=${widget.station.latitud},${widget.station.longitud}&mode=driving&key=${AppConfig.googleMapsApiKey}';
-
-    final res = await http.get(Uri.parse(url));
-
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-
-      if (data['routes'].isNotEmpty) {
-        final points = data['routes'][0]['overview_polyline']['points'];
-        final decodedPoints = _decodePolyline(points);
-
-        setState(() {
-          _routePoints = decodedPoints;
-        });
       }
     }
   }

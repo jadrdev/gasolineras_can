@@ -10,6 +10,7 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 enum SortBy { precio, distancia }
 
 class GasStationListPage extends StatefulWidget {
