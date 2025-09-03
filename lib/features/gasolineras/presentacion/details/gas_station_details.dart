@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gasolineras_can/core/directions_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gasolineras_can/core/location.dart';
@@ -9,7 +10,6 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-import 'package:gasolineras_can/core/directions_service.dart';
 
 class GasStationDetailPage extends StatefulWidget {
   final GasStation station;
@@ -28,6 +28,7 @@ class GasStationDetailPage extends StatefulWidget {
 class _GasStationDetailPageState extends State<GasStationDetailPage> {
   late LatLng _userPosition;
   bool _loadingLocation = true;
+  late DirectionsService directionsService;
 
   // 🔹 Aquí guardaremos los puntos de la ruta
   List<LatLng> _routePoints = [];
@@ -46,10 +47,16 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         _userPosition = LatLng(pos.latitude, pos.longitude);
       });
 
-      // Después de obtener la posición del usuario, pedimos la ruta
-      await _fetchRoute();
+       // Pedir la ruta usando el servicio
+      final route = await directionsService.getRoute(
+        origin: _userPosition,
+        destination: LatLng(widget.station.latitud, widget.station.longitud),
+      );
+
+   
 
       setState(() {
+        _routePoints = route;
         _loadingLocation = false;
       });
     } on LocationPermissionException catch (e) {
@@ -82,38 +89,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     }
   }
 
-  List<LatLng> _decodePolyline(String polyline) {
-    List<LatLng> points = [];
-    int index = 0, len = polyline.length;
-    int lat = 0, lng = 0;
-
-    while (index < len) {
-      int b, shift = 0, result = 0;
-      do {
-        b = polyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = polyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      points.add(LatLng(lat / 1E5, lng / 1E5));
-    }
-
-    return points;
-  }
-
-  Future<void> _launchMaps() async {
+   Future<void> _launchMaps() async {
     final url =
         'https://www.google.com/maps/dir/?api=1&origin=${_userPosition.latitude},${_userPosition.longitude}&destination=${widget.station.latitud},${widget.station.longitud}&travelmode=driving';
     final uri = Uri.parse(url);
