@@ -1,24 +1,26 @@
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
+import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gasolineras_can/core/location.dart';
-import 'package:gasolineras_can/core/config.dart';
+
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 
 class GasStationDetailPage extends StatefulWidget {
   final GasStation station;
   final FavoriteRepository favoriteRepository;
+  final DirectionsRepository directionsRepository; // 👈 nuevo
 
   const GasStationDetailPage({
     super.key,
     required this.station,
     required this.favoriteRepository,
+    required this.directionsRepository,
   });
 
   @override
@@ -36,22 +38,33 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
   @override
   void initState() {
     super.initState();
-    directionsService = DirectionsService(AppConfig.googleMapsApiKey);
     _initPositions();
   }
 
   Future<void> _initPositions() async {
     try {
       final pos = await determinePosition();
+      final origin = LatLng(pos.latitude, pos.longitude);
+      final destination = LatLng(
+        widget.station.latitud,
+        widget.station.longitud,
+      );
       setState(() {
         _userPosition = LatLng(pos.latitude, pos.longitude);
       });
 
        // Pedir la ruta usando el servicio
-      final route = await directionsService.getRoute(
-        origin: _userPosition,
-        destination: LatLng(widget.station.latitud, widget.station.longitud),
+      // final route = await directionsService.getRoute(
+      //   origin: _userPosition,
+      //   destination: LatLng(widget.station.latitud, widget.station.longitud),
+      // );
+
+      final route = await widget.directionsRepository.getRoute(
+        origin,
+        destination,
       );
+
+      
 
    
 

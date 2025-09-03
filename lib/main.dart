@@ -18,6 +18,8 @@ class MyApp extends StatelessWidget {
   final AuthBloc authBloc;
   const MyApp({super.key, required this.authBloc});
 
+  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(

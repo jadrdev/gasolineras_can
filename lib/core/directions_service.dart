@@ -1,17 +1,16 @@
 import 'dart:convert';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 
-class DirectionsService {
+class DirectionsService implements DirectionsRepository {
   final String apiKey;
 
   DirectionsService(this.apiKey);
 
   /// Obtiene la ruta en coche entre dos puntos (origen/destino)
-  Future<List<LatLng>> getRoute({
-    required LatLng origin,
-    required LatLng destination,
-  }) async {
+  @override
+  Future<List<LatLng>> getRoute(LatLng origin, LatLng destination) async {
     final url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=driving&key=$apiKey';
 
@@ -23,8 +22,8 @@ class DirectionsService {
 
     final data = jsonDecode(res.body);
 
-    if (data['routes'].isEmpty) {
-      throw Exception('No se encontró ruta disponible');
+    if (data['routes'] == null || data['routes'].isEmpty) {
+      throw Exception('No se encontr\u00f3 ruta disponible');
     }
 
     final points = data['routes'][0]['overview_polyline']['points'];
