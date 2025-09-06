@@ -44,19 +44,12 @@ SortBy _sortBy = SortBy.precio;
 Future<void> _loadStations() async {
     try {
       final pos = await determinePosition();
-      final estaciones = await GasStationRepository().fetchStations(
-        pos.latitude,
-        pos.longitude,
-      );
 
-      // Calculamos distancia
-      for (var e in estaciones) {
-        e.calcularDistancia(pos.latitude, pos.longitude);
-      }
-
-      // Mandamos al BLoC las estaciones ya con distancia
-      bloc.add(LoadStationsWithDistance(estaciones));
+      // Despachamos la petición al BLoC para que se encargue de
+      // obtener las estaciones y calcular distancias.
+      bloc.add(LoadStations(lat: pos.latitude, lng: pos.longitude));
     } catch (e) {
+      // Si falla la obtención de la posición, notificamos al BLoC
       bloc.add(GasStationLoadError(e.toString()));
     }
   }
@@ -104,30 +97,39 @@ Future<void> _loadStations() async {
       value: bloc,
       child: Scaffold(
                 appBar: AppBar(
-          title: Row(
-            children: [
-              Icon(
-                _sortBy == SortBy.precio
-                    ? Icons
-                          .local_gas_station // precio → surtidor
-                    : Icons.location_on, // distancia → pin
-                size: 20,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Gasolineras de Canarias"),
-                  Text(
-                    _sortBy == SortBy.precio
-                        ? "Ordenado por precio"
-                        : "Ordenado por distancia",
-                    style: const TextStyle(fontSize: 13, color: Colors.white70),
-                  ),
-                ],
-              ),
-            ],
+          // Aumentamos ligeramente la altura y aplicamos un padding superior
+          // dinámico para evitar que el título quede detrás de un hole-punch
+          // o notch central en dispositivos Android.
+          toolbarHeight: kToolbarHeight + 8,
+          title: Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top > 0 ? 6.0 : 0.0,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _sortBy == SortBy.precio
+                      ? Icons
+                            .local_gas_station // precio → surtidor
+                      : Icons.location_on, // distancia → pin
+                  size: 20,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Gasolineras de Canarias"),
+                    Text(
+                      _sortBy == SortBy.precio
+                          ? "Ordenado por precio"
+                          : "Ordenado por distancia",
+                      style: const TextStyle(fontSize: 13, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
             actions: [
             PopupMenuButton<SortBy>(
@@ -275,6 +277,8 @@ Future<void> _loadStations() async {
                                       Text(
                                         "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
                                       ),
+                                      const SizedBox(width: 12),
+                                   
                                     ],
                                   ),
                                 ],

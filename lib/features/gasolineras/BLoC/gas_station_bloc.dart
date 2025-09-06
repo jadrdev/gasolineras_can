@@ -33,10 +33,7 @@ class GasStationLoadError extends GasStationEvent {
   GasStationLoadError(this.message);
 }
 
-class LoadStationsWithDistance extends GasStationEvent {
-  final List<GasStation> estaciones;
-  LoadStationsWithDistance(this.estaciones);
-}
+// LoadStationsWithDistance eliminado: la UI debe despachar LoadStations(lat,lng)
 
 // BLoC
 class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
@@ -59,9 +56,11 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
       }
     });
 
-    // Handler del nuevo evento
-    on<LoadStationsWithDistance>((event, emit) {
-      emit(GasStationLoaded(event.estaciones));
+  // Todas las cargas se hacen a través de `LoadStations` y el repositorio
+    
+    // Handler para eventos de error lanzados desde la UI o repositorio
+    on<GasStationLoadError>((event, emit) {
+      emit(GasStationError(event.message));
     });
   }
 }

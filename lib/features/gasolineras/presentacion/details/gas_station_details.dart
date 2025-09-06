@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
+import 'package:gasolineras_can/core/notifications/notification_service.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -121,7 +122,13 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.station.nombre),
+        toolbarHeight: kToolbarHeight + 6,
+        title: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top > 0 ? 4.0 : 0.0,
+          ),
+          child: Text(widget.station.nombre),
+        ),
         actions: [
           FavoriteWidget(
             station: widget.station,
@@ -202,6 +209,19 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                     icon: const Icon(Icons.directions),
                     label: const Text("Cómo llegar"),
                   ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await NotificationService.showNotification(
+                        title: "Precio bajo en ${widget.station.nombre}",
+                        body: "Gasolina 95 ha bajado a 1.45 €",
+                      );
+                    },
+                    icon: const Icon(Icons.notifications),
+                    label: const Text("Simular alerta"),
+                  ),
+
+
                 ],
               ),
             ),

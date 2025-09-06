@@ -137,7 +137,7 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 ## Development Notes
 
 ### BLoC Events and States
-- Events trigger state changes (`AuthLoggedIn`, `LoadStationsWithDistance`)
+ - Events trigger state changes (`AuthLoggedIn`, `LoadStations`)
 - States represent UI state (`AuthInitial`, `GasStationLoaded`)
 - Use `BlocBuilder` for reactive UI updates
 
