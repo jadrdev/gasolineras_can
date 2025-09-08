@@ -38,8 +38,8 @@ android {
         
         // Required for flutter_local_notifications
         multiDexEnabled = true
-        // Provide MAPS_API_KEY from android/local.properties (preferred) or from project properties
-        val localProps = java.util.Properties()
+    // Provide MAPS_API_KEY from android/local.properties (preferred) or from project properties
+    val localProps = Properties()
         val localPropsFile = rootProject.file("local.properties")
         if (localPropsFile.exists()) {
             localPropsFile.inputStream().use { localProps.load(it) }
