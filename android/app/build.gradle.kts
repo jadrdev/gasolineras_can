@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -36,6 +38,15 @@ android {
         
         // Required for flutter_local_notifications
         multiDexEnabled = true
+        // Provide MAPS_API_KEY from android/local.properties (preferred) or from project properties
+        val localProps = java.util.Properties()
+        val localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localPropsFile.inputStream().use { localProps.load(it) }
+        }
+        manifestPlaceholders["MAPS_API_KEY"] =
+            (localProps.getProperty("MAPS_API_KEY") ?: project.findProperty("MAPS_API_KEY")?.toString()
+                ?: "")
     }
 
     buildTypes {
