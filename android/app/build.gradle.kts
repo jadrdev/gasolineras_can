@@ -56,15 +56,21 @@ android {
             if (keyPropsFile.exists()) {
                 val keyProps = Properties()
                 keyPropsFile.inputStream().use { keyProps.load(it) }
-                val storeFile = file(keyProps.getProperty("storeFile"))
+                val storeFilePath = keyProps.getProperty("storeFile")
+                val keystoreFile = file(storeFilePath)
 
-                signingConfigs.create("release") {
-                    storeFile = if (storeFile.exists()) storeFile else null
-                    storePassword = keyProps.getProperty("storePassword")
-                    keyAlias = keyProps.getProperty("keyAlias")
-                    keyPassword = keyProps.getProperty("keyPassword")
+                if (keystoreFile.exists()) {
+                    signingConfigs.create("release") {
+                        storeFile = keystoreFile
+                        storePassword = keyProps.getProperty("storePassword")
+                        keyAlias = keyProps.getProperty("keyAlias")
+                        keyPassword = keyProps.getProperty("keyPassword")
+                    }
+                    signingConfig = signingConfigs.getByName("release")
+                } else {
+                    // Fallback to debug signing when keystore file doesn't exist
+                    signingConfig = signingConfigs.getByName("debug")
                 }
-                signingConfig = signingConfigs.getByName("release")
             } else {
                 // Fallback to debug signing when no key.properties is present
                 signingConfig = signingConfigs.getByName("debug")

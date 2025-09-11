@@ -97,39 +97,30 @@ Future<void> _loadStations() async {
       value: bloc,
       child: Scaffold(
                 appBar: AppBar(
-          // Aumentamos ligeramente la altura y aplicamos un padding superior
-          // dinámico para evitar que el título quede detrás de un hole-punch
-          // o notch central en dispositivos Android.
-          toolbarHeight: kToolbarHeight + 8,
-          title: Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top > 0 ? 6.0 : 0.0,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _sortBy == SortBy.precio
-                      ? Icons
-                            .local_gas_station // precio → surtidor
-                      : Icons.location_on, // distancia → pin
-                  size: 20,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Gasolineras de Canarias"),
-                    Text(
-                      _sortBy == SortBy.precio
-                          ? "Ordenado por precio"
-                          : "Ordenado por distancia",
-                      style: const TextStyle(fontSize: 13, color: Colors.white70),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          title: Row(
+            children: [
+              Icon(
+                _sortBy == SortBy.precio
+                    ? Icons
+                          .local_gas_station // precio → surtidor
+                    : Icons.location_on, // distancia → pin
+                size: 20,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Gasolineras de Canarias"),
+                  Text(
+                    _sortBy == SortBy.precio
+                        ? "Ordenado por precio"
+                        : "Ordenado por distancia",
+                    style: const TextStyle(fontSize: 13, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ],
           ),
             actions: [
             PopupMenuButton<SortBy>(
@@ -270,15 +261,19 @@ Future<void> _loadStations() async {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      Text(
-                                        "Gasolina 95: ${e.gasolina95?.toStringAsFixed(2) ?? "-"} €",
+                                      Flexible(
+                                        child: Text(
+                                          "Gasolina 95: ${e.gasolina95?.toStringAsFixed(2) ?? "-"} €",
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                      const SizedBox(width: 12),
-                                   
                                     ],
                                   ),
                                 ],
