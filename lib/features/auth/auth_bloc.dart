@@ -39,6 +39,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> register({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      print("Error registro: $e");
+    }
+  }
+
   // Método para logout
   Future<void> logout() async {
     await _firebaseAuth.signOut();

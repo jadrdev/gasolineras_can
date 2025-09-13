@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
-import 'package:gasolineras_can/core/notifications/notification_service.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,6 +34,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
 
   // 🔹 Aquí guardaremos los puntos de la ruta
   List<LatLng> _routePoints = [];
+  double _fabScale = 1.0;
 
   @override
   void initState() {
@@ -118,6 +118,13 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     }
   }
 
+  Future<void> _onFabPressed() async {
+    setState(() => _fabScale = 0.92);
+    await Future.delayed(const Duration(milliseconds: 100));
+    setState(() => _fabScale = 1.0);
+    await _launchMaps();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,86 +148,133 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         children: [
           Expanded(
             flex: 2,
-            child: _loadingLocation
-                ? const Center(child: CircularProgressIndicator())
-                : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
-                        widget.station.latitud,
-                        widget.station.longitud,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                clipBehavior: Clip.hardEdge,
+                child: _loadingLocation
+                    ? const Center(child: CircularProgressIndicator())
+                    : Stack(
+                        children: [
+                          GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                widget.station.latitud,
+                                widget.station.longitud,
+                              ),
+                              zoom: 14,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('station'),
+                                position: LatLng(
+                                  widget.station.latitud,
+                                  widget.station.longitud,
+                                ),
+                                infoWindow: InfoWindow(title: widget.station.nombre),
+                              ),
+                              Marker(
+                                markerId: const MarkerId('user'),
+                                position: _userPosition,
+                                infoWindow: const InfoWindow(title: "Tu ubicación"),
+                                icon: BitmapDescriptor.defaultMarkerWithHue(
+                                  BitmapDescriptor.hueBlue,
+                                ),
+                              ),
+                            },
+                            polylines: {
+                              if (_routePoints.isNotEmpty)
+                                Polyline(
+                                  polylineId: const PolylineId('route'),
+                                  points: _routePoints,
+                                  color: Colors.blue,
+                                  width: 5,
+                                ),
+                            },
+                          ),
+                          Positioned(
+                            right: 12,
+                            bottom: 12,
+                            child: GestureDetector(
+                              onTap: _onFabPressed,
+                              child: AnimatedScale(
+                                scale: _fabScale,
+                                duration: const Duration(milliseconds: 120),
+                                child: FloatingActionButton.small(
+                                  onPressed: _onFabPressed,
+                                  backgroundColor: Colors.white,
+                                  child: const Icon(Icons.directions, color: Colors.black87),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      zoom: 14,
-                    ),
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('station'),
-                        position: LatLng(
-                          widget.station.latitud,
-                          widget.station.longitud,
-                        ),
-                        infoWindow: InfoWindow(title: widget.station.nombre),
-                      ),
-                      Marker(
-                        markerId: const MarkerId('user'),
-                        position: _userPosition,
-                        infoWindow: const InfoWindow(title: "Tu ubicación"),
-                        icon: BitmapDescriptor.defaultMarkerWithHue(
-                          BitmapDescriptor.hueBlue,
-                        ),
-                      ),
-                    },
-                    polylines: {
-                      if (_routePoints.isNotEmpty)
-                        Polyline(
-                          polylineId: const PolylineId('route'),
-                          points: _routePoints,
-                          color: Colors.blue,
-                          width: 5,
-                        ),
-                    },
-                  ),
+              ),
+            ),
           ),
           Expanded(
             flex: 1,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListView(
                 children: [
                   Text(
                     widget.station.nombre,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text("Dirección: ${widget.station.direccion}"),
                   Text("Marca: ${widget.station.marca}"),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Gasolina 95: ${widget.station.gasolina95?.toStringAsFixed(2) ?? "-"} €",
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      if (widget.station.gasolina95 != null)
+                        Tooltip(
+                          message: 'Gasolina 95',
+                          child: Chip(
+                            backgroundColor: Colors.green,
+                            avatar: const CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.white24,
+                              child: Text('95', style: TextStyle(fontSize: 12, color: Colors.white)),
+                            ),
+                            label: Text('${widget.station.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      if (widget.station.diesel != null)
+                        Tooltip(
+                          message: 'Diésel',
+                          child: Chip(
+                            backgroundColor: Colors.grey[800] ?? Colors.black,
+                            avatar: const CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.white24,
+                              child: Text('D', style: TextStyle(fontSize: 12, color: Colors.white)),
+                            ),
+                            label: Text('${widget.station.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                    ],
                   ),
-                  Text(
-                    "Diésel: ${widget.station.diesel?.toStringAsFixed(2) ?? "-"} €",
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _launchMaps,
+                          icon: const Icon(Icons.directions),
+                          label: const Text('Cómo llegar'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _launchMaps,
-                    icon: const Icon(Icons.directions),
-                    label: const Text("Cómo llegar"),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      await NotificationService.showNotification(
-                        title: "Precio bajo en ${widget.station.nombre}",
-                        body: "Gasolina 95 ha bajado a 1.45 €",
-                      );
-                    },
-                    icon: const Icon(Icons.notifications),
-                    label: const Text("Simular alerta"),
-                  ),
-
 
                 ],
               ),

@@ -31,6 +31,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
 late GasStationBloc bloc;
 late FavoriteRepository favoriteRepository;
 SortBy _sortBy = SortBy.precio;
+String _searchQuery = '';
 
   @override
   void initState() {
@@ -189,99 +190,204 @@ Future<void> _loadStations() async {
                   builder: (context, snapshot) {
                     final favorites = snapshot.data ?? [];
 
-                    // Ordenar por precio o distancia como antes
+                    // Filtrar por búsqueda
+                    final filtered = estaciones.where((s) {
+                      final q = _searchQuery.toLowerCase();
+                      if (q.isEmpty) return true;
+                      return (s.nombre.toLowerCase().contains(q) ||
+                          s.direccion.toLowerCase().contains(q) ||
+                          s.marca.toLowerCase().contains(q));
+                    }).toList();
+
+                    // Ordenar por precio o distancia
                     if (_sortBy == SortBy.precio) {
-                      estaciones.sort((a, b) {
+                      filtered.sort((a, b) {
                         final aPrice = a.gasolina95 ?? double.infinity;
                         final bPrice = b.gasolina95 ?? double.infinity;
                         return aPrice.compareTo(bPrice);
                       });
                     } else {
-                      estaciones.sort((a, b) {
+                      filtered.sort((a, b) {
                         final aDist = a.distancia ?? double.infinity;
                         final bDist = b.distancia ?? double.infinity;
                         return aDist.compareTo(bDist);
                       });
                     }
 
-                    return ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: estaciones.length,
-                      itemBuilder: (context, index) {
-                        final e = estaciones[index];
-                        final isFavorite = favorites.contains(e.id.toString());
-
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => GasStationDetailPage(
-                                  station: e,
-                                  favoriteRepository: favoriteRepository,
-                                  directionsRepository: directionsRepository,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Card(
-                            color: isFavorite
-                                ? Colors.yellow[50]
-                                : null, // 🔹 fondo distinto si es favorito
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                    if (filtered.isEmpty) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.local_gas_station, size: 64, color: Colors.grey),
+                                SizedBox(height: 12),
+                                Text('No se han encontrado gasolineras', style: TextStyle(fontSize: 18)),
+                                SizedBox(height: 8),
+                                Text('Prueba a actualizar o cambiar los filtros.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                              ],
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          e.nombre,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      FavoriteWidget(
-                                        station: e,
-                                        repository: favoriteRepository,
-                                      ),
-                                    ],
+                          )
+                        ],
+                      );
+                    }
+
+                    return CustomScrollView(
+                      slivers: [
+                        // Leyenda eliminada por preferencia del usuario
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: 'Buscar por nombre, dirección o marca',
+                                      prefixIcon: Icon(Icons.search),
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    onChanged: (v) => setState(() {
+                                      _searchQuery = v;
+                                    }),
                                   ),
-                                  Text(e.direccion),
-                                  Text("Marca: ${e.marca}"),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          "Gasolina 95: ${e.gasolina95?.toStringAsFixed(2) ?? "-"} €",
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Flexible(
-                                        child: Text(
-                                          "Diésel: ${e.diesel?.toStringAsFixed(2) ?? "-"} €",
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final e = filtered[index];
+                              final isFavorite = favorites.contains(e.id.toString());
+
+                              Color priceColor(double? price, {String? type}) {
+                                // Si se especifica el tipo, preferimos el color de manguera
+                                if (type == '95') return Colors.green;
+                                if (type == 'D') return Colors.grey[900] ?? Colors.black;
+                                if (price == null) return Colors.grey;
+                                if (price < 1.4) return Colors.green;
+                                if (price < 1.7) return Colors.orange;
+                                return Colors.red;
+                              }
+
+                              String formatDistance(double? meters) {
+                                if (meters == null) return '-';
+                                if (meters >= 1000) return '${(meters / 1000).toStringAsFixed(1)} km';
+                                return '${meters.toStringAsFixed(0)} m';
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                child: Card(
+                                  color: isFavorite ? Colors.yellow[50] : null,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(10),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => GasStationDetailPage(
+                                            station: e,
+                                            favoriteRepository: favoriteRepository,
+                                            directionsRepository: directionsRepository,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(e.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                                    const SizedBox(height: 4),
+                                                    Text(e.direccion, style: const TextStyle(color: Colors.grey)),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: [
+                                                  Wrap(
+                                                    spacing: 6,
+                                                    runSpacing: 4,
+                                                    alignment: WrapAlignment.end,
+                                                    children: [
+                                                      if (e.gasolina95 != null)
+                                                        Tooltip(
+                                                          message: 'Gasolina 95',
+                                                          child: Chip(
+                                                            backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                                            avatar: const CircleAvatar(
+                                                              radius: 10,
+                                                              backgroundColor: Colors.white24,
+                                                              child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                            ),
+                                                            label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                                                          ),
+                                                        ),
+                                                      if (e.diesel != null)
+                                                        Tooltip(
+                                                          message: 'Diésel',
+                                                          child: Chip(
+                                                            backgroundColor: priceColor(e.diesel, type: 'D'),
+                                                            avatar: const CircleAvatar(
+                                                              radius: 10,
+                                                              backgroundColor: Colors.white24,
+                                                              child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                            ),
+                                                            label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.navigation, size: 14, color: Colors.grey[700]),
+                                                      const SizedBox(width: 4),
+                                                      Text(formatDistance(e.distancia), style: const TextStyle(color: Colors.grey)),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('Marca: ${e.marca.isNotEmpty ? e.marca : '-'}', style: const TextStyle(color: Colors.black54)),
+                                              FavoriteWidget(station: e, repository: favoriteRepository),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount: filtered.length,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: const SizedBox(height: 12),
+                        ),
+                      ],
                     );
                   },
                 );
