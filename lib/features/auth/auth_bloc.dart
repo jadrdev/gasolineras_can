@@ -13,7 +13,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({FirebaseAuth? firebaseAuth})
     : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
       super(AuthInitial()) {
-    // Detectar cambios de usuario
+    // Registrar handlers primero para que `add(...)` pueda usarse en la
+    // suscripción sin lanzar StateError.
+    on<AuthLoggedIn>((event, emit) => emit(Authenticated()));
+    on<AuthLoggedOut>((event, emit) => emit(Unauthenticated()));
+    on<AuthErrorEvent>((event, emit) => emit(AuthError(event.message)));
+
+    // Detectar cambios de usuario después de registrar handlers
     _firebaseAuth.authStateChanges().listen((user) {
       if (user != null) {
         add(AuthLoggedIn());
@@ -21,9 +27,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         add(AuthLoggedOut());
       }
     });
-
-    on<AuthLoggedIn>((event, emit) => emit(Authenticated()));
-    on<AuthLoggedOut>((event, emit) => emit(Unauthenticated()));
   }
 
   // Método para login
@@ -34,8 +37,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: password,
       );
     } catch (e) {
-      // Aquí podrías emitir un estado de error o usar Formz para validación
-      print("Error login: $e");
+      // Manejo más específico para errores de Firebase Auth
+      if (e is FirebaseAuthException) {
+        final message = _mapFirebaseAuthError(e);
+        add(AuthErrorEvent(message));
+      } else {
+        final message = 'Error inesperado al iniciar sesión';
+        add(AuthErrorEvent(message));
+      }
     }
   }
 
@@ -49,7 +58,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: password,
       );
     } catch (e) {
-      print("Error registro: $e");
+      if (e is FirebaseAuthException) {
+        final message = _mapFirebaseAuthError(e);
+        add(AuthErrorEvent(message));
+      } else {
+        final message = 'Error inesperado al registrarse';
+        add(AuthErrorEvent(message));
+      }
+    }
+  }
+
+  String _mapFirebaseAuthError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'invalid-argument':
+        return 'Credenciales inválidas o caducadas. Por favor inténtalo de nuevo.';
+      case 'user-not-found':
+        return 'No existe una cuenta con ese correo.';
+      case 'wrong-password':
+        return 'Contraseña incorrecta.';
+      case 'user-disabled':
+        return 'La cuenta ha sido deshabilitada.';
+      case 'email-already-in-use':
+        return 'El correo ya está en uso.';
+      case 'weak-password':
+        return 'La contraseña es demasiado débil.';
+      case 'network-request-failed':
+        return 'Error de red. Revisa tu conexión.';
+      default:
+        return e.message ?? 'Error de autenticación';
     }
   }
 

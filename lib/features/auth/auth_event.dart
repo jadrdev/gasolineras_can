@@ -12,3 +12,12 @@ class AuthStarted extends AuthEvent {}
 class AuthLoggedIn extends AuthEvent {}
 
 class AuthLoggedOut extends AuthEvent {}
+
+/// Evento para propagar errores desde el BLoC a la UI
+class AuthErrorEvent extends AuthEvent {
+  final String message;
+  const AuthErrorEvent(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

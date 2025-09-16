@@ -35,19 +35,27 @@ class _LoginScreenState extends State<LoginScreen> {
     final width = MediaQuery.of(context).size.width;
     final cardWidth = width > 600 ? 500.0 : width * 0.95;
 
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 6,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Container(
-              width: cardWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 6,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Container(
+                width: cardWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   const CircleAvatar(
                     radius: 36,
                     child: Icon(Icons.local_gas_station, size: 36),
@@ -117,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
