@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:gasolineras_can/features/auth/profile_page.dart';
 import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
@@ -37,31 +38,52 @@ class _HomeScreenState extends State<HomeScreen> {
       ProfilePage(),
     ];
 
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: pages),
-      extendBody: true,
-      bottomNavigationBar: Container(
+    final bool isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+    Widget buildIosTabBar() {
+      return Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              color: Colors.white.withOpacity(0.12),
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              child: CNTabBar(
-                items: const [
-                  CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),
-                  CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
-                  CNTabBarItem(label: 'Perfil', icon: CNSymbol('person.crop.circle')),
-                ],
-                currentIndex: _currentIndex,
-                onTap: (i) => setState(() => _currentIndex = i),
-              ),
+          child: Container(
+            color: Colors.white.withOpacity(0.12),
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: CNTabBar(
+              items: const [
+                CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),
+                CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
+                CNTabBarItem(label: 'Perfil', icon: CNSymbol('person.crop.circle')),
+              ],
+              currentIndex: _currentIndex,
+              onTap: (i) => setState(() => _currentIndex = i),
             ),
           ),
         ),
-      ),
+      );
+    }
+
+    Widget buildMaterialTabBar() {
+      return BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.red,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_gas_station),
+            label: 'Gasolineras',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritos'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
+      );
+    }
+
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: pages),
+      extendBody: true,
+      bottomNavigationBar: isIOS ? buildIosTabBar() : buildMaterialTabBar(),
     );
   }
 }

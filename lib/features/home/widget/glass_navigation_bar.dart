@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 
 class GlassNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -20,21 +21,17 @@ class GlassNavigationBar extends StatelessWidget {
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white.withOpacity(0.2),
-          elevation: 0,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.white70,
-          currentIndex: currentIndex,
-          onTap: onTap,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_gas_station),
-              label: "Gasolineras",
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.star), label: "Favoritos"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
-          ],
+        child: Container(
+          color: Colors.white.withOpacity(0.12),
+          child: CNTabBar(
+            items: const [
+              CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),
+              CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
+              CNTabBarItem(label: 'Perfil', icon: CNSymbol('person.crop.circle')),
+            ],
+            currentIndex: currentIndex,
+            onTap: onTap,
+          ),
         ),
       ),
     );
