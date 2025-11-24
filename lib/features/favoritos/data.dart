@@ -1,64 +1,55 @@
-// data.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'domain.dart';
 
 class FavoriteRepository implements IFavoriteRepository {
-  final FirebaseFirestore firestore;
-  final FirebaseAuth auth;
-
-  FavoriteRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : firestore = firestore ?? FirebaseFirestore.instance,
-      auth = auth ?? FirebaseAuth.instance;
+  final supabase = Supabase.instance.client;
 
   // Stream de favoritos en tiempo real
+  @override
   Stream<List<String>> favoritesStream() {
-    final uid = auth.currentUser?.uid;
-    if (uid == null) return Stream.value([]);
-    return firestore
-        .collection('users')
-        .doc(uid)
-        .collection('favorites')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((d) => d.id).toList());
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return Stream.value([]);
+
+    // Supabase streaming de tabla
+    return supabase
+        .from('favorites:user_id=eq.$userId')
+        .stream(primaryKey: ['id'])
+        .map((rows) => rows.map((r) => r['station_id'] as String).toList());
   }
 
   @override
   Future<void> addFavorite(String stationId) async {
-    final uid = auth.currentUser?.uid;
-    if (uid == null) return;
-    await firestore
-        .collection('users')
-        .doc(uid)
-        .collection('favorites')
-        .doc(stationId)
-        .set({
-          'stationId': stationId,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await supabase.from('favorites').insert({
+      'user_id': userId,
+      'station_id': stationId,
+    });
   }
 
   @override
   Future<void> removeFavorite(String stationId) async {
-    final uid = auth.currentUser?.uid;
-    if (uid == null) return;
-    await firestore
-        .collection('users')
-        .doc(uid)
-        .collection('favorites')
-        .doc(stationId)
-        .delete();
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('station_id', stationId);
   }
 
   @override
   Future<List<String>> getFavorites() async {
-    final uid = auth.currentUser?.uid;
-    if (uid == null) return [];
-    final snapshot = await firestore
-        .collection('users')
-        .doc(uid)
-        .collection('favorites')
-        .get();
-    return snapshot.docs.map((d) => d.id).toList();
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final res = await supabase
+        .from('favorites')
+        .select('station_id')
+        .eq('user_id', userId);
+
+    return (res as List).map((r) => r['station_id'] as String).toList();
   }
 }
