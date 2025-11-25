@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gasolineras_can"
+    namespace = "com.jadrdev.gasolinera"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -51,8 +51,8 @@ android {
 
     buildTypes {
         release {
-            // Load signing configuration from android/key.properties if available
-            val keyPropsFile = rootProject.file("android/key.properties")
+            // Load signing configuration from key.properties if available
+            val keyPropsFile = rootProject.file("key.properties")
             if (keyPropsFile.exists()) {
                 val keyProps = Properties()
                 keyPropsFile.inputStream().use { keyProps.load(it) }

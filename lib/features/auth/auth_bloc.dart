@@ -52,11 +52,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required String password,
   }) async {
     try {
-      await _supabase.auth.signUp(email: email, password: password);
+      print('🔵 Intentando registrar usuario: $email');
+      final response = await _supabase.auth.signUp(email: email, password: password);
+      print('✅ Respuesta de registro: ${response.user?.id}');
+      print('📧 Email confirmado: ${response.user?.emailConfirmedAt}');
+      
+      if (response.user != null) {
+        print('✅ Usuario creado exitosamente');
+      }
     } on AuthException catch (e) {
-      add(AuthErrorEvent(e.message));
-    } catch (_) {
-      add(AuthErrorEvent("Error inesperado al registrarse"));
+      print('❌ Error de autenticación: ${e.message}');
+      print('❌ Código de error: ${e.statusCode}');
+      add(AuthErrorEvent('Error: ${e.message}'));
+    } catch (e) {
+      print('❌ Error inesperado: $e');
+      add(AuthErrorEvent("Error inesperado: $e"));
     }
   }
 

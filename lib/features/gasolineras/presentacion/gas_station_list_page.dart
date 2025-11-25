@@ -17,7 +17,7 @@ import 'package:gasolineras_can/core/config.dart';
 enum SortBy { precio, distancia }
 
   // 🔹 Cambia este flag para alternar entre MOCK y API real
-  const useMock = true;
+  const useMock = false;
 
 class GasStationListPage extends StatefulWidget {
   const GasStationListPage({super.key});

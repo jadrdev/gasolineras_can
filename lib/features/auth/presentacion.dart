@@ -47,12 +47,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
       listener: (context, state) {
         if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
           );
         } else if (state is Authenticated) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registro exitoso. Verifica tu correo electrónico.')),
+            const SnackBar(
+              content: Text('✅ Registro exitoso. Puedes iniciar sesión ahora.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 4),
+            ),
           );
+          // Navegar automáticamente al login después de 2 segundos
+          Future.delayed(const Duration(seconds: 2), () {
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
+          });
         }
       },
       child: Scaffold(
@@ -203,7 +217,11 @@ class _LoginScreenState extends State<LoginScreen> {
       listener: (context, state) {
         if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
           );
         }
       },

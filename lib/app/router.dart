@@ -32,10 +32,13 @@ GoRouter createRouter(AuthBloc authBloc) {
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
       final loggedIn = authBloc.state is Authenticated;
-      final loggingIn = state.uri.toString() == '/login';
+      final currentPath = state.uri.toString();
+      final isAuthPage = currentPath == '/login' || currentPath == '/register';
 
-      if (!loggedIn && !loggingIn) return '/login';
-      if (loggedIn && loggingIn) return '/home';
+      // Si no está logueado y no está en una página de autenticación, redirigir a login
+      if (!loggedIn && !isAuthPage) return '/login';
+      // Si está logueado y está en una página de autenticación, redirigir a home
+      if (loggedIn && isAuthPage) return '/home';
       return null;
     },
     routes: [

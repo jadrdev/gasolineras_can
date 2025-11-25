@@ -1,4 +1,4 @@
-package com.example.gasolineras_can
+package com.jadrdev.gasolinera
 
 import io.flutter.embedding.android.FlutterActivity
 
