@@ -28,15 +28,13 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 GoRouter createRouter(AuthBloc authBloc) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/home',
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
       final loggedIn = authBloc.state is Authenticated;
       final currentPath = state.uri.toString();
       final isAuthPage = currentPath == '/login' || currentPath == '/register';
 
-      // Si no está logueado y no está en una página de autenticación, redirigir a login
-      if (!loggedIn && !isAuthPage) return '/login';
       // Si está logueado y está en una página de autenticación, redirigir a home
       if (loggedIn && isAuthPage) return '/home';
       return null;

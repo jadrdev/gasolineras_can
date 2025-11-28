@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 import '../gasolineras/models/gas_station.dart';
 
 class FavoriteWidget extends StatelessWidget {
@@ -12,24 +14,69 @@ class FavoriteWidget extends StatelessWidget {
     required this.repository,
   });
 
+  void _showLoginDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.lock_outline, color: Colors.orange),
+            SizedBox(width: 12),
+            Expanded(child: Text('Inicia sesión')),
+          ],
+        ),
+        content: const Text(
+          'Necesitas iniciar sesión para guardar gasolineras en tus favoritos.',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.go('/login');
+            },
+            icon: const Icon(Icons.login),
+            label: const Text('Iniciar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<String>>(
-      stream: repository.favoritesStream(), // ← usa el stream de favoritos
+    final user = Supabase.instance.client.auth.currentUser;
+    final isLoggedIn = user != null;
+
+    return StreamBuilder<List<int>>(
+      stream: repository.favoritesStream(),
       builder: (context, snapshot) {
         final favorites = snapshot.data ?? [];
-        final isFavorite = favorites.contains(station.id.toString());
+        final isFavorite = favorites.contains(station.id);
 
         return IconButton(
           icon: Icon(isFavorite ? Icons.star : Icons.star_border),
-          color: Colors.amber,
+          color: isFavorite ? Colors.amber : null,
           onPressed: () async {
-            if (isFavorite) {
-              await repository.removeFavorite(station.id.toString());
-            } else {
-              await repository.addFavorite(station.id.toString());
+            // Si no está logueado, mostrar diálogo
+            if (!isLoggedIn) {
+              _showLoginDialog(context);
+              return;
             }
-            // No necesitamos setState, el StreamBuilder se actualizará automáticamente
+
+            // Si está logueado, proceder normalmente
+            if (isFavorite) {
+              await repository.removeFavorite(station.id);
+            } else {
+              await repository.addFavorite(station.id);
+            }
           },
         );
       },

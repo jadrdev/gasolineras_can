@@ -7,7 +7,7 @@ class Favorite {
 }
 
 abstract class IFavoriteRepository {
-  Future<void> addFavorite(String stationId);
-  Future<void> removeFavorite(String stationId);
-  Future<List<String>> getFavorites();
+  Future<void> addFavorite(int stationId);
+  Future<void> removeFavorite(int stationId);
+  Future<List<int>> getFavorites();
 }

@@ -56,15 +56,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         } else if (state is Authenticated) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Registro exitoso. Puedes iniciar sesión ahora.'),
+              content: Text(
+                '✅ ¡Gracias por registrarte! Te hemos enviado un email para confirmar tu registro. Por favor, revisa tu bandeja de entrada.',
+              ),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 4),
+              duration: Duration(seconds: 6),
             ),
           );
-          // Navegar automáticamente al login después de 2 segundos
+          // Navegar automáticamente al home después de 2 segundos
           Future.delayed(const Duration(seconds: 2), () {
             if (context.mounted) {
-              Navigator.pop(context);
+              context.go('/home');
             }
           });
         }
@@ -226,85 +228,121 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Container(
-                width: cardWidth,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                  const CircleAvatar(
-                    radius: 36,
-                    child: Icon(Icons.local_gas_station, size: 36),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Gasolineras de Canarias',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Inicia sesión para continuar',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Correo electrónico',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Contraseña',
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isFormValid
-                          ? () {
-                              final email = emailController.text.trim();
-                              final password = passwordController.text.trim();
-                              context.read<AuthBloc>().login(email: email, password: password);
-                            }
-                          : null,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Text('Iniciar sesión'),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                    elevation: 6,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Container(
+                      width: cardWidth,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircleAvatar(
+                            radius: 36,
+                            child: Icon(Icons.local_gas_station, size: 36),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Gasolineras de Canarias',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Inicia sesión para continuar',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Correo electrónico',
+                              prefixIcon: Icon(Icons.email),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: passwordController,
+                            decoration: const InputDecoration(
+                              labelText: 'Contraseña',
+                              prefixIcon: Icon(Icons.lock),
+                            ),
+                            obscureText: true,
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isFormValid
+                                  ? () {
+                                      final email = emailController.text.trim();
+                                      final password = passwordController.text.trim();
+                                      context.read<AuthBloc>().login(email: email, password: password);
+                                    }
+                                  : null,
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12.0),
+                                child: Text('Iniciar sesión'),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('¿No tienes cuenta?'),
+                              TextButton(
+                                onPressed: () => context.go('/register'),
+                                child: const Text('Regístrate'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('¿No tienes cuenta?'),
-                      TextButton(
-                        onPressed: () => context.go('/register'),
-                        child: const Text('Regístrate'),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
+              // Botón flotante para volver al inicio
+              Positioned(
+                top: 16,
+                left: 16,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => context.go('/home'),
+                    borderRadius: BorderRadius.circular(30),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }

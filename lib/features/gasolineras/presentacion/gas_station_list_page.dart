@@ -97,28 +97,22 @@ Future<void> _loadStations() async {
     return BlocProvider.value(
       value: bloc,
       child: Scaffold(
-                appBar: AppBar(
+          appBar: AppBar(
           title: Row(
             children: [
               Icon(
                 _sortBy == SortBy.precio
                     ? Icons
-                          .local_gas_station // precio → surtidor
+                      .local_gas_station // precio → surtidor
                     : Icons.location_on, // distancia → pin
                 size: 20,
-                color: Colors.white,
+                color: Colors.black,
               ),
               const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text("Gasolineras de Canarias"),
-                  Text(
-                    _sortBy == SortBy.precio
-                        ? "Ordenado por precio"
-                        : "Ordenado por distancia",
-                    style: const TextStyle(fontSize: 13, color: Colors.white70),
-                  ),
                 ],
               ),
             ],
@@ -149,11 +143,19 @@ Future<void> _loadStations() async {
                   ),
                 ),
               ],
-              icon: const Icon(Icons.sort),
+              icon: const Icon(Icons.filter_alt),
             ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => context.read<AuthBloc>().logout(),
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                // Solo mostrar el botón de logout si el usuario está autenticado
+                if (authState is Authenticated) {
+                  return IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () => context.read<AuthBloc>().logout(),
+                  );
+                }
+                return const SizedBox.shrink(); // No mostrar nada si no está autenticado
+              },
             ),
           ],
         ),
@@ -185,7 +187,7 @@ Future<void> _loadStations() async {
               } else if (state is GasStationLoaded) {
                 final estaciones = List<GasStation>.from(state.stations);
 
-                return StreamBuilder<List<String>>(
+                return StreamBuilder<List<int>>(
                   stream: favoriteRepository.favoritesStream(),
                   builder: (context, snapshot) {
                     final favorites = snapshot.data ?? [];
@@ -263,7 +265,7 @@ Future<void> _loadStations() async {
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               final e = filtered[index];
-                              final isFavorite = favorites.contains(e.id.toString());
+                              final isFavorite = favorites.contains(e.id);
 
                               Color priceColor(double? price, {String? type}) {
                                 // Si se especifica el tipo, preferimos el color de manguera
@@ -367,13 +369,6 @@ Future<void> _loadStations() async {
                                             ],
                                           ),
                                           const SizedBox(height: 8),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text('Marca: ${e.marca.isNotEmpty ? e.marca : '-'}', style: const TextStyle(color: Colors.black54)),
-                                              FavoriteWidget(station: e, repository: favoriteRepository),
-                                            ],
-                                          ),
                                         ],
                                       ),
                                     ),
