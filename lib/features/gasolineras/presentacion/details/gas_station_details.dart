@@ -9,7 +9,7 @@ import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:map_launcher/map_launcher.dart';
 
 class GasStationDetailPage extends StatefulWidget {
   final GasStation station;
@@ -103,19 +103,88 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     }
   }
 
-   Future<void> _launchMaps() async {
-    final url =
-        'https://www.google.com/maps/dir/?api=1&origin=${_userPosition.latitude},${_userPosition.longitude}&destination=${widget.station.latitud},${widget.station.longitud}&travelmode=driving';
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+  Future<void> _launchMaps() async {
+    try {
+      final availableMaps = await MapLauncher.installedMaps;
+      
+      // Debug: ver cuántas apps se detectaron
+      print('🗺️ Apps de mapas detectadas: ${availableMaps.length}');
+      for (var map in availableMaps) {
+        print('  - ${map.mapName}');
+      }
+      
+      if (availableMaps.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No hay aplicaciones de mapas instaladas')),
+          );
+        }
+        return;
+      }
+
+      // Siempre mostrar el selector para que el usuario pueda elegir
+      if (context.mounted) {
+        await _showMapOptions(availableMaps);
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el mapa')),
+          SnackBar(content: Text('Error al abrir el mapa: $e')),
         );
       }
     }
+  }
+
+  Future<void> _showMapOptions(List<AvailableMap> availableMaps) async {
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Selecciona una app de mapas',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ...availableMaps.map((map) {
+                return ListTile(
+                  leading: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Image.asset(
+                      map.icon,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.map, size: 40);
+                      },
+                    ),
+                  ),
+                  title: Text(map.mapName),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await map.showDirections(
+                      destination: Coords(widget.station.latitud, widget.station.longitud),
+                      origin: Coords(_userPosition.latitude, _userPosition.longitude),
+                      destinationTitle: widget.station.nombre,
+                    );
+                  },
+                );
+              }),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _onFabPressed() async {
@@ -232,33 +301,68 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                   Text("Dirección: ${widget.station.direccion}"),
                   Text("Marca: ${widget.station.marca}"),
                   const SizedBox(height: 10),
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
                     children: [
                       if (widget.station.gasolina95 != null)
                         Tooltip(
                           message: 'Gasolina 95',
                           child: Chip(
                             backgroundColor: Colors.green,
+                            visualDensity: VisualDensity.compact,
+                            shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
-                              radius: 12,
+                              radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('95', style: TextStyle(fontSize: 12, color: Colors.white)),
+                              child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                            label: Text('${widget.station.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
                           ),
                         ),
-                      const SizedBox(width: 8),
+                      if (widget.station.gasolina98 != null)
+                        Tooltip(
+                          message: 'Gasolina 98',
+                          child: Chip(
+                            backgroundColor: Colors.blue,
+                            visualDensity: VisualDensity.compact,
+                            shape: const StadiumBorder(),
+                            avatar: const CircleAvatar(
+                              radius: 10,
+                              backgroundColor: Colors.white24,
+                              child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                            ),
+                            label: Text('${widget.station.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          ),
+                        ),
                       if (widget.station.diesel != null)
                         Tooltip(
                           message: 'Diésel',
                           child: Chip(
                             backgroundColor: Colors.grey[800] ?? Colors.black,
+                            visualDensity: VisualDensity.compact,
+                            shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
-                              radius: 12,
+                              radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('D', style: TextStyle(fontSize: 12, color: Colors.white)),
+                              child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
+                            label: Text('${widget.station.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          ),
+                        ),
+                      if (widget.station.dieselPremium != null)
+                        Tooltip(
+                          message: 'Diésel Premium',
+                          child: Chip(
+                            backgroundColor: Colors.grey[800] ?? Colors.black,
+                            visualDensity: VisualDensity.compact,
+                            shape: const StadiumBorder(),
+                            avatar: const CircleAvatar(
+                              radius: 10,
+                              backgroundColor: Colors.white24,
+                              child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                            ),
+                            label: Text('${widget.station.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
                           ),
                         ),
                     ],

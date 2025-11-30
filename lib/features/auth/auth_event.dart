@@ -10,6 +10,10 @@ class AuthLoggedIn extends AuthEvent {}
 
 class AuthLoggedOut extends AuthEvent {}
 
+class AuthLoadingEvent extends AuthEvent {}
+
+class RegistrationSuccessEvent extends AuthEvent {}
+
 class AuthErrorEvent extends AuthEvent {
   final String message;
   const AuthErrorEvent(this.message);

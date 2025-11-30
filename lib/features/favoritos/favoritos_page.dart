@@ -155,10 +155,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         return Colors.red;
                       }
 
-                      String formatDistance(double? meters) {
-                        if (meters == null) return '-';
-                        if (meters >= 1000) return '${(meters / 1000).toStringAsFixed(1)} km';
-                        return '${meters.toStringAsFixed(0)} m';
+                      String formatDistance(double? km) {
+                        if (km == null) return '-';
+                        if (km >= 1) return '${km.toStringAsFixed(1)} km';
+                        return '${(km * 1000).toStringAsFixed(0)} m';
                       }
 
                       return Padding(
@@ -193,60 +193,83 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                           children: [
                                             Text(e.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                             const SizedBox(height: 4),
-                                            Text(e.direccion, style: const TextStyle(color: Colors.grey)),
+                                            Text(e.direccion, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                      Row(
                                         children: [
-                                          Wrap(
-                                            spacing: 6,
-                                            runSpacing: 4,
-                                            alignment: WrapAlignment.end,
-                                            children: [
-                                              if (e.gasolina95 != null)
-                                                Tooltip(
-                                                  message: 'Gasolina 95',
-                                                  child: Chip(
-                                                    backgroundColor: priceColor(e.gasolina95, type: '95'),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
-                                                    ),
-                                                    label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
-                                                  ),
-                                                ),
-                                              if (e.diesel != null)
-                                                Tooltip(
-                                                  message: 'Diésel',
-                                                  child: Chip(
-                                                    backgroundColor: priceColor(e.diesel, type: 'D'),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
-                                                    ),
-                                                    label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white)),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.navigation, size: 14, color: Colors.grey[700]),
-                                              const SizedBox(width: 4),
-                                              Text(formatDistance(e.distancia), style: const TextStyle(color: Colors.grey)),
-                                            ],
-                                          ),
+                                          Icon(Icons.navigation, size: 14, color: Colors.grey[700]),
+                                          const SizedBox(width: 4),
+                                          Text(formatDistance(e.distancia), style: const TextStyle(color: Colors.grey)),
                                         ],
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      if (e.gasolina95 != null)
+                                        Tooltip(
+                                          message: 'Gasolina 95',
+                                          child: Chip(
+                                            backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                            visualDensity: VisualDensity.compact,
+                                            avatar: const CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: Colors.white24,
+                                              child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                            ),
+                                            label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                          ),
+                                        ),
+                                      if (e.gasolina98 != null)
+                                        Tooltip(
+                                          message: 'Gasolina 98',
+                                          child: Chip(
+                                            backgroundColor: Colors.blue,
+                                            visualDensity: VisualDensity.compact,
+                                            avatar: const CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: Colors.white24,
+                                              child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                            ),
+                                            label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                          ),
+                                        ),
+                                      if (e.diesel != null)
+                                        Tooltip(
+                                          message: 'Diésel',
+                                          child: Chip(
+                                            backgroundColor: priceColor(e.diesel, type: 'D'),
+                                            visualDensity: VisualDensity.compact,
+                                            avatar: const CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: Colors.white24,
+                                              child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                            ),
+                                            label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                          ),
+                                        ),
+                                      if (e.dieselPremium != null)
+                                        Tooltip(
+                                          message: 'Diésel Premium',
+                                          child: Chip(
+                                            backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                            visualDensity: VisualDensity.compact,
+                                            avatar: const CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: Colors.white24,
+                                              child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                            ),
+                                            label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

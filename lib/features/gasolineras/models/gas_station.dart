@@ -8,7 +8,9 @@ class GasStation {
   final double longitud;
   final String marca;
   final double? gasolina95;
+  final double? gasolina98;
   final double? diesel;
+  final double? dieselPremium;
   double? distancia; // ✅ Nuevo campo
 
   GasStation({
@@ -19,7 +21,9 @@ class GasStation {
     required this.longitud,
     required this.marca,
     this.gasolina95,
+    this.gasolina98,
     this.diesel,
+    this.dieselPremium,
     this.distancia,
   });
 
@@ -34,8 +38,14 @@ class GasStation {
       gasolina95: json["Gasolina95"] != null
           ? double.tryParse(json["Gasolina95"].toString())
           : null,
+      gasolina98: json["Gasolina98"] != null
+          ? double.tryParse(json["Gasolina98"].toString())
+          : null,
       diesel: json["Diesel"] != null
           ? double.tryParse(json["Diesel"].toString())
+          : null,
+      dieselPremium: json["DieselPremium"] != null
+          ? double.tryParse(json["DieselPremium"].toString())
           : null,
     );
   }
