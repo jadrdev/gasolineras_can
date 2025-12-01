@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
@@ -22,28 +23,29 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 600px;
             background: white;
             padding: 60px 40px;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
             animation: slideUp 0.5s ease-out;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .success-icon {
             width: 80px;
             height: 80px;
@@ -55,16 +57,17 @@
             margin: 0 auto 30px;
             animation: scaleIn 0.5s ease-out 0.2s both;
         }
-        
+
         @keyframes scaleIn {
             from {
                 transform: scale(0);
             }
+
             to {
                 transform: scale(1);
             }
         }
-        
+
         .success-icon svg {
             width: 50px;
             height: 50px;
@@ -74,28 +77,28 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-        
+
         h1 {
             color: #667eea;
             margin-bottom: 20px;
             font-size: 2.5em;
             font-weight: 700;
         }
-        
+
         .app-name {
             color: #764ba2;
             font-weight: 600;
             font-size: 1.2em;
             margin-bottom: 30px;
         }
-        
+
         .message {
             font-size: 1.1em;
             color: #555;
             margin-bottom: 30px;
             line-height: 1.8;
         }
-        
+
         .highlight {
             background: linear-gradient(135deg, #f8f9ff 0%, #fff5f8 100%);
             padding: 20px;
@@ -103,16 +106,16 @@
             margin: 30px 0;
             border-left: 4px solid #667eea;
         }
-        
+
         .highlight p {
             margin: 10px 0;
             color: #333;
         }
-        
+
         .highlight strong {
             color: #667eea;
         }
-        
+
         .cta-button {
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -126,24 +129,24 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .cta-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
-        
+
         .features {
             margin-top: 40px;
             text-align: left;
         }
-        
+
         .features h2 {
             color: #667eea;
             font-size: 1.3em;
             margin-bottom: 20px;
             text-align: center;
         }
-        
+
         .feature-item {
             display: flex;
             align-items: start;
@@ -152,11 +155,11 @@
             border-radius: 8px;
             transition: background 0.3s ease;
         }
-        
+
         .feature-item:hover {
             background: #f8f9ff;
         }
-        
+
         .feature-icon {
             width: 24px;
             height: 24px;
@@ -169,18 +172,18 @@
             margin-right: 15px;
             margin-top: 2px;
         }
-        
+
         .feature-icon::after {
             content: "✓";
             color: white;
             font-weight: bold;
             font-size: 14px;
         }
-        
+
         .feature-text {
             flex: 1;
         }
-        
+
         .footer {
             margin-top: 40px;
             padding-top: 30px;
@@ -188,22 +191,23 @@
             color: #666;
             font-size: 0.9em;
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 40px 20px;
             }
-            
+
             h1 {
                 font-size: 2em;
             }
-            
+
             .message {
                 font-size: 1em;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="success-icon">
@@ -211,22 +215,17 @@
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
         </div>
-        
+
         <h1>¡Bienvenido!</h1>
         <p class="app-name">Gasolineras de Canarias</p>
-        
+
         <p class="message">
             Gracias por registrarte en nuestra aplicación. Tu cuenta ha sido creada exitosamente.
         </p>
-        
-        <div class="highlight">
-            <p><strong>📧 Verifica tu correo electrónico</strong></p>
-            <p>Hemos enviado un correo de confirmación a tu dirección de email. Por favor, revisa tu bandeja de entrada y haz clic en el enlace de verificación para activar completamente tu cuenta.</p>
-        </div>
-        
+
         <div class="features">
             <h2>¿Qué puedes hacer ahora?</h2>
-            
+
             <div class="feature-item">
                 <div class="feature-icon"></div>
                 <div class="feature-text">
@@ -234,7 +233,7 @@
                     Localiza las estaciones de servicio más próximas a tu ubicación
                 </div>
             </div>
-            
+
             <div class="feature-item">
                 <div class="feature-icon"></div>
                 <div class="feature-text">
@@ -242,7 +241,7 @@
                     Consulta y compara los precios de combustible actualizados
                 </div>
             </div>
-            
+
             <div class="feature-item">
                 <div class="feature-icon"></div>
                 <div class="feature-text">
@@ -250,7 +249,7 @@
                     Marca tus gasolineras preferidas para acceder rápidamente
                 </div>
             </div>
-            
+
             <div class="feature-item">
                 <div class="feature-icon"></div>
                 <div class="feature-text">
@@ -259,13 +258,15 @@
                 </div>
             </div>
         </div>
-        
+
         <a href="https://jadrdev.github.io/gasolineras_can/" class="cta-button">Volver a la App</a>
-        
+
         <div class="footer">
-            <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:jadrdev@gmail.com" style="color: #667eea; text-decoration: none;">jadrdev@gmail.com</a></p>
+            <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:jadrdev@gmail.com"
+                    style="color: #667eea; text-decoration: none;">jadrdev@gmail.com</a></p>
             <p style="margin-top: 20px;">© 2025 Gasolineras de Canarias. Todos los derechos reservados.</p>
         </div>
     </div>
 </body>
+
 </html>
