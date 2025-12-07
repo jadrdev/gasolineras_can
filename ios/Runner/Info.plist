@@ -26,12 +26,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>comgooglemaps</string>
@@ -57,6 +51,12 @@
 		<string>moovit</string>
 		<string>neshan</string>
 	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Esta app usa notificaciones para mantenerte informado.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

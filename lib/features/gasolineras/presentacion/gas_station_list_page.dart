@@ -42,9 +42,14 @@ String _searchQuery = '';
     _loadStations(); // cargar al inicio
   }
 
-Future<void> _loadStations() async {
+Future<void> _loadStations({bool forceRefresh = false}) async {
+    // Si ya tenemos datos cargados y no se fuerza refresh, no hacer nada
+    if (!forceRefresh && bloc.state is GasStationLoaded) {
+      return;
+    }
+
     try {
-      final pos = await determinePosition();
+      final pos = await determinePosition(forceRefresh: forceRefresh);
 
       // Despachamos la petición al BLoC para que se encargue de
       // obtener las estaciones y calcular distancias.
@@ -160,7 +165,7 @@ Future<void> _loadStations() async {
           ],
         ),
         body: RefreshIndicator(
-          onRefresh: _loadStations,
+          onRefresh: () => _loadStations(forceRefresh: true),
           child: BlocBuilder<GasStationBloc, GasStationState>(
             builder: (context, state) {
               if (state is GasStationLoading) {
@@ -285,7 +290,7 @@ Future<void> _loadStations() async {
                               }
 
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                                 child: Card(
                                   color: isFavorite ? Colors.yellow[50] : null,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -331,71 +336,178 @@ Future<void> _loadStations() async {
                                             ],
                                           ),
                                           const SizedBox(height: 8),
-                                           Wrap(
-                                            spacing: 6,
-                                            runSpacing: 4,
-                                            children: [
-                                              if (e.gasolina95 != null)
-                                                Tooltip(
-                                                  message: 'Gasolina 95',
-                                                  child: Chip(
-                                                    backgroundColor: priceColor(e.gasolina95, type: '95'),
-                                                    visualDensity: VisualDensity.compact,
-                                                    shape: const StadiumBorder(),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
-                                                    ),
-                                                    label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                          Builder(
+                                            builder: (context) {
+                                              // Contar cuántos tipos de combustible hay
+                                              final fuelTypes = [
+                                                if (e.gasolina95 != null) 'g95',
+                                                if (e.gasolina98 != null) 'g98',
+                                                if (e.diesel != null) 'd',
+                                                if (e.dieselPremium != null) 'dp',
+                                              ];
+
+                                              // Función para crear chip ancho (para grid 2x2)
+                                              Widget buildWideChip({
+                                                required String label,
+                                                required String price,
+                                                required Color backgroundColor,
+                                              }) {
+                                                return Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                                  decoration: BoxDecoration(
+                                                    color: backgroundColor,
+                                                    borderRadius: BorderRadius.circular(20),
                                                   ),
-                                                ),
-                                              if (e.gasolina98 != null)
-                                                Tooltip(
-                                                  message: 'Gasolina 98',
-                                                  child: Chip(
-                                                    backgroundColor: Colors.blue,
-                                                    visualDensity: VisualDensity.compact,
-                                                    shape: const StadiumBorder(),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
-                                                    ),
-                                                    label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      CircleAvatar(
+                                                        radius: 10,
+                                                        backgroundColor: Colors.white24,
+                                                        child: Text(label, style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Text(price, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                                                    ],
                                                   ),
-                                                ),
-                                              if (e.diesel != null)
-                                                Tooltip(
-                                                  message: 'Diésel',
-                                                  child: Chip(
-                                                    backgroundColor: priceColor(e.diesel, type: 'D'),
-                                                    visualDensity: VisualDensity.compact,
-                                                    shape: const StadiumBorder(),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                );
+                                              }
+
+                                              // Si hay 4 tipos, mostrar en grid 2x2 con chips anchos
+                                              if (fuelTypes.length == 4) {
+                                                return Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        if (e.gasolina95 != null)
+                                                          Expanded(
+                                                            child: Tooltip(
+                                                              message: 'Gasolina 95',
+                                                              child: buildWideChip(
+                                                                label: '95',
+                                                                price: '${e.gasolina95!.toStringAsFixed(2)} €',
+                                                                backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        const SizedBox(width: 6),
+                                                        if (e.gasolina98 != null)
+                                                          Expanded(
+                                                            child: Tooltip(
+                                                              message: 'Gasolina 98',
+                                                              child: buildWideChip(
+                                                                label: '98',
+                                                                price: '${e.gasolina98!.toStringAsFixed(2)} €',
+                                                                backgroundColor: Colors.blue,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                      ],
                                                     ),
-                                                    label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
-                                                  ),
-                                                ),
-                                              if (e.dieselPremium != null)
-                                                Tooltip(
-                                                  message: 'Diésel Premium',
-                                                  child: Chip(
-                                                    backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
-                                                    visualDensity: VisualDensity.compact,
-                                                    shape: const StadiumBorder(),
-                                                    avatar: const CircleAvatar(
-                                                      radius: 10,
-                                                      backgroundColor: Colors.white24,
-                                                      child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                    const SizedBox(height: 6),
+                                                    Row(
+                                                      children: [
+                                                        if (e.diesel != null)
+                                                          Expanded(
+                                                            child: Tooltip(
+                                                              message: 'Diésel',
+                                                              child: buildWideChip(
+                                                                label: 'D',
+                                                                price: '${e.diesel!.toStringAsFixed(2)} €',
+                                                                backgroundColor: priceColor(e.diesel, type: 'D'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        const SizedBox(width: 6),
+                                                        if (e.dieselPremium != null)
+                                                          Expanded(
+                                                            child: Tooltip(
+                                                              message: 'Diésel Premium',
+                                                              child: buildWideChip(
+                                                                label: 'DP',
+                                                                price: '${e.dieselPremium!.toStringAsFixed(2)} €',
+                                                                backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                      ],
                                                     ),
-                                                    label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                  ],
+                                                );
+                                              }
+
+                                              // Si no hay 4 tipos, usar chips compactos en una línea
+                                              final chips = [
+                                                if (e.gasolina95 != null)
+                                                  Tooltip(
+                                                    message: 'Gasolina 95',
+                                                    child: Chip(
+                                                      backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                                      visualDensity: VisualDensity.compact,
+                                                      shape: const StadiumBorder(),
+                                                      avatar: const CircleAvatar(
+                                                        radius: 10,
+                                                        backgroundColor: Colors.white24,
+                                                        child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                      ),
+                                                      label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                    ),
                                                   ),
-                                                ),
-                                            ],
+                                                if (e.gasolina98 != null)
+                                                  Tooltip(
+                                                    message: 'Gasolina 98',
+                                                    child: Chip(
+                                                      backgroundColor: Colors.blue,
+                                                      visualDensity: VisualDensity.compact,
+                                                      shape: const StadiumBorder(),
+                                                      avatar: const CircleAvatar(
+                                                        radius: 10,
+                                                        backgroundColor: Colors.white24,
+                                                        child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                      ),
+                                                      label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                    ),
+                                                  ),
+                                                if (e.diesel != null)
+                                                  Tooltip(
+                                                    message: 'Diésel',
+                                                    child: Chip(
+                                                      backgroundColor: priceColor(e.diesel, type: 'D'),
+                                                      visualDensity: VisualDensity.compact,
+                                                      shape: const StadiumBorder(),
+                                                      avatar: const CircleAvatar(
+                                                        radius: 10,
+                                                        backgroundColor: Colors.white24,
+                                                        child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                      ),
+                                                      label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                    ),
+                                                  ),
+                                                if (e.dieselPremium != null)
+                                                  Tooltip(
+                                                    message: 'Diésel Premium',
+                                                    child: Chip(
+                                                      backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                                      visualDensity: VisualDensity.compact,
+                                                      shape: const StadiumBorder(),
+                                                      avatar: const CircleAvatar(
+                                                        radius: 10,
+                                                        backgroundColor: Colors.white24,
+                                                        child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                      ),
+                                                      label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                    ),
+                                                  ),
+                                              ];
+
+                                              // Mostrar en una sola línea con Wrap
+                                              return Wrap(
+                                                spacing: 6,
+                                                runSpacing: 4,
+                                                children: chips,
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),
@@ -408,7 +520,7 @@ Future<void> _loadStations() async {
                           ),
                         ),
                         SliverToBoxAdapter(
-                          child: const SizedBox(height: 12),
+                          child: const SizedBox(height: 120),
                         ),
                       ],
                     );
