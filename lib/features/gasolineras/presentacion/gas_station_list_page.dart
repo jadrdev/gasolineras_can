@@ -7,7 +7,6 @@ import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart'
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
-import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';

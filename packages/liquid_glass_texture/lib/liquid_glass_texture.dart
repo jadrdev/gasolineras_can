@@ -1,3 +1,3 @@
-library liquid_glass_texture;
+library;
 
 export 'src/themes/liquid_glass_theme.dart';

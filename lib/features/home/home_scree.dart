@@ -6,7 +6,6 @@ import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/gas_station_list_page.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:ui';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
