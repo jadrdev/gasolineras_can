@@ -288,6 +288,22 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                 return '${(km * 1000).toStringAsFixed(0)} m';
                               }
 
+                              String formatLastUpdate(DateTime? lastUpdate) {
+                                if (lastUpdate == null) return 'Sin actualizar';
+                                final now = DateTime.now();
+                                final difference = now.difference(lastUpdate);
+                                
+                                if (difference.inMinutes < 60) {
+                                  return 'Actualizado hace ${difference.inMinutes} min';
+                                } else if (difference.inHours < 24) {
+                                  return 'Actualizado hace ${difference.inHours} h';
+                                } else if (difference.inDays < 7) {
+                                  return 'Actualizado hace ${difference.inDays} días';
+                                } else {
+                                  return 'Actualizado el ${lastUpdate.day}/${lastUpdate.month}/${lastUpdate.year}';
+                                }
+                              }
+
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                                 child: Card(
@@ -321,10 +337,20 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                     Text(e.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                                     const SizedBox(height: 4),
                                                     Text(e.direccion, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                                                    const SizedBox(height: 4),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.access_time, size: 12, color: Colors.grey[600]),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          formatLastUpdate(e.lastUpdate),
+                                                          style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
                                               Row(
                                                 children: [
                                                   Icon(Icons.navigation, size: 14, color: Colors.grey[700]),

@@ -11,6 +11,7 @@ class GasStation {
   final double? gasolina98;
   final double? diesel;
   final double? dieselPremium;
+  final DateTime? lastUpdate;
   double? distancia; // ✅ Nuevo campo
 
   GasStation({
@@ -24,6 +25,7 @@ class GasStation {
     this.gasolina98,
     this.diesel,
     this.dieselPremium,
+    this.lastUpdate,
     this.distancia,
   });
 
@@ -46,6 +48,9 @@ class GasStation {
           : null,
       dieselPremium: json["DieselPremium"] != null
           ? double.tryParse(json["DieselPremium"].toString())
+          : null,
+      lastUpdate: json["lastUpdate"] != null
+          ? DateTime.tryParse(json["lastUpdate"].toString())
           : null,
     );
   }
