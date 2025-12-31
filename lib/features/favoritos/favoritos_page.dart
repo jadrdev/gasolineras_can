@@ -68,18 +68,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
             icon: const Icon(Icons.refresh),
             onPressed: _loadStations,
           ),
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, authState) {
-              // Solo mostrar el botón de logout si el usuario está autenticado
-              if (authState is Authenticated) {
-                return IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () => context.read<AuthBloc>().logout(),
-                );
-              }
-              return const SizedBox.shrink(); // No mostrar nada si no está autenticado
-            },
-          ),
         ],
       ),
       body: _isLoading

@@ -149,18 +149,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
               ],
               icon: const Icon(Icons.filter_alt),
             ),
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, authState) {
-                // Solo mostrar el botón de logout si el usuario está autenticado
-                if (authState is Authenticated) {
-                  return IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () => context.read<AuthBloc>().logout(),
-                  );
-                }
-                return const SizedBox.shrink(); // No mostrar nada si no está autenticado
-              },
-            ),
+           
           ],
         ),
         body: RefreshIndicator(
@@ -254,6 +243,12 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                       hintText: 'Buscar por nombre, dirección o marca',
                                       prefixIcon: Icon(Icons.search),
                                       border: OutlineInputBorder(),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.grey),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.blue),
+                                      ),
                                     ),
                                     onChanged: (v) => setState(() {
                                       _searchQuery = v;
