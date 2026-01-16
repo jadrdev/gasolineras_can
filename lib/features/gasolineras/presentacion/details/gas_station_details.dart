@@ -54,21 +54,10 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         _userPosition = LatLng(pos.latitude, pos.longitude);
       });
 
-       // Pedir la ruta usando el servicio
-      // final route = await directionsService.getRoute(
-      //   origin: _userPosition,
-      //   destination: LatLng(widget.station.latitud, widget.station.longitud),
-      // );
-
       final route = await widget.directionsRepository.getRoute(
         origin,
         destination,
       );
-
-      
-
-   
-
       setState(() {
         _routePoints = route;
         _loadingLocation = false;

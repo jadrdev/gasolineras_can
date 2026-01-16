@@ -55,28 +55,36 @@ class FavoriteWidget extends StatelessWidget {
     final user = Supabase.instance.client.auth.currentUser;
     final isLoggedIn = user != null;
 
-    return StreamBuilder<List<int>>(
-      stream: repository.favoritesStream(),
-      builder: (context, snapshot) {
-        final favorites = snapshot.data ?? [];
-        final isFavorite = favorites.contains(station.id);
+    // Cargar favoritos inicialmente desde caché local para renderizado rápido
+    return FutureBuilder<List<int>>(
+      future: repository.getFavorites(),
+      builder: (context, futureSnapshot) {
+        // Usar StreamBuilder con datos iniciales del Future
+        return StreamBuilder<List<int>>(
+          stream: repository.favoritesStream(),
+          initialData: futureSnapshot.data, // 👈 Datos iniciales para renderizado inmediato
+          builder: (context, snapshot) {
+            final favorites = snapshot.data ?? [];
+            final isFavorite = favorites.contains(station.id);
 
-        return IconButton(
-          icon: Icon(isFavorite ? Icons.star : Icons.star_border),
-          color: isFavorite ? Colors.amber : null,
-          onPressed: () async {
-            // Si no está logueado, mostrar diálogo
-            if (!isLoggedIn) {
-              _showLoginDialog(context);
-              return;
-            }
+            return IconButton(
+              icon: Icon(isFavorite ? Icons.star : Icons.star_border),
+              color: isFavorite ? Colors.amber : null,
+              onPressed: () async {
+                // Si no está logueado, mostrar diálogo
+                if (!isLoggedIn) {
+                  _showLoginDialog(context);
+                  return;
+                }
 
-            // Si está logueado, proceder normalmente
-            if (isFavorite) {
-              await repository.removeFavorite(station.id);
-            } else {
-              await repository.addFavorite(station.id);
-            }
+                // Si está logueado, proceder normalmente
+                if (isFavorite) {
+                  await repository.removeFavorite(station.id);
+                } else {
+                  await repository.addFavorite(station.id);
+                }
+              },
+            );
           },
         );
       },
