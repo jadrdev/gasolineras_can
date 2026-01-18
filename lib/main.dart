@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/router.dart';
 import 'features/auth/auth_bloc.dart';
+import 'core/notifications/notification_service.dart';
+import 'core/background/background_task_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +18,12 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  final authBloc =  ();
+  // Inicializar servicios de notificaciones y background
+  await NotificationService.init();
+  await BackgroundTaskService.initialize();
+  await BackgroundTaskService.registerPriceCheckTask();
+
+  final authBloc = AuthBloc();
 
   runApp(
     BlocProvider.value(

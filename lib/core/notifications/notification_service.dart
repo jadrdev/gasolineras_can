@@ -43,4 +43,45 @@ class NotificationService {
       platformDetails,
     );
   }
+
+  static Future<void> showPriceChangeNotification({
+    required int changesCount,
+    required int decreaseCount,
+    required String details,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'price_changes_channel',
+      'Cambios de Precios',
+      channelDescription: 'Notificaciones sobre cambios en precios de combustible',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      styleInformation: BigTextStyleInformation(''),
+    );
+
+    const iOSDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iOSDetails,
+    );
+
+    String title;
+    if (decreaseCount > 0) {
+      title = '💰 ¡Precios actualizados! ($decreaseCount bajaron)';
+    } else {
+      title = '📊 Precios actualizados ($changesCount cambios)';
+    }
+
+    await _notifications.show(
+      1, // ID específico para notificaciones de precios
+      title,
+      details,
+      platformDetails,
+    );
+  }
 }
