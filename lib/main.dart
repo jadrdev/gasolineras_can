@@ -16,7 +16,7 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  final authBloc =  ();
+  final authBloc = AuthBloc();
 
   runApp(
     BlocProvider.value(

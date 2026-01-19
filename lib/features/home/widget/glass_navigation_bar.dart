@@ -22,7 +22,7 @@ class GlassNavigationBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           child: CNTabBar(
             items: const [
               CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),

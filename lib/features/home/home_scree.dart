@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: Container(
-            color: Colors.white.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             child: CNTabBar(
               items: items,
