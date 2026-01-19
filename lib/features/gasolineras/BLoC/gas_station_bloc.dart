@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
-import 'package:gasolineras_can/core/storage/price_storage_service.dart';
 
 // Eventos
 abstract class GasStationEvent {}
@@ -52,12 +51,6 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
         }
 
         emit(GasStationLoaded(stations));
-        
-        // Guardar precios y ubicación para verificación en background
-        final priceStorage = PriceStorageService();
-        await priceStorage.savePrices(stations);
-        await priceStorage.saveLastLocation(event.lat, event.lng);
-        
       } catch (e) {
         emit(GasStationError(e.toString()));
       }
