@@ -1,0 +1,328 @@
+{
+  "@@locale": "es",
+  
+  "appTitle": "Gasolineras de Canarias",
+  "@appTitle": {
+    "description": "Title of the application"
+  },
+
+  "tabGasStations": "Gasolineras",
+  "@tabGasStations": {
+    "description": "Tab label for gas stations list"
+  },
+
+  "tabFavorites": "Favoritos",
+  "@tabFavorites": {
+    "description": "Tab label for favorites"
+  },
+
+  "tabProfile": "Perfil",
+  "@tabProfile": {
+    "description": "Tab label for profile"
+  },
+
+  "sortByPrice": "Ordenar por precio",
+  "@sortByPrice": {
+    "description": "Menu option to sort by price"
+  },
+
+  "sortByDistance": "Ordenar por distancia",
+  "@sortByDistance": {
+    "description": "Menu option to sort by distance"
+  },
+
+  "searchHint": "Buscar por nombre, dirección o marca",
+  "@searchHint": {
+    "description": "Hint text for search field"
+  },
+
+  "noGasStationsFound": "No se han encontrado gasolineras",
+  "@noGasStationsFound": {
+    "description": "Message when no gas stations are found"
+  },
+
+  "tryRefreshOrChangeFilters": "Prueba a actualizar o cambiar los filtros.",
+  "@tryRefreshOrChangeFilters": {
+    "description": "Suggestion when no results found"
+  },
+
+  "retry": "Reintentar",
+  "@retry": {
+    "description": "Button to retry an action"
+  },
+
+  "updatedMinutesAgo": "Actualizado hace {minutes} min",
+  "@updatedMinutesAgo": {
+    "description": "Last update time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "updatedHoursAgo": "Actualizado hace {hours} h",
+  "@updatedHoursAgo": {
+    "description": "Last update time in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+
+  "updatedDaysAgo": "Actualizado hace {days} días",
+  "@updatedDaysAgo": {
+    "description": "Last update time in days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "updatedOn": "Actualizado el {date}",
+  "@updatedOn": {
+    "description": "Last update date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notUpdated": "Sin actualizar",
+  "@notUpdated": {
+    "description": "When there's no update information"
+  },
+
+  "gasoline95": "Gasolina 95",
+  "@gasoline95": {
+    "description": "Gasoline 95 fuel type"
+  },
+
+  "gasoline98": "Gasolina 98",
+  "@gasoline98": {
+    "description": "Gasoline 98 fuel type"
+  },
+
+  "diesel": "Diésel",
+  "@diesel": {
+    "description": "Diesel fuel type"
+  },
+
+  "dieselPremium": "Diésel Premium",
+  "@dieselPremium": {
+    "description": "Premium diesel fuel type"
+  },
+
+  "yourLocation": "Tu ubicación",
+  "@yourLocation": {
+    "description": "Label for user's current location"
+  },
+
+  "howToGetThere": "Cómo llegar",
+  "@howToGetThere": {
+    "description": "Button to get directions"
+  },
+
+  "selectMapApp": "Selecciona una app de mapas",
+  "@selectMapApp": {
+    "description": "Title for map app selector"
+  },
+
+  "noMapAppsInstalled": "No hay aplicaciones de mapas instaladas",
+  "@noMapAppsInstalled": {
+    "description": "Message when no map apps are available"
+  },
+
+  "address": "Dirección:",
+  "@address": {
+    "description": "Address label"
+  },
+
+  "brand": "Marca:",
+  "@brand": {
+    "description": "Brand label"
+  },
+
+  "myFavorites": "Mis Favoritos",
+  "@myFavorites": {
+    "description": "Title for favorites page"
+  },
+
+  "noFavorites": "No tienes favoritos",
+  "@noFavorites": {
+    "description": "Message when user has no favorites"
+  },
+
+  "addFavoritesFromMainList": "Agrega gasolineras a favoritos desde la lista principal",
+  "@addFavoritesFromMainList": {
+    "description": "Instruction to add favorites"
+  },
+
+  "favoriteStationsNotFound": "No se encontraron las gasolineras favoritas",
+  "@favoriteStationsNotFound": {
+    "description": "Message when favorite stations can't be found"
+  },
+
+  "logout": "Cerrar sesión",
+  "@logout": {
+    "description": "Logout button text"
+  },
+
+  "logoutConfirmation": "¿Estás seguro de que deseas cerrar sesión?",
+  "@logoutConfirmation": {
+    "description": "Logout confirmation message"
+  },
+
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+
+  "activeMember": "Miembro activo",
+  "@activeMember": {
+    "description": "Active member status"
+  },
+
+  "accountInformation": "Información de la cuenta",
+  "@accountInformation": {
+    "description": "Account information section title"
+  },
+
+  "email": "Email",
+  "@email": {
+    "description": "Email label"
+  },
+
+  "userId": "ID de usuario",
+  "@userId": {
+    "description": "User ID label"
+  },
+
+  "memberSince": "Miembro desde",
+  "@memberSince": {
+    "description": "Member since label"
+  },
+
+  "profileNotAvailable": "Perfil no disponible",
+  "@profileNotAvailable": {
+    "description": "Profile not available title"
+  },
+
+  "loginToViewProfile": "Inicia sesión para ver tu perfil y acceder a funciones adicionales",
+  "@loginToViewProfile": {
+    "description": "Message prompting user to login"
+  },
+
+  "login": "Iniciar sesión",
+  "@login": {
+    "description": "Login button text"
+  },
+
+  "loginPrompt": "Inicia sesión para continuar",
+  "@loginPrompt": {
+    "description": "Login prompt message"
+  },
+
+  "password": "Contraseña",
+  "@password": {
+    "description": "Password field label"
+  },
+
+  "noAccount": "¿No tienes cuenta?",
+  "@noAccount": {
+    "description": "Prompt for users without account"
+  },
+
+  "register": "Regístrate",
+  "@register": {
+    "description": "Register button text"
+  },
+
+  "createAccount": "Crear cuenta",
+  "@createAccount": {
+    "description": "Create account title"
+  },
+
+  "registration": "Registro",
+  "@registration": {
+    "description": "Registration title"
+  },
+
+  "createAccountToSaveFavorites": "Crea tu cuenta para guardar tus gasolineras favoritas",
+  "@createAccountToSaveFavorites": {
+    "description": "Registration subtitle"
+  },
+
+  "emailAddress": "Correo electrónico",
+  "@emailAddress": {
+    "description": "Email address field label"
+  },
+
+  "minimumCharacters": "Mínimo 6 caracteres",
+  "@minimumCharacters": {
+    "description": "Password minimum length hint"
+  },
+
+  "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+  "@passwordTooShort": {
+    "description": "Password too short error"
+  },
+
+  "confirmPassword": "Confirmar contraseña",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+
+  "passwordsDoNotMatch": "Las contraseñas no coinciden",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords don't match error"
+  },
+
+  "alreadyHaveAccount": "¿Ya tienes cuenta?",
+  "@alreadyHaveAccount": {
+    "description": "Prompt for users with existing account"
+  },
+
+  "registrationSuccess": "✅ ¡Gracias por registrarte! Te hemos enviado un email para confirmar tu registro. Por favor, revisa tu bandeja de entrada.",
+  "@registrationSuccess": {
+    "description": "Registration success message"
+  },
+
+  "invalidEmail": "Correo electrónico no válido",
+  "@invalidEmail": {
+    "description": "Invalid email error"
+  },
+
+  "settings": "Configuración",
+  "@settings": {
+    "description": "Settings section title"
+  },
+
+  "language": "Idioma",
+  "@language": {
+    "description": "Language setting label"
+  },
+
+  "selectLanguage": "Seleccionar idioma",
+  "@selectLanguage": {
+    "description": "Select language dialog title"
+  },
+
+  "spanish": "Español",
+  "@spanish": {
+    "description": "Spanish language option"
+  },
+
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+
+  "german": "Deutsch",
+  "@german": {
+    "description": "German language option"
+  }
+}
