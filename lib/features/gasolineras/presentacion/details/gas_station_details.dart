@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
+import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -272,6 +273,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                       ),
               ),
             ),
+          ),
+          // Banner ad entre el mapa y los detalles
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: BannerAdWidget(),
           ),
           Expanded(
             flex: 1,

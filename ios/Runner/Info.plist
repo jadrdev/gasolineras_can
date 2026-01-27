@@ -58,7 +58,10 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>Esta app usa notificaciones para mantenerte informado.</string>
+	<string>Esta app utiliza publicidad personalizada para mejorar tu experiencia</string>
+	<!-- AdMob App ID (Test ID - replace with production ID) -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
