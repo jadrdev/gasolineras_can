@@ -5,7 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 /// Usa IDs de prueba de Google por defecto
 class BannerAdWidget extends StatefulWidget {
   final AdSize adSize;
-  
+
   const BannerAdWidget({
     super.key,
     this.adSize = AdSize.banner,
@@ -21,7 +21,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   // ID de prueba de Google AdMob para banners
   // TODO: Reemplazar con tu ID real de producción
-  static const String _adUnitId = 'ca-app-pub-3940256099942544/6300978111';
+  static const String _adUnitId = 'ca-app-pub-6222545269341721~3182250737';
 
   @override
   void initState() {

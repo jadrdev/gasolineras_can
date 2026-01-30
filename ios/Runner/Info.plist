@@ -61,7 +61,7 @@
 	<string>Esta app utiliza publicidad personalizada para mejorar tu experiencia</string>
 	<!-- AdMob App ID (Test ID - replace with production ID) -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-6222545269341721~3182250737</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
