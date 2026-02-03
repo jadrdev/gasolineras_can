@@ -19,9 +19,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
-  // ID de prueba de Google AdMob para banners
-  // TODO: Reemplazar con tu ID real de producción
-  static const String _adUnitId = 'ca-app-pub-6222545269341721/7511842553';
+  // ID de bloque de anuncios de producción
+  static const String _adUnitId = 'ca-app-pub-6222545269341721/3861142664';
 
   @override
   void initState() {
