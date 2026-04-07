@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
