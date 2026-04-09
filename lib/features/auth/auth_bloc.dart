@@ -72,7 +72,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on AuthException catch (e) {
       print('❌ Error de autenticación: ${e.message}');
       print('❌ Código de error: ${e.statusCode}');
-      add(AuthErrorEvent('Error: ${e.message}'));
+      
+      // Manejar error específico de envío de email
+      if (e.message.contains('Error sending confirmation email') || 
+          e.statusCode == '500') {
+        add(AuthErrorEvent(
+          'No se pudo enviar el email de confirmación. '
+          'Por favor, contacta al administrador o desactiva la confirmación por email en Supabase. '
+          'Dashboard → Authentication → Providers → Email → Deshabilitar "Enable email confirmations"'
+        ));
+      } else {
+        add(AuthErrorEvent('Error: ${e.message}'));
+      }
     } catch (e) {
       print('❌ Error inesperado: $e');
       add(AuthErrorEvent("Error inesperado: $e"));

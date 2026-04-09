@@ -50,14 +50,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SnackBar(
               content: Text(state.message),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 5),
+              duration: const Duration(seconds: 8),
+              action: SnackBarAction(
+                label: 'OK',
+                textColor: Colors.white,
+                onPressed: () {},
+              ),
             ),
           );
         } else if (state is RegistrationSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                '✅ ¡Gracias por registrarte! Te hemos enviado un email para confirmar tu registro. Por favor, revisa tu bandeja de entrada.',
+                '✅ ¡Registro exitoso! Si la confirmación por email está habilitada, '
+                'revisa tu bandeja de entrada. En caso contrario, ya puedes iniciar sesión.',
               ),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 6),
