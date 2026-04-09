@@ -198,6 +198,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _submitted = false;
 
   // Email validation regex
   static final RegExp _emailRegex = RegExp(
@@ -205,9 +206,9 @@ class _LoginScreenState extends State<LoginScreen> {
   );
 
   bool get _isEmailValid => _emailRegex.hasMatch(emailController.text.trim());
-  
+
   bool get _isFormValid =>
-      emailController.text.trim().isNotEmpty && 
+      emailController.text.trim().isNotEmpty &&
       _isEmailValid &&
       passwordController.text.trim().isNotEmpty;
 
@@ -279,18 +280,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 labelText: 'Correo electrónico',
                                 prefixIcon: const Icon(Icons.email),
-                                errorText: emailController.text.isNotEmpty && !_isEmailValid
-                                    ? 'Correo electrónico no válido'
-                                    : null,
+                                errorText: _submitted && emailController.text.trim().isEmpty
+                                    ? 'El correo es obligatorio'
+                                    : emailController.text.isNotEmpty && !_isEmailValid
+                                        ? 'Correo electrónico no válido'
+                                        : null,
                               ),
                             ),
                             const SizedBox(height: 16),
                             TextField(
                               controller: passwordController,
                               enabled: !isLoading,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Contraseña',
-                                prefixIcon: Icon(Icons.lock),
+                                prefixIcon: const Icon(Icons.lock),
+                                errorText: _submitted && passwordController.text.trim().isEmpty
+                                    ? 'La contraseña es obligatoria'
+                                    : null,
                               ),
                               obscureText: true,
                             ),
@@ -298,13 +304,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: _isFormValid && !isLoading
-                                    ? () {
+                                onPressed: isLoading
+                                    ? null
+                                    : () {
+                                        if (!_isFormValid) {
+                                          setState(() => _submitted = true);
+                                          return;
+                                        }
                                         final email = emailController.text.trim();
                                         final password = passwordController.text.trim();
                                         context.read<AuthBloc>().login(email: email, password: password);
-                                      }
-                                    : null,
+                                      },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                                   child: isLoading

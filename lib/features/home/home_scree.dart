@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final items = <CNTabBarItem>[
         const CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),
         if (isLoggedIn)
-          const CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
+        const CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
         const CNTabBarItem(label: 'Perfil', icon: CNSymbol('person.crop.circle')),
       ];
 

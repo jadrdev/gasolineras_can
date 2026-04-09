@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
 import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
-import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/directions/data/mock_directions_repository.dart';
 import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
