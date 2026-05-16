@@ -1,39 +1,6 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+// Stub: el widget original usaba `cupertino_native` (CNTabBar) y se ha
+// dejado vacío durante la migración. Cuando lo necesites, sustituye el
+// contenido por la versión Material-only o reintroduce cupertino_native
+// en pubspec.yaml si ya está estable en iOS 26+.
 
-class GlassNavigationBar extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-
-  const GlassNavigationBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(24),
-        topRight: Radius.circular(24),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          color: Colors.white.withValues(alpha: 0.12),
-          child: CNTabBar(
-            items: const [
-              CNTabBarItem(label: 'Gasolineras', icon: CNSymbol('house.fill')),
-              CNTabBarItem(label: 'Favoritos', icon: CNSymbol('star.fill')),
-              CNTabBarItem(label: 'Perfil', icon: CNSymbol('person.crop.circle')),
-            ],
-            currentIndex: currentIndex,
-            onTap: onTap,
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Sin imports ni código para que no arrastre dependencias rotas.

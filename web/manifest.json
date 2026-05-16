@@ -1,6 +1,6 @@
 {
-    "name": "GasoCan",
-    "short_name": "GasoCan",
+    "name": "gasolineras_can_v2",
+    "short_name": "gasolineras_can_v2",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -3,13 +3,13 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    
+
     <application
         android:label="GasoCan"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:networkSecurityConfig="@xml/network_security_config">
-        <!-- Google Maps API key: injected via manifestPlaceholders in build.gradle.kts -->
+        <!-- Google Maps API key: injected via manifestPlaceholders en build.gradle.kts -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
@@ -40,7 +40,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!-- AdMob App ID (Test ID - replace with production ID) -->
+        <!-- AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-6222545269341721~3182250737"/>
@@ -57,4 +57,3 @@
         </intent>
     </queries>
 </manifest>
-

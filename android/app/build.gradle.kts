@@ -16,36 +16,35 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         // Enable core library desugaring for flutter_local_notifications
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.jadrdev.gasolinera"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        
+
         // Required for flutter_local_notifications
         multiDexEnabled = true
-    // Provide MAPS_API_KEY from android/local.properties (preferred) or from project properties
-    val localProps = Properties()
+
+        // Provide MAPS_API_KEY from android/local.properties (preferred)
+        val localProps = Properties()
         val localPropsFile = rootProject.file("local.properties")
         if (localPropsFile.exists()) {
             localPropsFile.inputStream().use { localProps.load(it) }
         }
         manifestPlaceholders["MAPS_API_KEY"] =
-            (localProps.getProperty("MAPS_API_KEY") ?: project.findProperty("MAPS_API_KEY")?.toString()
+            (localProps.getProperty("MAPS_API_KEY")
+                ?: project.findProperty("MAPS_API_KEY")?.toString()
                 ?: "")
     }
 
@@ -68,11 +67,9 @@ android {
                     }
                     signingConfig = signingConfigs.getByName("release")
                 } else {
-                    // Fallback to debug signing when keystore file doesn't exist
                     signingConfig = signingConfigs.getByName("debug")
                 }
             } else {
-                // Fallback to debug signing when no key.properties is present
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
