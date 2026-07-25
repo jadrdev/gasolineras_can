@@ -13,7 +13,7 @@ plugins {
 android {
     namespace = "com.jadrdev.gasolinera"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -50,6 +50,21 @@ android {
 
     buildTypes {
         release {
+            // Algunas configuraciones de macOS fallan al strip de símbolos de
+            // librerías nativas. Desactivamos el strip para evitar el error.
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "none"
+            }
+
+            packagingOptions {
+                jniLibs {
+                    keepDebugSymbols += "**/*.so"
+                }
+            }
+
             // Load signing configuration from key.properties if available
             val keyPropsFile = rootProject.file("key.properties")
             if (keyPropsFile.exists()) {
