@@ -14,9 +14,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  bool _submitted = false;
+
+  static final RegExp _emailRegex = RegExp(
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  );
+
+  bool get _isEmailValid => _emailRegex.hasMatch(emailController.text.trim());
 
   bool get _isFormValid =>
       emailController.text.trim().isNotEmpty &&
+      _isEmailValid &&
       passwordController.text.trim().isNotEmpty &&
       confirmPasswordController.text.trim().isNotEmpty &&
       passwordController.text == confirmPasswordController.text &&
@@ -40,8 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final cardWidth = width > 600 ? 500.0 : width * 0.95;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -69,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               duration: Duration(seconds: 6),
             ),
           );
-          // Navegar automáticamente al home después de 2 segundos
           Future.delayed(const Duration(seconds: 2), () {
             if (context.mounted) {
               context.go('/home');
@@ -78,111 +84,201 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Crear cuenta'),
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Container(
-                width: cardWidth,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircleAvatar(
-                      radius: 36,
-                      child: Icon(Icons.person_add, size: 36),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Registro',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Crea tu cuenta para guardar tus gasolineras favoritas',
-                      style: TextStyle(color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico',
-                        prefixIcon: Icon(Icons.email),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Contraseña',
-                        prefixIcon: const Icon(Icons.lock),
-                        helperText: 'Mínimo 6 caracteres',
-                        errorText: passwordController.text.isNotEmpty &&
-                                passwordController.text.length < 6
-                            ? 'La contraseña debe tener al menos 6 caracteres'
-                            : null,
-                      ),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: confirmPasswordController,
-                      decoration: InputDecoration(
-                        labelText: 'Confirmar contraseña',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        errorText: confirmPasswordController.text.isNotEmpty &&
-                                passwordController.text != confirmPasswordController.text
-                            ? 'Las contraseñas no coinciden'
-                            : null,
-                      ),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isFormValid
-                            ? () {
-                                final email = emailController.text.trim();
-                                final password = passwordController.text.trim();
-                                context.read<AuthBloc>().register(
-                                      email: email,
-                                      password: password,
-                                    );
-                              }
-                            : null,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.0),
-                          child: Text('Crear cuenta'),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary.withValues(alpha: 0.9),
+                colorScheme.surface,
+              ],
+              stops: const [0.0, 0.35, 0.35],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.local_gas_station,
+                          color: colorScheme.primary,
+                          size: 32,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('¿Ya tienes cuenta?'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Inicia sesión'),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Crear cuenta',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Gasolineras de Canarias',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                // Form card
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(28),
+                        topRight: Radius.circular(28),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Únete y ahorra',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Guarda tus gasolineras favoritas y recibe alertas de precios.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          _buildTextField(
+                            controller: emailController,
+                            label: 'Correo electrónico',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            errorText: _submitted && emailController.text.trim().isEmpty
+                                ? 'El correo es obligatorio'
+                                : emailController.text.isNotEmpty && !_isEmailValid
+                                    ? 'Correo electrónico no válido'
+                                    : null,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: passwordController,
+                            label: 'Contraseña',
+                            icon: Icons.lock_outline,
+                            obscureText: true,
+                            helperText: 'Mínimo 6 caracteres',
+                            errorText: _submitted && passwordController.text.trim().isEmpty
+                                ? 'La contraseña es obligatoria'
+                                : passwordController.text.isNotEmpty &&
+                                        passwordController.text.length < 6
+                                    ? 'La contraseña debe tener al menos 6 caracteres'
+                                    : null,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: confirmPasswordController,
+                            label: 'Confirmar contraseña',
+                            icon: Icons.lock_outline,
+                            obscureText: true,
+                            errorText: _submitted &&
+                                    confirmPasswordController.text.isNotEmpty &&
+                                    passwordController.text != confirmPasswordController.text
+                                ? 'Las contraseñas no coinciden'
+                                : null,
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: _isFormValid
+                                  ? () {
+                                      final email = emailController.text.trim();
+                                      final password = passwordController.text.trim();
+                                      context.read<AuthBloc>().register(
+                                            email: email,
+                                            password: password,
+                                          );
+                                    }
+                                  : () => setState(() => _submitted = true),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Crear cuenta',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '¿Ya tienes cuenta?',
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => context.go('/login'),
+                                child: const Text('Inicia sesión'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          _buildBackToHomeButton(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBackToHomeButton() {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () => context.go('/home'),
+        icon: const Icon(Icons.arrow_back),
+        label: const Text('Volver al inicio'),
       ),
     );
   }
@@ -200,7 +296,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool _submitted = false;
 
-  // Email validation regex
   static final RegExp _emailRegex = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   );
@@ -228,13 +323,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final cardWidth = width > 600 ? 500.0 : width * 0.95;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Authenticated) {
-          // Navigate to home on successful login
           context.go('/home');
         }
       },
@@ -243,67 +336,133 @@ class _LoginScreenState extends State<LoginScreen> {
         final errorMessage = state is AuthError ? state.message : null;
 
         return Scaffold(
-          body: SafeArea(
-            child: Stack(
-              children: [
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Card(
-                      elevation: 6,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Container(
-                        width: cardWidth,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primary.withValues(alpha: 0.9),
+                  colorScheme.surface,
+                ],
+                stops: const [0.0, 0.35, 0.35],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.local_gas_station,
+                            color: colorScheme.primary,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bienvenido',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Gasolineras de Canarias',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Form card
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(28),
+                          topRight: Radius.circular(28),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const CircleAvatar(
-                              radius: 36,
-                              child: Icon(Icons.local_gas_station, size: 36),
+                            Text(
+                              'Inicia sesión',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Gasolineras de Canarias',
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Accede a tus favoritos y preferencias de vehículo.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Inicia sesión para continuar',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 20),
-                            TextField(
+                            const SizedBox(height: 24),
+                            _buildTextField(
                               controller: emailController,
+                              label: 'Correo electrónico',
+                              icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               enabled: !isLoading,
-                              decoration: InputDecoration(
-                                labelText: 'Correo electrónico',
-                                prefixIcon: const Icon(Icons.email),
-                                errorText: _submitted && emailController.text.trim().isEmpty
-                                    ? 'El correo es obligatorio'
-                                    : emailController.text.isNotEmpty && !_isEmailValid
-                                        ? 'Correo electrónico no válido'
-                                        : null,
+                              errorText: _submitted && emailController.text.trim().isEmpty
+                                  ? 'El correo es obligatorio'
+                                  : emailController.text.isNotEmpty && !_isEmailValid
+                                      ? 'Correo electrónico no válido'
+                                      : null,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              controller: passwordController,
+                              label: 'Contraseña',
+                              icon: Icons.lock_outline,
+                              obscureText: true,
+                              enabled: !isLoading,
+                              errorText: _submitted && passwordController.text.trim().isEmpty
+                                  ? 'La contraseña es obligatoria'
+                                  : null,
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: isLoading ? null : () {},
+                                child: const Text('¿Olvidaste tu contraseña?'),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            TextField(
-                              controller: passwordController,
-                              enabled: !isLoading,
-                              decoration: InputDecoration(
-                                labelText: 'Contraseña',
-                                prefixIcon: const Icon(Icons.lock),
-                                errorText: _submitted && passwordController.text.trim().isEmpty
-                                    ? 'La contraseña es obligatoria'
-                                    : null,
-                              ),
-                              obscureText: true,
-                            ),
-                            const SizedBox(height: 20),
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton(
+                              child: FilledButton(
                                 onPressed: isLoading
                                     ? null
                                     : () {
@@ -313,36 +472,51 @@ class _LoginScreenState extends State<LoginScreen> {
                                         }
                                         final email = emailController.text.trim();
                                         final password = passwordController.text.trim();
-                                        context.read<AuthBloc>().login(email: email, password: password);
+                                        context.read<AuthBloc>().login(
+                                              email: email,
+                                              password: password,
+                                            );
                                       },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                  child: isLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : const Text('Iniciar sesión'),
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Iniciar sesión',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                               ),
                             ),
-                            // Error message below the button
                             if (errorMessage != null) ...[
                               const SizedBox(height: 16),
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.red.shade200),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: Colors.red.shade700,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
@@ -357,58 +531,82 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('¿No tienes cuenta?'),
+                                Text(
+                                  '¿No tienes cuenta?',
+                                  style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
                                 TextButton(
                                   onPressed: isLoading ? null : () => context.go('/register'),
                                   child: const Text('Regístrate'),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 24),
+                            _buildBackToHomeButton(),
                           ],
                         ),
                       ),
                     ),
                   ),
-                ),
-                // Botón flotante para volver al inicio
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: isLoading ? null : () => context.go('/home'),
-                      borderRadius: BorderRadius.circular(30),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
     );
   }
+
+  Widget _buildBackToHomeButton() {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () => context.go('/home'),
+        icon: const Icon(Icons.arrow_back),
+        label: const Text('Volver al inicio'),
+      ),
+    );
+  }
+}
+
+Widget _buildTextField({
+  required TextEditingController controller,
+  required String label,
+  required IconData icon,
+  bool obscureText = false,
+  TextInputType keyboardType = TextInputType.text,
+  String? helperText,
+  String? errorText,
+  bool enabled = true,
+}) {
+  return TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    obscureText: obscureText,
+    enabled: enabled,
+    decoration: InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      helperText: helperText,
+      errorText: errorText,
+      border: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.blue, width: 2),
+      ),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+    ),
+  );
 }

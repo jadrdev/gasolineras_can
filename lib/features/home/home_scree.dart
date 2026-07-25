@@ -23,16 +23,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
   StreamSubscription<AuthState>? _authSubscription;
 
+  // Páginas estables para que IndexedStack conserve su estado al cambiar de tab.
+  late final List<Widget> _pages;
+
   @override
   void initState() {
     super.initState();
-    // Escuchar cambios en el estado de autenticación
+    _pages = [
+      const GasStationListPage(key: PageStorageKey('gas_stations')),
+      FavoritesPage(
+        key: const PageStorageKey('favorites'),
+        repository: _favoriteRepository,
+      ),
+      const ProfilePage(key: PageStorageKey('profile')),
+    ];
+
+    // Escuchar cambios en el estado de autenticación. Solo reseteamos a la
+    // pestaña de inicio cuando el usuario CIERRA sesión, no en cada evento.
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
-      setState(() {
-        _currentIndex = 0;
-      });
+      if (data.event == AuthChangeEvent.signedOut) {
+        setState(() {
+          _currentIndex = 0;
+        });
+      }
     });
   }
 
@@ -47,18 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     final isLoggedIn = user != null;
 
-    // Páginas según el estado de autenticación
-    final pages = <Widget>[
-      // Tab 0: Gasolineras (siempre visible)
-      const GasStationListPage(),
-      // Tab 1: Favoritos (solo si está logueado) o Perfil (si no está logueado)
-      if (isLoggedIn) FavoritesPage(repository: _favoriteRepository),
-      // Tab 2 (o Tab 1 si no está logueado): Perfil (siempre visible)
-      const ProfilePage(),
-    ];
-
-    final safeIndex =
-        _currentIndex >= pages.length ? 0 : _currentIndex;
+    // Si no está logueado, ocultamos la pestaña de favoritos pero mantenemos
+    // las páginas en el IndexedStack para no perder el estado al volver.
+    final safeIndex = isLoggedIn
+        ? (_currentIndex >= _pages.length ? 0 : _currentIndex)
+        : (_currentIndex == 1 ? 0 : _currentIndex);
 
     final items = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
@@ -77,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      body: IndexedStack(index: safeIndex, children: pages),
+      body: IndexedStack(index: safeIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: safeIndex,
         onTap: (i) => setState(() => _currentIndex = i),

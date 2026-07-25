@@ -19,26 +19,45 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   final _gasStationRepo = GasStationRepository();
   List<GasStation> _allStations = [];
+  List<int> _favoriteIds = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadStations();
+    _loadData();
   }
 
-  Future<void> _loadStations() async {
+  Future<void> _loadData() async {
     try {
       setState(() => _isLoading = true);
-      // Obtener posición actual para cargar estaciones cercanas
+
+      // Cargar favoritos y estaciones en paralelo.
       final pos = await determinePosition();
-      final stations = await _gasStationRepo.fetchStations(pos.latitude, pos.longitude);
-      setState(() {
-        _allStations = stations;
-        _isLoading = false;
-      });
+      final results = await Future.wait([
+        widget.repository.getFavorites(),
+        _gasStationRepo.fetchStations(
+          pos.latitude,
+          pos.longitude,
+          radiusKm: 300,
+          limit: 500,
+        ),
+      ]);
+
+      final favoriteIds = results[0] as List<int>;
+      final stations = results[1] as List<GasStation>;
+
+      if (mounted) {
+        setState(() {
+          _favoriteIds = favoriteIds;
+          _allStations = stations;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -64,20 +83,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadStations,
+            onPressed: _loadData,
           ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : StreamBuilder<List<int>>(
-              stream: widget.repository.favoritesStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final favoriteIds = snapshot.data ?? [];
+          : Builder(
+              builder: (context) {
+                final favoriteIds = _favoriteIds;
 
                 if (favoriteIds.isEmpty) {
                   final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
@@ -107,6 +121,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     .where((station) => favoriteIds.contains(station.id))
                     .toList();
 
+                debugPrint(
+                  '⭐ Favoritos UI: ${favoriteIds.length} IDs, '
+                  '${_allStations.length} estaciones cargadas, '
+                  '${favoriteStations.length} coincidencias',
+                );
+
                 if (favoriteStations.isEmpty && _allStations.isNotEmpty) {
                   return Center(
                     child: Column(
@@ -124,8 +144,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   );
                 }
 
+                debugPrint('🎨 Renderizando ${favoriteStations.length} favoritos');
                 return RefreshIndicator(
-                  onRefresh: _loadStations,
+                  onRefresh: _loadData,
                   child: ListView.builder(
                     itemCount: favoriteStations.length,
                     padding: const EdgeInsets.all(8),

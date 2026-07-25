@@ -4,10 +4,18 @@ import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:http/http.dart' as http;
 
 class GasStationRepository {
-  Future<List<GasStation>> fetchStations(double lat, double lng) async {
+  /// Carga estaciones dentro de un radio en kilómetros desde la ubicación dada.
+  /// Por defecto busca en un radio de 16 km (vista cercana). Para favoritos
+  /// se puede ampliar el radio para cubrir toda la región.
+  Future<List<GasStation>> fetchStations(
+    double lat,
+    double lng, {
+    int radiusKm = 16,
+    int limit = 200,
+  }) async {
     final url = Uri.parse(
       'https://api.precioil.es/estaciones/radio'
-      '?latitud=$lat&longitud=$lng&radio=16&limite=200&pagina=1',
+      '?latitud=$lat&longitud=$lng&radio=$radiusKm&limite=$limit&pagina=1',
     );
 
     debugPrint("🌐 Haciendo petición a: $url");

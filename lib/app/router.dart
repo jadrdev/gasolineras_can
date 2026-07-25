@@ -5,7 +5,6 @@ import 'package:gasolineras_can/features/auth/presentacion.dart';
 import 'package:gasolineras_can/features/home/home_scree.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 
 /// A ChangeNotifier that listens to a Stream and notifies listeners when the stream emits a value.
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -40,10 +39,23 @@ GoRouter createRouter(AuthBloc authBloc) {
     },
     routes: [
       GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
+      ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const RegisterScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
       ),
       GoRoute(
         path: '/home',

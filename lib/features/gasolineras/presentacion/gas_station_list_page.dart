@@ -8,9 +8,11 @@ import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository
 import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
+import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gasolineras_can/core/config.dart';
 
 
@@ -19,18 +21,23 @@ enum SortBy { precio, distancia }
   // 🔹 Cambia este flag para alternar entre MOCK y API real
   const useMock = false;
 
+const _prefSortBy = 'sortBy';
+const _prefFuelType = 'fuelType';
+
 class GasStationListPage extends StatefulWidget {
   const GasStationListPage({super.key});
 
   @override
   State<GasStationListPage> createState() => _GasStationListPageState();
-  
+
 }
 
 class _GasStationListPageState extends State<GasStationListPage> {
 late GasStationBloc bloc;
 late FavoriteRepository favoriteRepository;
 SortBy _sortBy = SortBy.precio;
+FuelType _activeFuel = FuelType.g95;
+double _tankLiters = 50;
 String _searchQuery = '';
 
   @override
@@ -38,7 +45,7 @@ String _searchQuery = '';
     super.initState();
     bloc = GasStationBloc(GasStationRepository());
     favoriteRepository = FavoriteRepository();
-    _loadSortPreference(); // 🔹 Cargamos la preferencia
+    _loadPreferences(); // 🔹 Cargamos preferencias
     _loadStations(); // cargar al inicio
   }
 
@@ -60,22 +67,47 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
     }
   }
 
-  /// 🔹 Guardar preferencia en local
-  Future<void> _saveSortPreference(SortBy value) async {
+  /// 🔹 Guardar preferencias en local
+  Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("sortBy", value.name); // Guardamos como string
+    await prefs.setString(_prefSortBy, _sortBy.name);
+    await prefs.setString(_prefFuelType, _activeFuel.name);
   }
 
-  /// 🔹 Cargar preferencia en local
-  Future<void> _loadSortPreference() async {
+  /// 🔹 Cargar preferencias en local
+  Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString("sortBy");
-    if (saved != null) {
+    final savedSort = prefs.getString(_prefSortBy);
+    final savedFuel = prefs.getString(_prefFuelType);
+
+    FuelType? profileFuel;
+    if (Supabase.instance.client.auth.currentUser != null) {
+      final profile = await UserProfileRepository().getProfile();
+      profileFuel = profile?.preferredFuel;
+    }
+
+    if (Supabase.instance.client.auth.currentUser != null) {
+      final profile = await UserProfileRepository().getProfile();
+      if (profile != null) {
+        _tankLiters = profile.tankLiters;
+      }
+    }
+
+    if (savedSort != null || savedFuel != null || profileFuel != null) {
       setState(() {
-        _sortBy = SortBy.values.firstWhere(
-          (e) => e.name == saved,
-          orElse: () => SortBy.precio,
-        );
+        if (savedSort != null) {
+          _sortBy = SortBy.values.firstWhere(
+            (e) => e.name == savedSort,
+            orElse: () => SortBy.precio,
+          );
+        }
+        _activeFuel = profileFuel ??
+            (savedFuel != null
+                ? FuelType.values.firstWhere(
+                    (e) => e.name == savedFuel,
+                    orElse: () => FuelType.g95,
+                  )
+                : FuelType.g95);
       });
     }
   }
@@ -84,9 +116,148 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
     setState(() {
       _sortBy = value;
     });
-    _saveSortPreference(value); // 🔹 Guardamos al cambiar
+    _savePreferences();
   }
-  
+
+  void _onFuelTypeChanged(FuelType value) {
+    setState(() {
+      _activeFuel = value;
+    });
+    _savePreferences();
+  }
+
+  Widget _buildFuelChips(BuildContext context, GasStation station) {
+    final availableFuels = FuelType.values
+        .where((f) => station.priceFor(f) != null)
+        .toList();
+
+    if (availableFuels.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Si el combustible activo no está disponible, mostrar el primero que sí.
+    final displayFuel = availableFuels.contains(_activeFuel)
+        ? _activeFuel
+        : availableFuels.first;
+    final displayPrice = station.priceFor(displayFuel)!;
+
+    final otherCount = availableFuels.length - 1;
+
+    Widget buildActiveChip() {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: FuelColors.of(displayFuel),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircleAvatar(
+              radius: 10,
+              backgroundColor: Colors.white24,
+              child: Text(
+                '⛽',
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '${displayPrice.toStringAsFixed(2)} €',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        buildActiveChip(),
+        if (otherCount > 0)
+          ActionChip(
+            visualDensity: VisualDensity.compact,
+            avatar: const Icon(Icons.expand_more, size: 18),
+            label: Text('+${otherCount.toString()}'),
+            onPressed: () => _showAllFuelsBottomSheet(context, station),
+          ),
+      ],
+    );
+  }
+
+  void _showAllFuelsBottomSheet(BuildContext context, GasStation station) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        final fuels = FuelType.values
+            .where((f) => station.priceFor(f) != null)
+            .toList();
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  station.nombre,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Precios disponibles',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...fuels.map((fuel) {
+                  final price = station.priceFor(fuel)!;
+                  final isActive = fuel == _activeFuel;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: FuelColors.of(fuel),
+                      child: Text(
+                        fuel.shortLabel,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    title: Text(fuel.displayName),
+                    trailing: Text(
+                      '${price.toStringAsFixed(2)} €/L',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isActive ? FuelColors.of(fuel) : null,
+                      ),
+                    ),
+                    onTap: () {
+                      _onFuelTypeChanged(fuel);
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     bloc.close();
@@ -102,37 +273,84 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
     return BlocProvider.value(
       value: bloc,
       child: Scaffold(
-          appBar: AppBar(
+        appBar: AppBar(
           title: Row(
             children: [
               Icon(
                 _sortBy == SortBy.precio
-                    ? Icons
-                      .local_gas_station // precio → surtidor
-                    : Icons.location_on, // distancia → pin
+                    ? Icons.local_gas_station
+                    : Icons.location_on,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Gasolineras de Canarias"),
-                ],
+              const Expanded(
+                child: Text(
+                  "Gasolineras",
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
-            actions: [
+          actions: [
+            // Selector de tipo de combustible
+            PopupMenuButton<FuelType>(
+              initialValue: _activeFuel,
+              onSelected: _onFuelTypeChanged,
+              tooltip: 'Tipo de combustible',
+              itemBuilder: (context) => FuelType.values.map((fuel) {
+                final isSelected = fuel == _activeFuel;
+                return PopupMenuItem(
+                  value: fuel,
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 10,
+                        backgroundColor: FuelColors.of(fuel),
+                        child: Text(
+                          fuel.shortLabel,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text(fuel.displayName)),
+                      if (isSelected)
+                        const Icon(Icons.check, size: 18, color: Colors.blue),
+                    ],
+                  ),
+                );
+              }).toList(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: FuelColors.of(_activeFuel),
+                  child: Text(
+                    _activeFuel.shortLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             PopupMenuButton<SortBy>(
               initialValue: _sortBy,
-              onSelected: _onSortChanged, // 🔹 Llamamos al método que guarda
+              onSelected: _onSortChanged,
+              tooltip: 'Ordenar por',
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: SortBy.precio,
                   child: Row(
                     children: [
-                      Icon(Icons.local_gas_station, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Text("Ordenar por precio"),
+                      const Icon(Icons.local_gas_station, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text("Por precio (${_activeFuel.shortLabel})"),
                     ],
                   ),
                 ),
@@ -142,14 +360,13 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                     children: [
                       Icon(Icons.location_on, color: Colors.green),
                       SizedBox(width: 8),
-                      Text("Ordenar por distancia"),
+                      Text("Por distancia"),
                     ],
                   ),
                 ),
               ],
               icon: const Icon(Icons.filter_alt),
             ),
-           
           ],
         ),
         body: RefreshIndicator(
@@ -194,11 +411,11 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                           s.marca.toLowerCase().contains(q));
                     }).toList();
 
-                    // Ordenar por precio o distancia
+                    // Ordenar por precio (del combustible activo) o distancia
                     if (_sortBy == SortBy.precio) {
                       filtered.sort((a, b) {
-                        final aPrice = a.gasolina95 ?? double.infinity;
-                        final bPrice = b.gasolina95 ?? double.infinity;
+                        final aPrice = a.priceFor(_activeFuel) ?? double.infinity;
+                        final bPrice = b.priceFor(_activeFuel) ?? double.infinity;
                         return aPrice.compareTo(bPrice);
                       });
                     } else {
@@ -301,16 +518,16 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                 }
                               }
 
-                              // Destaca el dato por el que se está ordenando (precio de
-                              // gasolina 95 o distancia), ya que es lo que hace que esta
-                              // gasolinera esté en esta posición de la lista.
+                              // Destaca el dato por el que se está ordenando (precio
+                              // del combustible activo o distancia).
                               Widget buildHeadline() {
-                                if (_sortBy == SortBy.precio && e.gasolina95 != null) {
+                                final activePrice = e.priceFor(_activeFuel);
+                                if (_sortBy == SortBy.precio && activePrice != null) {
                                   return Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
-                                        'Gasolina 95',
+                                        _activeFuel.displayName,
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -318,11 +535,11 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                         ),
                                       ),
                                       Text(
-                                        '${e.gasolina95!.toStringAsFixed(2)} €',
+                                        '${activePrice.toStringAsFixed(2)} €',
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
-                                          color: FuelColors.of(FuelType.g95),
+                                          color: FuelColors.of(_activeFuel),
                                         ),
                                       ),
                                     ],
@@ -367,6 +584,8 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                             station: e,
                                             favoriteRepository: favoriteRepository,
                                             directionsRepository: directionsRepository,
+                                            preferredFuel: _activeFuel,
+                                            tankLiters: _tankLiters,
                                           ),
                                         ),
                                       );
@@ -444,179 +663,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                             ],
                                           ),
                                           const SizedBox(height: 8),
-                                          Builder(
-                                            builder: (context) {
-                                              // Contar cuántos tipos de combustible hay
-                                              final fuelTypes = [
-                                                if (e.gasolina95 != null) 'g95',
-                                                if (e.gasolina98 != null) 'g98',
-                                                if (e.diesel != null) 'd',
-                                                if (e.dieselPremium != null) 'dp',
-                                              ];
-
-                                              // Función para crear chip ancho (para grid 2x2)
-                                              Widget buildWideChip({
-                                                required String label,
-                                                required String price,
-                                                required Color backgroundColor,
-                                              }) {
-                                                return Container(
-                                                  width: double.infinity,
-                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                                  decoration: BoxDecoration(
-                                                    color: backgroundColor,
-                                                    borderRadius: BorderRadius.circular(20),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundColor: Colors.white24,
-                                                        child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(price, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                                                    ],
-                                                  ),
-                                                );
-                                              }
-
-                                              // Si hay 4 tipos, mostrar en grid 2x2 con chips anchos
-                                              if (fuelTypes.length == 4) {
-                                                return Column(
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        if (e.gasolina95 != null)
-                                                          Expanded(
-                                                            child: Tooltip(
-                                                              message: 'Gasolina 95',
-                                                              child: buildWideChip(
-                                                                label: '95',
-                                                                price: '${e.gasolina95!.toStringAsFixed(2)} €',
-                                                                backgroundColor: FuelColors.of(FuelType.g95),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        const SizedBox(width: 6),
-                                                        if (e.gasolina98 != null)
-                                                          Expanded(
-                                                            child: Tooltip(
-                                                              message: 'Gasolina 98',
-                                                              child: buildWideChip(
-                                                                label: '98',
-                                                                price: '${e.gasolina98!.toStringAsFixed(2)} €',
-                                                                backgroundColor: FuelColors.of(FuelType.g98),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Row(
-                                                      children: [
-                                                        if (e.diesel != null)
-                                                          Expanded(
-                                                            child: Tooltip(
-                                                              message: 'Diésel',
-                                                              child: buildWideChip(
-                                                                label: 'D',
-                                                                price: '${e.diesel!.toStringAsFixed(2)} €',
-                                                                backgroundColor: FuelColors.of(FuelType.diesel),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        const SizedBox(width: 6),
-                                                        if (e.dieselPremium != null)
-                                                          Expanded(
-                                                            child: Tooltip(
-                                                              message: 'Diésel Premium',
-                                                              child: buildWideChip(
-                                                                label: 'DP',
-                                                                price: '${e.dieselPremium!.toStringAsFixed(2)} €',
-                                                                backgroundColor: FuelColors.of(FuelType.dieselPremium),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              }
-
-                                              // Si no hay 4 tipos, usar chips compactos en una línea
-                                              final chips = [
-                                                if (e.gasolina95 != null)
-                                                  Tooltip(
-                                                    message: 'Gasolina 95',
-                                                    child: Chip(
-                                                      backgroundColor: FuelColors.of(FuelType.g95),
-                                                      visualDensity: VisualDensity.compact,
-                                                      shape: const StadiumBorder(),
-                                                      avatar: const CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundColor: Colors.white24,
-                                                        child: Text('95', style: TextStyle(fontSize: 11, color: Colors.white)),
-                                                      ),
-                                                      label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                                                    ),
-                                                  ),
-                                                if (e.gasolina98 != null)
-                                                  Tooltip(
-                                                    message: 'Gasolina 98',
-                                                    child: Chip(
-                                                      backgroundColor: FuelColors.of(FuelType.g98),
-                                                      visualDensity: VisualDensity.compact,
-                                                      shape: const StadiumBorder(),
-                                                      avatar: const CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundColor: Colors.white24,
-                                                        child: Text('98', style: TextStyle(fontSize: 11, color: Colors.white)),
-                                                      ),
-                                                      label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                                                    ),
-                                                  ),
-                                                if (e.diesel != null)
-                                                  Tooltip(
-                                                    message: 'Diésel',
-                                                    child: Chip(
-                                                      backgroundColor: FuelColors.of(FuelType.diesel),
-                                                      visualDensity: VisualDensity.compact,
-                                                      shape: const StadiumBorder(),
-                                                      avatar: const CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundColor: Colors.white24,
-                                                        child: Text('D', style: TextStyle(fontSize: 11, color: Colors.white)),
-                                                      ),
-                                                      label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                                                    ),
-                                                  ),
-                                                if (e.dieselPremium != null)
-                                                  Tooltip(
-                                                    message: 'Diésel Premium',
-                                                    child: Chip(
-                                                      backgroundColor: FuelColors.of(FuelType.dieselPremium),
-                                                      visualDensity: VisualDensity.compact,
-                                                      shape: const StadiumBorder(),
-                                                      avatar: const CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundColor: Colors.white24,
-                                                        child: Text('DP', style: TextStyle(fontSize: 11, color: Colors.white)),
-                                                      ),
-                                                      label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                                                    ),
-                                                  ),
-                                              ];
-
-                                              // Mostrar en una sola línea con Wrap
-                                              return Wrap(
-                                                spacing: 6,
-                                                runSpacing: 4,
-                                                children: chips,
-                                              );
-                                            },
-                                          ),
+                                          _buildFuelChips(context, e),
                                         ],
                                       ),
                                     ),

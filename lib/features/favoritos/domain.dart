@@ -10,4 +10,5 @@ abstract class IFavoriteRepository {
   Future<void> addFavorite(int stationId);
   Future<void> removeFavorite(int stationId);
   Future<List<int>> getFavorites();
+  Stream<List<int>> favoritesStream();
 }

@@ -59,6 +59,8 @@
 	<string>Necesitamos tu ubicación para mostrar gasolineras cercanas.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Esta app utiliza publicidad personalizada para mejorar tu experiencia</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Te avisaremos cuando baje el precio del combustible en tus gasolineras favoritas.</string>
 	<!-- AdMob App ID -->
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-6222545269341721~3182250737</string>

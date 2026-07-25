@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
+
 class GasStation {
   final int id;
   final String nombre;
@@ -53,6 +55,20 @@ class GasStation {
           ? DateTime.tryParse(json["lastUpdate"].toString())
           : null,
     );
+  }
+
+  /// Precio del combustible identificado por [type], o `null` si no disponible.
+  double? priceFor(FuelType type) {
+    switch (type) {
+      case FuelType.g95:
+        return gasolina95;
+      case FuelType.g98:
+        return gasolina98;
+      case FuelType.diesel:
+        return diesel;
+      case FuelType.dieselPremium:
+        return dieselPremium;
+    }
   }
 
   void calcularDistancia(double userLat, double userLng) {

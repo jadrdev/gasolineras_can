@@ -5,9 +5,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/router.dart';
+import 'core/notifications/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
+import 'features/favoritos/price_alert_service.dart';
 import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -21,6 +23,12 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
+
+  // Notificaciones locales
+  await NotificationService.init();
+
+  // Alertas de precios para favoritos (cada 30 minutos en foreground)
+  PriceAlertService().start();
 
   final authBloc = AuthBloc();
   final themeCubit = ThemeCubit();

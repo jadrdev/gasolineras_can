@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/theme/theme_cubit.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
+import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
+import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -143,6 +146,8 @@ class ProfilePage extends StatelessWidget {
               children: [
                 _buildThemeCard(context),
                 const SizedBox(height: 16),
+                _buildVehicleCard(context),
+                const SizedBox(height: 16),
 
                 // Tarjeta de información del usuario
                 _buildInfoCard(
@@ -205,6 +210,216 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildVehicleCard(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return FutureBuilder<UserProfile?>(
+      future: UserProfileRepository().getProfile(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        final fuel = profile?.preferredFuel ?? FuelType.g95;
+        final liters = profile?.tankLiters ?? 50.0;
+        final licensePlate = profile?.licensePlate ?? '';
+
+        return StatefulBuilder(
+          builder: (context, setInnerState) {
+            final litersController = TextEditingController(
+              text: liters.toStringAsFixed(0),
+            );
+            final plateController = TextEditingController(text: licensePlate);
+
+            Future<void> saveVehicleData() async {
+              final parsed = double.tryParse(
+                litersController.text.replaceAll(',', '.'),
+              );
+              final plate = plateController.text.trim().toUpperCase();
+
+              await UserProfileRepository().updatePreferences(
+                preferredFuel: fuel,
+                tankLiters: parsed != null && parsed > 0 ? parsed : liters,
+                licensePlate: plate,
+              );
+            }
+
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.directions_car, color: colorScheme.primary),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Mi vehículo',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Matrícula',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: plateController,
+                      textCapitalization: TextCapitalization.characters,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-Z0-9\-]'),
+                        ),
+                        LengthLimitingTextInputFormatter(9),
+                      ],
+                      decoration: const InputDecoration(
+                        labelText: 'Ej: 1234ABC',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      onTapOutside: (_) async => saveVehicleData(),
+                      onSubmitted: (_) async => saveVehicleData(),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'La matrícula se guarda automáticamente al salir del campo o pulsar intro.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Combustible habitual',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    PopupMenuButton<FuelType>(
+                      initialValue: fuel,
+                      onSelected: (selected) async {
+                        await saveVehicleData();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Combustible actualizado a ${selected.displayName}')),
+                          );
+                        }
+                      },
+                      itemBuilder: (context) => FuelType.values.map((fuelType) {
+                        final isSelected = fuelType == fuel;
+                        return PopupMenuItem(
+                          value: fuelType,
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 10,
+                                backgroundColor: FuelColors.of(fuelType),
+                                child: Text(
+                                  fuelType.shortLabel,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(child: Text(fuelType.displayName)),
+                              if (isSelected)
+                                const Icon(Icons.check, size: 18, color: Colors.blue),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: colorScheme.outline),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: FuelColors.of(fuel),
+                              child: Text(
+                                fuel.shortLabel,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(fuel.displayName),
+                            const SizedBox(width: 8),
+                            Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: litersController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*[.,]?[0-9]*')),
+                      ],
+                      decoration: const InputDecoration(
+                        labelText: 'Litros del depósito',
+                        prefixIcon: Icon(Icons.local_gas_station),
+                        suffixText: 'L',
+                        border: OutlineInputBorder(),
+                      ),
+                      onTapOutside: (_) async {
+                        await saveVehicleData();
+                      },
+                      onSubmitted: (value) async {
+                        await saveVehicleData();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Tamaño del depósito actualizado')),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () async {
+                          await saveVehicleData();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Datos del vehículo guardados')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.save),
+                        label: const Text('Guardar datos del vehículo'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -392,54 +607,6 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 32,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 }
