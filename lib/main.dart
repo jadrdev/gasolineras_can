@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/router.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
 import 'l10n/app_localizations.dart';
 
@@ -22,10 +23,14 @@ Future<void> main() async {
   );
 
   final authBloc = AuthBloc();
+  final themeCubit = ThemeCubit();
 
   runApp(
-    BlocProvider.value(
-      value: authBloc,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: authBloc),
+        BlocProvider.value(value: themeCubit),
+      ],
       child: MyApp(authBloc: authBloc),
     ),
   );
@@ -37,16 +42,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Gasolineras de Canarias',
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.beVietnamProTextTheme(),
-      ),
-      routerConfig: createRouter(authBloc),
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Gasolineras de Canarias',
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeMode,
+          routerConfig: createRouter(authBloc),
+        );
+      },
     );
   }
 }

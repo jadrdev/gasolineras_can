@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../gasolineras/models/gas_station.dart';
 
-class FavoriteWidget extends StatelessWidget {
+class FavoriteWidget extends StatefulWidget {
   final GasStation station;
   final FavoriteRepository repository;
 
@@ -13,6 +13,35 @@ class FavoriteWidget extends StatelessWidget {
     required this.station,
     required this.repository,
   });
+
+  @override
+  State<FavoriteWidget> createState() => _FavoriteWidgetState();
+}
+
+class _FavoriteWidgetState extends State<FavoriteWidget> {
+  // El estado real vive en Supabase y se refleja vía favoritesStream(), pero
+  // esa suscripción realtime tarda en confirmar el cambio (hay un viaje de
+  // ida y vuelta de WebSocket por detrás del INSERT/DELETE ya confirmado).
+  // Este override optimista pinta la estrella al instante y se descarta en
+  // cuanto el stream confirma el mismo valor.
+  bool? _optimisticFavorite;
+
+  Future<void> _toggleFavorite(bool currentlyFavorite) async {
+    setState(() => _optimisticFavorite = !currentlyFavorite);
+    try {
+      if (currentlyFavorite) {
+        await widget.repository.removeFavorite(widget.station.id);
+      } else {
+        await widget.repository.addFavorite(widget.station.id);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _optimisticFavorite = currentlyFavorite);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo actualizar el favorito')),
+      );
+    }
+  }
 
   void _showLoginDialog(BuildContext context) {
     showDialog(
@@ -57,32 +86,35 @@ class FavoriteWidget extends StatelessWidget {
 
     // Cargar favoritos inicialmente desde caché local para renderizado rápido
     return FutureBuilder<List<int>>(
-      future: repository.getFavorites(),
+      future: widget.repository.getFavorites(),
       builder: (context, futureSnapshot) {
         // Usar StreamBuilder con datos iniciales del Future
         return StreamBuilder<List<int>>(
-          stream: repository.favoritesStream(),
+          stream: widget.repository.favoritesStream(),
           initialData: futureSnapshot.data, // 👈 Datos iniciales para renderizado inmediato
           builder: (context, snapshot) {
             final favorites = snapshot.data ?? [];
-            final isFavorite = favorites.contains(station.id);
+            final serverFavorite = favorites.contains(widget.station.id);
+            final isFavorite = _optimisticFavorite ?? serverFavorite;
+
+            // El stream ya confirmó el valor optimista: dejamos de forzarlo
+            // para que vuelva a seguir al servidor (p. ej. si se cambia
+            // desde otro dispositivo).
+            if (_optimisticFavorite != null && _optimisticFavorite == serverFavorite) {
+              _optimisticFavorite = null;
+            }
 
             return IconButton(
               icon: Icon(isFavorite ? Icons.star : Icons.star_border),
               color: isFavorite ? Colors.amber : null,
-              onPressed: () async {
+              onPressed: () {
                 // Si no está logueado, mostrar diálogo
                 if (!isLoggedIn) {
                   _showLoginDialog(context);
                   return;
                 }
 
-                // Si está logueado, proceder normalmente
-                if (isFavorite) {
-                  await repository.removeFavorite(station.id);
-                } else {
-                  await repository.addFavorite(station.id);
-                }
+                _toggleFavorite(isFavorite);
               },
             );
           },

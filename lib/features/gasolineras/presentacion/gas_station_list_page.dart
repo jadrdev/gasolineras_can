@@ -6,6 +6,7 @@ import 'package:gasolineras_can/features/directions/data/mock_directions_reposit
 import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/core/location.dart';
+import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
@@ -110,7 +111,6 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                       .local_gas_station // precio → surtidor
                     : Icons.location_on, // distancia → pin
                 size: 20,
-                color: Colors.black,
               ),
               const SizedBox(width: 8),
               Column(
@@ -216,12 +216,20 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                           Padding(
                             padding: const EdgeInsets.all(24.0),
                             child: Column(
-                              children: const [
-                                Icon(Icons.local_gas_station, size: 64, color: Colors.grey),
-                                SizedBox(height: 12),
-                                Text('No se han encontrado gasolineras', style: TextStyle(fontSize: 18)),
-                                SizedBox(height: 8),
-                                Text('Prueba a actualizar o cambiar los filtros.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                              children: [
+                                Icon(
+                                  Icons.local_gas_station,
+                                  size: 64,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(height: 12),
+                                const Text('No se han encontrado gasolineras', style: TextStyle(fontSize: 18)),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Prueba a actualizar o cambiar los filtros.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                ),
                               ],
                             ),
                           )
@@ -265,17 +273,11 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                             (context, index) {
                               final e = filtered[index];
                               final isFavorite = favorites.contains(e.id);
-
-                              Color priceColor(double? price, {String? type}) {
-                                // Si se especifica el tipo, preferimos el color de manguera
-                                if (type == '95') return Colors.green;
-                                if (type == 'D') return Colors.grey[900] ?? Colors.black;
-                                if (type == 'DP') return Colors.grey[900] ?? Colors.black;
-                                if (price == null) return Colors.grey;
-                                if (price < 1.4) return Colors.green;
-                                if (price < 1.7) return Colors.orange;
-                                return Colors.red;
-                              }
+                              final isDark =
+                                  Theme.of(context).brightness == Brightness.dark;
+                              final favoriteColor = isDark
+                                  ? Colors.amber.withValues(alpha: 0.15)
+                                  : Colors.amber.shade50;
 
                               String formatDistance(double? km) {
                                 if (km == null) return '-';
@@ -299,10 +301,61 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                 }
                               }
 
+                              // Destaca el dato por el que se está ordenando (precio de
+                              // gasolina 95 o distancia), ya que es lo que hace que esta
+                              // gasolinera esté en esta posición de la lista.
+                              Widget buildHeadline() {
+                                if (_sortBy == SortBy.precio && e.gasolina95 != null) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Gasolina 95',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${e.gasolina95!.toStringAsFixed(2)} €',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: FuelColors.of(FuelType.g95),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Distancia',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      formatDistance(e.distancia),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                                 child: Card(
-                                  color: isFavorite ? Colors.yellow[50] : null,
+                                  color: isFavorite ? favoriteColor : null,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(10),
@@ -324,34 +377,69 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Expanded(
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(e.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                                    const SizedBox(height: 4),
-                                                    Text(e.direccion, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                                                    const SizedBox(height: 4),
-                                                    Row(
-                                                      children: [
-                                                        Icon(Icons.access_time, size: 12, color: Colors.grey[600]),
-                                                        const SizedBox(width: 4),
-                                                        Text(
-                                                          formatLastUpdate(e.lastUpdate),
-                                                          style: TextStyle(color: Colors.grey[600], fontSize: 11),
-                                                        ),
-                                                      ],
+                                                    Text(
+                                                      e.nombre,
+                                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      e.direccion,
+                                                      style: TextStyle(
+                                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                        fontSize: 13,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              Row(
-                                                children: [
-                                                  Icon(Icons.navigation, size: 14, color: Colors.grey[700]),
-                                                  const SizedBox(width: 4),
-                                                  Text(formatDistance(e.distancia), style: const TextStyle(color: Colors.grey)),
-                                                ],
+                                              const SizedBox(width: 8),
+                                              buildHeadline(),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              if (_sortBy != SortBy.distancia) ...[
+                                                Icon(
+                                                  Icons.navigation,
+                                                  size: 12,
+                                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  formatDistance(e.distancia),
+                                                  style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                              ],
+                                              Icon(
+                                                Icons.access_time,
+                                                size: 12,
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Expanded(
+                                                child: Text(
+                                                  formatLastUpdate(e.lastUpdate),
+                                                  style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                    fontSize: 12,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -385,10 +473,10 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                       CircleAvatar(
                                                         radius: 10,
                                                         backgroundColor: Colors.white24,
-                                                        child: Text(label, style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+                                                        child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
                                                       ),
                                                       const SizedBox(width: 8),
-                                                      Text(price, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                                                      Text(price, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                                                     ],
                                                   ),
                                                 );
@@ -407,7 +495,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                               child: buildWideChip(
                                                                 label: '95',
                                                                 price: '${e.gasolina95!.toStringAsFixed(2)} €',
-                                                                backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                                                backgroundColor: FuelColors.of(FuelType.g95),
                                                               ),
                                                             ),
                                                           ),
@@ -419,7 +507,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                               child: buildWideChip(
                                                                 label: '98',
                                                                 price: '${e.gasolina98!.toStringAsFixed(2)} €',
-                                                                backgroundColor: Colors.blue,
+                                                                backgroundColor: FuelColors.of(FuelType.g98),
                                                               ),
                                                             ),
                                                           ),
@@ -435,7 +523,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                               child: buildWideChip(
                                                                 label: 'D',
                                                                 price: '${e.diesel!.toStringAsFixed(2)} €',
-                                                                backgroundColor: priceColor(e.diesel, type: 'D'),
+                                                                backgroundColor: FuelColors.of(FuelType.diesel),
                                                               ),
                                                             ),
                                                           ),
@@ -447,7 +535,7 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                               child: buildWideChip(
                                                                 label: 'DP',
                                                                 price: '${e.dieselPremium!.toStringAsFixed(2)} €',
-                                                                backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                                                backgroundColor: FuelColors.of(FuelType.dieselPremium),
                                                               ),
                                                             ),
                                                           ),
@@ -463,60 +551,60 @@ Future<void> _loadStations({bool forceRefresh = false}) async {
                                                   Tooltip(
                                                     message: 'Gasolina 95',
                                                     child: Chip(
-                                                      backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                                      backgroundColor: FuelColors.of(FuelType.g95),
                                                       visualDensity: VisualDensity.compact,
                                                       shape: const StadiumBorder(),
                                                       avatar: const CircleAvatar(
                                                         radius: 10,
                                                         backgroundColor: Colors.white24,
-                                                        child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                        child: Text('95', style: TextStyle(fontSize: 11, color: Colors.white)),
                                                       ),
-                                                      label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                      label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                                     ),
                                                   ),
                                                 if (e.gasolina98 != null)
                                                   Tooltip(
                                                     message: 'Gasolina 98',
                                                     child: Chip(
-                                                      backgroundColor: Colors.blue,
+                                                      backgroundColor: FuelColors.of(FuelType.g98),
                                                       visualDensity: VisualDensity.compact,
                                                       shape: const StadiumBorder(),
                                                       avatar: const CircleAvatar(
                                                         radius: 10,
                                                         backgroundColor: Colors.white24,
-                                                        child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                        child: Text('98', style: TextStyle(fontSize: 11, color: Colors.white)),
                                                       ),
-                                                      label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                      label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                                     ),
                                                   ),
                                                 if (e.diesel != null)
                                                   Tooltip(
                                                     message: 'Diésel',
                                                     child: Chip(
-                                                      backgroundColor: priceColor(e.diesel, type: 'D'),
+                                                      backgroundColor: FuelColors.of(FuelType.diesel),
                                                       visualDensity: VisualDensity.compact,
                                                       shape: const StadiumBorder(),
                                                       avatar: const CircleAvatar(
                                                         radius: 10,
                                                         backgroundColor: Colors.white24,
-                                                        child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                        child: Text('D', style: TextStyle(fontSize: 11, color: Colors.white)),
                                                       ),
-                                                      label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                      label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                                     ),
                                                   ),
                                                 if (e.dieselPremium != null)
                                                   Tooltip(
                                                     message: 'Diésel Premium',
                                                     child: Chip(
-                                                      backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                                      backgroundColor: FuelColors.of(FuelType.dieselPremium),
                                                       visualDensity: VisualDensity.compact,
                                                       shape: const StadiumBorder(),
                                                       avatar: const CircleAvatar(
                                                         radius: 10,
                                                         backgroundColor: Colors.white24,
-                                                        child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                                        child: Text('DP', style: TextStyle(fontSize: 11, color: Colors.white)),
                                                       ),
-                                                      label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                                      label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                                     ),
                                                   ),
                                               ];

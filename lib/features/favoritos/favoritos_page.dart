@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
+import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
@@ -47,10 +48,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.star,
               size: 20,
-              color: Colors.black,
             ),
             const SizedBox(width: 8),
             Column(
@@ -80,21 +80,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 final favoriteIds = snapshot.data ?? [];
 
                 if (favoriteIds.isEmpty) {
+                  final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.star_border, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
+                      children: [
+                        Icon(Icons.star_border, size: 64, color: mutedColor),
+                        const SizedBox(height: 16),
                         Text(
                           'No tienes favoritos',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                          style: TextStyle(fontSize: 18, color: mutedColor),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Agrega gasolineras a favoritos desde la lista principal',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: mutedColor),
                         ),
                       ],
                     ),
@@ -131,26 +132,21 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     itemBuilder: (context, index) {
                       final e = favoriteStations[index];
 
-                      Color priceColor(double? price, {String? type}) {
-                        // Si se especifica el tipo, preferimos el color de manguera
-                        if (type == '95') return Colors.green;
-                        if (type == 'D') return Colors.grey[900] ?? Colors.black;
-                        if (price == null) return Colors.grey;
-                        if (price < 1.4) return Colors.green;
-                        if (price < 1.7) return Colors.orange;
-                        return Colors.red;
-                      }
-
                       String formatDistance(double? km) {
                         if (km == null) return '-';
                         if (km >= 1) return '${km.toStringAsFixed(1)} km';
                         return '${(km * 1000).toStringAsFixed(0)} m';
                       }
 
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final favoriteColor = isDark
+                          ? Colors.amber.withValues(alpha: 0.15)
+                          : Colors.amber.shade50;
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                         child: Card(
-                          color: Colors.yellow[50], // Siempre amarillo porque son favoritos
+                          color: favoriteColor, // Siempre resaltado porque son favoritos
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
@@ -172,23 +168,51 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(e.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                            const SizedBox(height: 4),
-                                            Text(e.direccion, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                                            Text(
+                                              e.nombre,
+                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              e.direccion,
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                fontSize: 13,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      Row(
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          Icon(Icons.navigation, size: 14, color: Colors.grey[700]),
-                                          const SizedBox(width: 4),
-                                          Text(formatDistance(e.distancia), style: const TextStyle(color: Colors.grey)),
+                                          Text(
+                                            'Distancia',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            formatDistance(e.distancia),
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).colorScheme.primary,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -202,56 +226,56 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         Tooltip(
                                           message: 'Gasolina 95',
                                           child: Chip(
-                                            backgroundColor: priceColor(e.gasolina95, type: '95'),
+                                            backgroundColor: FuelColors.of(FuelType.g95),
                                             visualDensity: VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                              child: Text('95', style: TextStyle(fontSize: 11, color: Colors.white)),
                                             ),
-                                            label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                            label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                           ),
                                         ),
                                       if (e.gasolina98 != null)
                                         Tooltip(
                                           message: 'Gasolina 98',
                                           child: Chip(
-                                            backgroundColor: Colors.blue,
+                                            backgroundColor: FuelColors.of(FuelType.g98),
                                             visualDensity: VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                              child: Text('98', style: TextStyle(fontSize: 11, color: Colors.white)),
                                             ),
-                                            label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                            label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                           ),
                                         ),
                                       if (e.diesel != null)
                                         Tooltip(
                                           message: 'Diésel',
                                           child: Chip(
-                                            backgroundColor: priceColor(e.diesel, type: 'D'),
+                                            backgroundColor: FuelColors.of(FuelType.diesel),
                                             visualDensity: VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                              child: Text('D', style: TextStyle(fontSize: 11, color: Colors.white)),
                                             ),
-                                            label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                            label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                           ),
                                         ),
                                       if (e.dieselPremium != null)
                                         Tooltip(
                                           message: 'Diésel Premium',
                                           child: Chip(
-                                            backgroundColor: priceColor(e.dieselPremium, type: 'DP'),
+                                            backgroundColor: FuelColors.of(FuelType.dieselPremium),
                                             visualDensity: VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                                              child: Text('DP', style: TextStyle(fontSize: 11, color: Colors.white)),
                                             ),
-                                            label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                            label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                                           ),
                                         ),
                                     ],

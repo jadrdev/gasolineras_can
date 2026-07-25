@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gasolineras_can/core/theme/theme_cubit.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -140,6 +141,9 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildThemeCard(context),
+                const SizedBox(height: 16),
+
                 // Tarjeta de información del usuario
                 _buildInfoCard(
                   context,
@@ -257,6 +261,55 @@ class ProfilePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+            ),
+            const SizedBox(height: 32),
+            _buildThemeCard(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeCard(BuildContext context) {
+    final themeMode = context.watch<ThemeCubit>().state;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Apariencia',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: Icon(Icons.brightness_auto),
+                  label: Text('Auto'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: Icon(Icons.light_mode),
+                  label: Text('Claro'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: Icon(Icons.dark_mode),
+                  label: Text('Oscuro'),
+                ),
+              ],
+              selected: {themeMode},
+              onSelectionChanged: (selection) {
+                context.read<ThemeCubit>().setThemeMode(selection.first);
+              },
             ),
           ],
         ),

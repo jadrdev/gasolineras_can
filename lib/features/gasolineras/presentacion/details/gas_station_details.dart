@@ -9,6 +9,7 @@ import 'package:gasolineras_can/core/location.dart';
 
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
+import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:map_launcher/map_launcher.dart';
 
@@ -304,60 +305,60 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                         Tooltip(
                           message: 'Gasolina 95',
                           child: Chip(
-                            backgroundColor: Colors.green,
+                            backgroundColor: FuelColors.of(FuelType.g95),
                             visualDensity: VisualDensity.compact,
                             shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
                               radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('95', style: TextStyle(fontSize: 10, color: Colors.white)),
+                              child: Text('95', style: TextStyle(fontSize: 11, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            label: Text('${widget.station.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                           ),
                         ),
                       if (widget.station.gasolina98 != null)
                         Tooltip(
                           message: 'Gasolina 98',
                           child: Chip(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: FuelColors.of(FuelType.g98),
                             visualDensity: VisualDensity.compact,
                             shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
                               radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('98', style: TextStyle(fontSize: 10, color: Colors.white)),
+                              child: Text('98', style: TextStyle(fontSize: 11, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            label: Text('${widget.station.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                           ),
                         ),
                       if (widget.station.diesel != null)
                         Tooltip(
                           message: 'Diésel',
                           child: Chip(
-                            backgroundColor: Colors.grey[800] ?? Colors.black,
+                            backgroundColor: FuelColors.of(FuelType.diesel),
                             visualDensity: VisualDensity.compact,
                             shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
                               radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('D', style: TextStyle(fontSize: 10, color: Colors.white)),
+                              child: Text('D', style: TextStyle(fontSize: 11, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            label: Text('${widget.station.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                           ),
                         ),
                       if (widget.station.dieselPremium != null)
                         Tooltip(
                           message: 'Diésel Premium',
                           child: Chip(
-                            backgroundColor: Colors.grey[800] ?? Colors.black,
+                            backgroundColor: FuelColors.of(FuelType.dieselPremium),
                             visualDensity: VisualDensity.compact,
                             shape: const StadiumBorder(),
                             avatar: const CircleAvatar(
                               radius: 10,
                               backgroundColor: Colors.white24,
-                              child: Text('DP', style: TextStyle(fontSize: 10, color: Colors.white)),
+                              child: Text('DP', style: TextStyle(fontSize: 11, color: Colors.white)),
                             ),
-                            label: Text('${widget.station.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            label: Text('${widget.station.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
                           ),
                         ),
                     ],
