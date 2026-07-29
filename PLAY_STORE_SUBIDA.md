@@ -3,7 +3,7 @@
 > Proyecto Flutter: `gasolineras_can`  
 > Application ID: `com.jadrdev.gasolinera`  
 > Fecha de preparación: 2026-07-27  
-> Versión de compilación actual: `1.0.1+2`
+> Versión de compilación actual: `1.0.2+12`
 
 ---
 
@@ -42,6 +42,15 @@ Se perdió el keystore anterior de subida (`upload-keystore.jks`) y el certifica
 | `build/app/outputs/bundle/release/app-release.aab` | App Bundle listo para subir. | **NO** |
 
 > **Importante:** guarda `upload-keystore.jks`, `key.properties` y la contraseña en un gestor de contraseñas o almacenamiento seguro. Si se vuelven a perder, no se podrán subir más actualizaciones.
+
+### Tiempo de espera tras cambiar el certificado de carga
+
+Después de que Google apruebe un nuevo certificado de carga (upload key), Play Console puede imponer un breve período de enfriamiento antes de aceptar AAB firmados con él. En este proyecto se ha observado el siguiente caso:
+
+- **Mensaje de Play Console:** "Has subido un app bundle firmado con un certificado de subida que aún no es válido porque se ha cambiado recientemente. Podrás volver a subir app bundles a partir del siguiente momento: 29 jul 2026, 14:20:12 UTC."
+- **Hora de activación estimada (Canarias, UTC+1):** ~15:20 del 29 de julio de 2026.
+
+Durante este tiempo, **el AAB generado es válido**; solo hay que esperar a que Google active la nueva clave. No es necesario regenerar el AAB ni cambiar la firma.
 
 ---
 

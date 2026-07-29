@@ -1,7 +1,7 @@
 name: gasolineras_can
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.1+2
+version: 1.0.2+12
 
 environment:
   sdk: ^3.11.5
@@ -59,12 +59,25 @@ dev_dependencies:
   mockito: ^5.5.0
   flutter_launcher_icons: ^0.14.4
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
+  remove_alpha_ios: true
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#0A84FF"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#0A84FF"
+    theme_color: "#0A84FF"
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
 
 flutter:
   uses-material-design: true
