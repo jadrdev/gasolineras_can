@@ -42,13 +42,16 @@ app.*.map.json
 # Environment / secrets
 .env
 .env.*
+keystore_credentials.txt
 
-# Android signing files (keystore and key properties)
+# Android signing files (keystore, key properties and certificates)
 /android/key.properties
 /android/app/*.jks
 /android/app/*.keystore
+/android/app/*.pem
 *.jks
 *.keystore
+*.pem
 
 # Android Studio will place build artifacts here
 /android/app/debug

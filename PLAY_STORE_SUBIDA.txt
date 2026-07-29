@@ -1,0 +1,110 @@
+================================================================================
+ESTADO ACTUAL: PROYECTO LISTO PARA SUBIR A GOOGLE PLAY
+Fecha: 2026-07-27
+Application ID: com.jadrdev.gasolinera
+Version actual: 1.0.1+2
+================================================================================
+
+HECHO (no tienes que repetirlo)
+----------------------------------
+1. Se genero un NUEVO keystore de subida (upload key):
+   Archivo: android/app/upload-keystore.jks
+
+2. Se genero el certificado publico PEM:
+   Archivo: android/app/upload_certificate.pem
+
+3. Se actualizo android/key.properties con el nuevo keystore.
+
+4. Se incremento versionCode en pubspec.yaml: 1.0.1+2
+
+5. Se reinstalo el Android NDK para que la compilacion funcione.
+
+6. Se compilo el release firmado:
+   build/app/outputs/bundle/release/app-release.aab (66,2 MB)
+
+7. El .aab esta firmado con el nuevo certificado.
+   Huella SHA1 del certificado de subida:
+   3F:D1:44:D2:44:CD:C1:51:39:7D:19:C7:4C:D2:AC:F0:04:9E:B9:08
+
+8. Se anadio keystore_credentials.txt a .gitignore.
+
+
+CONTRASENA DEL NUEVO KEYSTORE
+--------------------------------
+La contrasena se guarda en estos dos archivos (NO estan en Git):
+- android/key.properties
+- keystore_credentials.txt (copia de seguridad en la raiz)
+
+IMPORTANTE: guarda esa contrasena en tu gestor de contrasenas.
+Si vuelves a perderla, no podras subir actualizaciones.
+
+
+PASOS QUE TIENES QUE HACER TU EN PLAY CONSOLE
+------------------------------------------------
+1. Entra en https://play.google.com/console
+
+2. Ve a tu app > Configuracion > Firma de aplicaciones.
+
+3. Busca la seccion "Clave de carga de aplicaciones" (Upload key).
+
+4. Solicita "Cambiar la clave de carga" / "Reset upload key".
+
+5. Sube el archivo:
+   android/app/upload_certificate.pem
+
+6. Google revisara y aprobara el cambio (normalmente horas, a veces 1-2 dias).
+
+7. Cuando este aprobado, sube el .aab:
+   build/app/outputs/bundle/release/app-release.aab
+
+8. Rellena la ficha de la version, guarda y envia a revision.
+
+
+COMANDOS PARA VOLVER A COMPILAR EN EL FUTURO
+-----------------------------------------------
+Si haces cambios y quieres generar otra version:
+
+   # Incrementa versionCode en pubspec.yaml primero
+   flutter clean
+   flutter pub get
+   flutter build appbundle --release
+
+El .aab estara en:
+   build/app/outputs/bundle/release/app-release.aab
+
+
+ARCHIVOS CRITICOS QUE NO DEBES PERDER
+---------------------------------------
+- android/app/upload-keystore.jks
+- android/key.properties
+- keystore_credentials.txt
+
+Guardalos en tu gestor de contrasenas / vault / disco seguro.
+
+
+ARCHIVOS QUE NO DEBES SUBIR A GIT
+------------------------------------
+- android/key.properties
+- android/app/*.jks
+- android/app/*.keystore
+- android/app/upload_certificate.pem
+- keystore_credentials.txt
+- .env
+
+Ya estan excluidos en .gitignore, pero revisalo si cambias de repo.
+
+
+NOTAS
+------
+- Si la app ya esta publicada y usa Play App Signing (tu caso), este
+  proceso funciona. Google cambia solo la clave de carga, la clave de
+  firma de la app no cambia.
+
+- El .aab generado ahora es valido para Play Console. Pero NO lo podras
+  subir hasta que Google apruebe el nuevo certificado PEM.
+
+- Si mas adelante cambias de ordenador, copia estos archivos:
+  android/app/upload-keystore.jks
+  android/key.properties
+
+================================================================================
