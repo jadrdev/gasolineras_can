@@ -26,6 +26,14 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    packaging {
+        // Keep native libraries uncompressed so they can be mmapped with
+        // 16 kB page size alignment on Android 15+ devices.
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     defaultConfig {
         applicationId = "com.jadrdev.gasolinera"
         minSdk = flutter.minSdkVersion
@@ -53,6 +61,11 @@ android {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
 
             // Load signing configuration from key.properties if available
             val keyPropsFile = rootProject.file("key.properties")

@@ -13,7 +13,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool _submitted = false;
 
   static final RegExp _emailRegex = RegExp(
@@ -181,11 +182,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Correo electrónico',
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
-                            errorText: _submitted && emailController.text.trim().isEmpty
+                            errorText:
+                                _submitted &&
+                                    emailController.text.trim().isEmpty
                                 ? 'El correo es obligatorio'
-                                : emailController.text.isNotEmpty && !_isEmailValid
-                                    ? 'Correo electrónico no válido'
-                                    : null,
+                                : emailController.text.isNotEmpty &&
+                                      !_isEmailValid
+                                ? 'Correo electrónico no válido'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
@@ -194,12 +198,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             icon: Icons.lock_outline,
                             obscureText: true,
                             helperText: 'Mínimo 6 caracteres',
-                            errorText: _submitted && passwordController.text.trim().isEmpty
+                            errorText:
+                                _submitted &&
+                                    passwordController.text.trim().isEmpty
                                 ? 'La contraseña es obligatoria'
                                 : passwordController.text.isNotEmpty &&
-                                        passwordController.text.length < 6
-                                    ? 'La contraseña debe tener al menos 6 caracteres'
-                                    : null,
+                                      passwordController.text.length < 6
+                                ? 'La contraseña debe tener al menos 6 caracteres'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
@@ -207,9 +213,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Confirmar contraseña',
                             icon: Icons.lock_outline,
                             obscureText: true,
-                            errorText: _submitted &&
+                            errorText:
+                                _submitted &&
                                     confirmPasswordController.text.isNotEmpty &&
-                                    passwordController.text != confirmPasswordController.text
+                                    passwordController.text !=
+                                        confirmPasswordController.text
                                 ? 'Las contraseñas no coinciden'
                                 : null,
                           ),
@@ -220,15 +228,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               onPressed: _isFormValid
                                   ? () {
                                       final email = emailController.text.trim();
-                                      final password = passwordController.text.trim();
+                                      final password = passwordController.text
+                                          .trim();
                                       context.read<AuthBloc>().register(
-                                            email: email,
-                                            password: password,
-                                          );
+                                        email: email,
+                                        password: password,
+                                      );
                                     }
                                   : () => setState(() => _submitted = true),
                               style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -434,11 +445,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               enabled: !isLoading,
-                              errorText: _submitted && emailController.text.trim().isEmpty
+                              errorText:
+                                  _submitted &&
+                                      emailController.text.trim().isEmpty
                                   ? 'El correo es obligatorio'
-                                  : emailController.text.isNotEmpty && !_isEmailValid
-                                      ? 'Correo electrónico no válido'
-                                      : null,
+                                  : emailController.text.isNotEmpty &&
+                                        !_isEmailValid
+                                  ? 'Correo electrónico no válido'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
@@ -447,7 +461,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               icon: Icons.lock_outline,
                               obscureText: true,
                               enabled: !isLoading,
-                              errorText: _submitted && passwordController.text.trim().isEmpty
+                              errorText:
+                                  _submitted &&
+                                      passwordController.text.trim().isEmpty
                                   ? 'La contraseña es obligatoria'
                                   : null,
                             ),
@@ -470,15 +486,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                           setState(() => _submitted = true);
                                           return;
                                         }
-                                        final email = emailController.text.trim();
-                                        final password = passwordController.text.trim();
+                                        final email = emailController.text
+                                            .trim();
+                                        final password = passwordController.text
+                                            .trim();
                                         context.read<AuthBloc>().login(
-                                              email: email,
-                                              password: password,
-                                            );
+                                          email: email,
+                                          password: password,
+                                        );
                                       },
                                 style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -508,7 +528,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.red.shade50,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.red.shade200),
+                                  border: Border.all(
+                                    color: Colors.red.shade200,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
@@ -542,7 +564,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: isLoading ? null : () => context.go('/register'),
+                                  onPressed: isLoading
+                                      ? null
+                                      : () => context.go('/register'),
                                   child: const Text('Regístrate'),
                                 ),
                               ],
@@ -591,6 +615,8 @@ Widget _buildTextField({
     enabled: enabled,
     decoration: InputDecoration(
       labelText: label,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      hintText: label,
       prefixIcon: Icon(icon),
       helperText: helperText,
       errorText: errorText,
@@ -607,6 +633,7 @@ Widget _buildTextField({
       ),
       filled: true,
       fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
     ),
   );
 }
