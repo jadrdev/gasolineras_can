@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyA9YdrrIcLsLBAt6McABK6lbnS0MInfKFo',
-    appId: '1:786696478134:ios:2184c382f189bdc90eb517',
+    appId: '1:786696478134:ios:ecb2ec9ddbd97a890eb517',
     messagingSenderId: '786696478134',
     projectId: 'gasolineras-can',
     storageBucket: 'gasolineras-can.firebasestorage.app',
-    iosBundleId: 'com.example.gasolinerasCan',
+    iosBundleId: 'com.jadrdev.gasolineracanarias',
   );
 }
