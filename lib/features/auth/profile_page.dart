@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/theme/theme_cubit.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
-import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
-import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
+import 'vehicle_profile_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -16,9 +14,7 @@ class ProfilePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.logout, color: Colors.orange),
@@ -40,9 +36,7 @@ class ProfilePage extends StatelessWidget {
               Navigator.of(dialogContext).pop();
               context.read<AuthBloc>().logout();
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Cerrar sesión'),
           ),
         ],
@@ -88,10 +82,7 @@ class ProfilePage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 4,
-                        ),
+                        border: Border.all(color: Colors.white, width: 4),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.2),
@@ -171,9 +162,9 @@ class ProfilePage extends StatelessWidget {
                     _buildInfoRow(
                       icon: Icons.calendar_today,
                       label: 'Miembro desde',
-                      value: DateFormat('dd/MM/yyyy').format(
-                        DateTime.parse(user.createdAt),
-                      ),
+                      value: DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(DateTime.parse(user.createdAt)),
                       color: colorScheme.tertiary,
                     ),
                   ],
@@ -213,215 +204,9 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleCard(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return FutureBuilder<UserProfile?>(
-      future: UserProfileRepository().getProfile(),
-      builder: (context, snapshot) {
-        final profile = snapshot.data;
-        final fuel = profile?.preferredFuel ?? FuelType.g95;
-        final liters = profile?.tankLiters ?? 50.0;
-        final licensePlate = profile?.licensePlate ?? '';
-
-        return StatefulBuilder(
-          builder: (context, setInnerState) {
-            final litersController = TextEditingController(
-              text: liters.toStringAsFixed(0),
-            );
-            final plateController = TextEditingController(text: licensePlate);
-
-            Future<void> saveVehicleData() async {
-              final parsed = double.tryParse(
-                litersController.text.replaceAll(',', '.'),
-              );
-              final plate = plateController.text.trim().toUpperCase();
-
-              await UserProfileRepository().updatePreferences(
-                preferredFuel: fuel,
-                tankLiters: parsed != null && parsed > 0 ? parsed : liters,
-                licensePlate: plate,
-              );
-            }
-
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.directions_car, color: colorScheme.primary),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Mi vehículo',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Matrícula',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: plateController,
-                      textCapitalization: TextCapitalization.characters,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'[a-zA-Z0-9\-]'),
-                        ),
-                        LengthLimitingTextInputFormatter(9),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Ej: 1234ABC',
-                        prefixIcon: Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(),
-                      ),
-                      onTapOutside: (_) async => saveVehicleData(),
-                      onSubmitted: (_) async => saveVehicleData(),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'La matrícula se guarda automáticamente al salir del campo o pulsar intro.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Combustible habitual',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    PopupMenuButton<FuelType>(
-                      initialValue: fuel,
-                      onSelected: (selected) async {
-                        await saveVehicleData();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Combustible actualizado a ${selected.displayName}')),
-                          );
-                        }
-                      },
-                      itemBuilder: (context) => FuelType.values.map((fuelType) {
-                        final isSelected = fuelType == fuel;
-                        return PopupMenuItem(
-                          value: fuelType,
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 10,
-                                backgroundColor: FuelColors.of(fuelType),
-                                child: Text(
-                                  fuelType.shortLabel,
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(child: Text(fuelType.displayName)),
-                              if (isSelected)
-                                const Icon(Icons.check, size: 18, color: Colors.blue),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colorScheme.outline),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircleAvatar(
-                              radius: 12,
-                              backgroundColor: FuelColors.of(fuel),
-                              child: Text(
-                                fuel.shortLabel,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text(fuel.displayName),
-                            const SizedBox(width: 8),
-                            Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: litersController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*[.,]?[0-9]*')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Litros del depósito',
-                        prefixIcon: Icon(Icons.local_gas_station),
-                        suffixText: 'L',
-                        border: OutlineInputBorder(),
-                      ),
-                      onTapOutside: (_) async {
-                        await saveVehicleData();
-                      },
-                      onSubmitted: (value) async {
-                        await saveVehicleData();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tamaño del depósito actualizado')),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () async {
-                          await saveVehicleData();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Datos del vehículo guardados')),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.save),
-                        label: const Text('Guardar datos del vehículo'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  Widget _buildVehicleCard(BuildContext context) => VehicleProfileCard(
+    key: ValueKey(Supabase.instance.client.auth.currentUser?.id),
+  );
 
   Widget _buildLoginPrompt(BuildContext context, ColorScheme colorScheme) {
     return Center(
@@ -448,10 +233,7 @@ class ProfilePage extends StatelessWidget {
             Text(
               'Inicia sesión para ver tu perfil y acceder a funciones adicionales',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
@@ -461,10 +243,7 @@ class ProfilePage extends StatelessWidget {
               icon: const Icon(Icons.login),
               label: const Text(
                 'Iniciar sesión',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
@@ -490,9 +269,7 @@ class ProfilePage extends StatelessWidget {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -539,9 +316,7 @@ class ProfilePage extends StatelessWidget {
   }) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -549,10 +324,7 @@ class ProfilePage extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ...children,
@@ -576,11 +348,7 @@ class ProfilePage extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(

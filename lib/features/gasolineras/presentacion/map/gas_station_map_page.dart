@@ -1,14 +1,10 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
-import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
-import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart';
-import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
@@ -16,11 +12,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 class GasStationMapPage extends StatefulWidget {
+  final List<GasStation> stations;
   final FuelType preferredFuel;
   final double tankLiters;
 
   const GasStationMapPage({
     super.key,
+    required this.stations,
     this.preferredFuel = FuelType.g95,
     this.tankLiters = 50,
   });
@@ -30,29 +28,9 @@ class GasStationMapPage extends StatefulWidget {
 }
 
 class _GasStationMapPageState extends State<GasStationMapPage> {
-  late GasStationBloc _bloc;
   GoogleMapController? _mapController;
-  LatLng? _userPosition;
-  bool _loadingLocation = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _bloc = GasStationBloc(GasStationRepository());
-    _loadStations();
-  }
-
-  Future<void> _loadStations() async {
-    try {
-      final pos = await determinePosition();
-      _userPosition = LatLng(pos.latitude, pos.longitude);
-      setState(() => _loadingLocation = false);
-      _bloc.add(LoadStations(lat: pos.latitude, lng: pos.longitude));
-    } catch (e) {
-      setState(() => _loadingLocation = false);
-      _bloc.add(GasStationLoadError(e.toString()));
-    }
-  }
+  late final Future<Set<Marker>> _markers = _buildMarkers(widget.stations);
+  final Map<String, Future<BitmapDescriptor>> _icons = {};
 
   Future<BitmapDescriptor> _buildPriceMarker(String text, Color color) async {
     final pictureRecorder = ui.PictureRecorder();
@@ -115,6 +93,8 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
     final image = await picture.toImage(size.toInt(), size.toInt());
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final png = bytes!.buffer.asUint8List();
+    image.dispose();
+    picture.dispose();
     return BitmapDescriptor.bytes(png);
   }
 
@@ -124,12 +104,12 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
 
     for (final station in stations) {
       final price = station.priceFor(widget.preferredFuel);
-      if (price == null) continue;
 
-      final icon = await _buildPriceMarker(
-        price.toStringAsFixed(2),
+      final label = price?.toStringAsFixed(3) ?? '—';
+      final icon = await (_icons[label] ??= _buildPriceMarker(
+        label,
         FuelColors.of(widget.preferredFuel),
-      );
+      ));
 
       markers.add(
         Marker(
@@ -138,7 +118,8 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
           icon: icon,
           infoWindow: InfoWindow(
             title: station.nombre,
-            snippet: '${widget.preferredFuel.displayName}: ${price.toStringAsFixed(2)} €/L',
+            snippet:
+                '${widget.preferredFuel.displayName}: ${price == null ? 'sin precio' : '${price.toStringAsFixed(3)} €/L'}',
           ),
           onTap: () => _showStationBottomSheet(station, favoriteRepository),
         ),
@@ -193,7 +174,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${widget.preferredFuel.displayName}: ${price.toStringAsFixed(2)} €/L',
+                      '${widget.preferredFuel.displayName}: ${price.toStringAsFixed(3)} €/L',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -206,7 +187,8 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () => _openStationDetail(station, favoriteRepository),
+                        onPressed: () =>
+                            _openStationDetail(station, favoriteRepository),
                         icon: const Icon(Icons.info_outline),
                         label: const Text('Ver detalle'),
                       ),
@@ -229,7 +211,10 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
     );
   }
 
-  void _openStationDetail(GasStation station, FavoriteRepository favoriteRepository) {
+  void _openStationDetail(
+    GasStation station,
+    FavoriteRepository favoriteRepository,
+  ) {
     Navigator.pop(context);
     Navigator.push(
       context,
@@ -251,7 +236,9 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
       if (availableMaps.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No hay aplicaciones de mapas instaladas')),
+          const SnackBar(
+            content: Text('No hay aplicaciones de mapas instaladas'),
+          ),
         );
         return;
       }
@@ -278,124 +265,130 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-              ...availableMaps.map((map) => ListTile(
-                    leading: Image.asset(
-                      map.icon,
-                      width: 40,
-                      height: 40,
-                      errorBuilder: (_, error, stack) => const Icon(Icons.map),
-                    ),
-                    title: Text(map.mapName),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await map.showDirections(
-                        destination: Coords(station.latitud, station.longitud),
-                        destinationTitle: station.nombre,
-                      );
-                    },
-                  )),
+              ...availableMaps.map(
+                (map) => ListTile(
+                  leading: Image.asset(
+                    map.icon,
+                    width: 40,
+                    height: 40,
+                    errorBuilder: (_, error, stack) => const Icon(Icons.map),
+                  ),
+                  title: Text(map.mapName),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await map.showDirections(
+                      destination: Coords(station.latitud, station.longitud),
+                      destinationTitle: station.nombre,
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al abrir el mapa: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al abrir el mapa: $e')));
     }
+  }
+
+  Future<void> _fitResults() async {
+    final stations = widget.stations;
+    if (stations.isEmpty) return;
+    if (stations.length == 1) {
+      await _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(stations.first.latitud, stations.first.longitud),
+          14,
+        ),
+      );
+      return;
+    }
+    final latitudes = stations.map((s) => s.latitud).toList()..sort();
+    final longitudes = stations.map((s) => s.longitud).toList()..sort();
+    await _mapController?.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(latitudes.first - 0.001, longitudes.first - 0.001),
+          northeast: LatLng(latitudes.last + 0.001, longitudes.last + 0.001),
+        ),
+        48,
+      ),
+    );
   }
 
   @override
   void dispose() {
     _mapController?.dispose();
-    _bloc.close();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
-        body: BlocBuilder<GasStationBloc, GasStationState>(
-          builder: (context, state) {
-            if (_loadingLocation || state is GasStationLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (state is GasStationError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.red),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _loadStations,
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            if (state is GasStationLoaded) {
-              final stations = state.stations;
-              final cameraPosition = _userPosition != null
-                  ? CameraPosition(target: _userPosition!, zoom: 13)
-                  : CameraPosition(
-                      target: LatLng(stations.first.latitud, stations.first.longitud),
-                      zoom: 13,
-                    );
-
-              return FutureBuilder<Set<Marker>>(
-                future: _buildMarkers(stations),
-                builder: (context, snapshot) {
-                  final markers = snapshot.data ?? {};
-
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: GoogleMap(
-                          initialCameraPosition: cameraPosition,
-                          markers: markers,
-                          myLocationEnabled: true,
-                          myLocationButtonEnabled: false,
-                          mapToolbarEnabled: false,
-                          onMapCreated: (controller) => _mapController = controller,
-                        ),
-                      ),
-                      const SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          child: BannerAdWidget(),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-
-            return const SizedBox();
-          },
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: Text('Mapa · ${widget.stations.length} gasolineras'),
+      actions: [
+        TextButton.icon(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.view_list_outlined),
+          label: const Text('Lista'),
         ),
-        floatingActionButton: FloatingActionButton.small(
-          onPressed: () async {
-            if (_userPosition == null) return;
-            await _mapController?.animateCamera(
-              CameraUpdate.newLatLngZoom(_userPosition!, 14),
-            );
-          },
-          child: const Icon(Icons.my_location),
-        ),
-      ),
-    );
-  }
+      ],
+    ),
+    body: widget.stations.isEmpty
+        ? const Center(child: Text('No hay gasolineras para mostrar.'))
+        : FutureBuilder<Set<Marker>>(
+            future: _markers,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    'No se pudo cargar el mapa. Vuelve a la lista e inténtalo de nuevo.',
+                  ),
+                );
+              }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return Column(
+                children: [
+                  Expanded(
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          widget.stations.first.latitud,
+                          widget.stations.first.longitud,
+                        ),
+                        zoom: 12,
+                      ),
+                      markers: snapshot.data!,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                        _fitResults();
+                      },
+                    ),
+                  ),
+                  const SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: BannerAdWidget(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+    floatingActionButton: widget.stations.isEmpty
+        ? null
+        : FloatingActionButton.small(
+            tooltip: 'Ver todos los resultados',
+            onPressed: _fitResults,
+            child: const Icon(Icons.zoom_out_map),
+          ),
+  );
 }

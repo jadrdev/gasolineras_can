@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,10 +23,12 @@ class UserProfile {
 /// Tabla: `users` con columnas `id`, `email`, `preferred_fuel`, `tank_liters`,
 /// `license_plate`.
 class UserProfileRepository {
+  static final _changes = StreamController<void>.broadcast();
+  static Stream<void> get changes => _changes.stream;
   final SupabaseClient _client;
 
   UserProfileRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   User? get currentUser => _client.auth.currentUser;
   User? get _currentUser => currentUser;
@@ -69,7 +73,18 @@ class UserProfileRepository {
       values['license_plate'] = licensePlate.isEmpty ? null : licensePlate;
     }
 
-    await _client.from('users').update(values).eq('id', user.id);
+    final updated = await _client
+        .from('users')
+        .update(values)
+        .eq('id', user.id)
+        .select('id');
+    if (updated.isEmpty) {
+      throw StateError('No se encontró el perfil del usuario');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fuelType', preferredFuel.name);
+    await prefs.setDouble('tankLiters', tankLiters);
+    _changes.add(null);
   }
 
   /// Actualiza únicamente la matrícula del usuario autenticado.
@@ -77,9 +92,12 @@ class UserProfileRepository {
     final user = _currentUser;
     if (user == null) throw Exception('No hay usuario autenticado');
 
-    await _client.from('users').update({
-      'license_plate': licensePlate?.isEmpty ?? true ? null : licensePlate,
-    }).eq('id', user.id);
+    await _client
+        .from('users')
+        .update({
+          'license_plate': licensePlate?.isEmpty ?? true ? null : licensePlate,
+        })
+        .eq('id', user.id);
   }
 
   static FuelType _parseFuel(dynamic value) {

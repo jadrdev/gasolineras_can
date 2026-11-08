@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -6,16 +7,14 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class BannerAdWidget extends StatefulWidget {
   final AdSize adSize;
 
-  const BannerAdWidget({
-    super.key,
-    this.adSize = AdSize.banner,
-  });
+  const BannerAdWidget({super.key, this.adSize = AdSize.banner});
 
   @override
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
 class _BannerAdWidgetState extends State<BannerAdWidget> {
+  static Future<InitializationStatus>? _initialization;
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
@@ -28,9 +27,20 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     _loadAd();
   }
 
-  void _loadAd() {
+  Future<void> _loadAd() async {
+    try {
+      await (_initialization ??= MobileAds.instance.initialize());
+    } catch (_) {
+      _initialization = null;
+      return;
+    }
+    if (!mounted) return;
     _bannerAd = BannerAd(
-      adUnitId: _adUnitId,
+      adUnitId: kDebugMode
+          ? (defaultTargetPlatform == TargetPlatform.iOS
+                ? 'ca-app-pub-3940256099942544/2934735716'
+                : 'ca-app-pub-3940256099942544/6300978111')
+          : _adUnitId,
       size: widget.adSize,
       request: const AdRequest(),
       listener: BannerAdListener(

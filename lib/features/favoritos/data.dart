@@ -3,7 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'domain.dart';
 
 class FavoriteRepository implements IFavoriteRepository {
-  final supabase = Supabase.instance.client;
+  final SupabaseClient supabase;
+  FavoriteRepository({SupabaseClient? client})
+    : supabase = client ?? Supabase.instance.client;
+  Stream<List<int>>? _stream;
+  List<int> cachedFavorites = [];
+  bool get isLoggedIn => supabase.auth.currentUser != null;
 
   // Stream de favoritos en tiempo real
   @override
@@ -15,15 +20,16 @@ class FavoriteRepository implements IFavoriteRepository {
     }
 
     debugPrint('🔄 favoritesStream: Iniciando stream para user $userId');
-    
+
     // Supabase streaming de tabla con sintaxis correcta
-    return supabase
+    return _stream ??= supabase
         .from('favorites')
         .stream(primaryKey: ['id'])
         .eq('user_id', userId)
         .map((rows) {
           final ids = rows.map((r) => r['station_id'] as int).toList();
           debugPrint('⭐ favoritesStream: Favoritos actuales: $ids');
+          cachedFavorites = ids;
           return ids;
         });
   }
@@ -34,7 +40,7 @@ class FavoriteRepository implements IFavoriteRepository {
     if (userId == null) return;
 
     debugPrint('➕ Agregando favorito: station_id=$stationId, user_id=$userId');
-    
+
     try {
       await supabase.from('favorites').insert({
         'user_id': userId,
@@ -58,7 +64,7 @@ class FavoriteRepository implements IFavoriteRepository {
     if (userId == null) return;
 
     debugPrint('➖ Eliminando favorito: station_id=$stationId, user_id=$userId');
-    
+
     try {
       await supabase
           .from('favorites')
@@ -68,8 +74,7 @@ class FavoriteRepository implements IFavoriteRepository {
       debugPrint('✅ Favorito eliminado exitosamente');
     } catch (e) {
       debugPrint('❌ Error al eliminar favorito: $e');
-      // Ignorar errores al eliminar - puede que ya no exista
-      return;
+      rethrow;
     }
   }
 

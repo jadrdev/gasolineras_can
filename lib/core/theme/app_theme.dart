@@ -25,7 +25,23 @@ class AppTheme {
     );
 
     return base.copyWith(
-      textTheme: GoogleFonts.beVietnamProTextTheme(base.textTheme),
+      textTheme: base.platform == TargetPlatform.iOS
+          ? base.textTheme
+          : GoogleFonts.beVietnamProTextTheme(base.textTheme),
+      scaffoldBackgroundColor: colorScheme.surfaceContainerLowest,
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surfaceContainerLow,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide.none,
+        ),
+      ),
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,

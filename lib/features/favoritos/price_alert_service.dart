@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:gasolineras_can/core/location.dart';
 import 'package:gasolineras_can/core/notifications/notification_service.dart';
 import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
@@ -22,12 +21,13 @@ class PriceAlertService {
   final GasStationRepository _stationRepository;
 
   Timer? _timer;
+  bool _checking = false;
 
   PriceAlertService({
     FavoriteRepository? favoriteRepository,
     GasStationRepository? stationRepository,
-  })  : _favoriteRepository = favoriteRepository ?? FavoriteRepository(),
-        _stationRepository = stationRepository ?? GasStationRepository();
+  }) : _favoriteRepository = favoriteRepository ?? FavoriteRepository(),
+       _stationRepository = stationRepository ?? GasStationRepository();
 
   /// Inicia comprobaciones periódicas cada [interval]. El primer check se hace
   /// tras el primer intervalo para no ralentizar el arranque de la app.
@@ -47,6 +47,8 @@ class PriceAlertService {
   /// Si [simulateDrop] es `true`, fuerza una bajada ficticia de 0,10 €/L
   /// sobre cada favorito para poder comprobar que la notificación funciona.
   Future<void> checkPriceDrops({bool simulateDrop = false}) async {
+    if (_checking) return;
+    _checking = true;
     try {
       final repo = UserProfileRepository();
       final user = repo.currentUser;
@@ -65,16 +67,16 @@ class PriceAlertService {
         return;
       }
 
-      final pos = await determinePosition();
-      final stations = await _stationRepository.fetchStations(
-        pos.latitude,
-        pos.longitude,
-      );
-
-      final snapshots = await _loadSnapshots();
-      final newSnapshots = <int, Map<String, double>>{};
+      final catalog = await _stationRepository.fetchCatalog(forceRefresh: true);
+      // Cached prices must never trigger a new-price alert.
+      if (catalog.offline) return;
+      final stations = catalog.stations;
+      final snapshots = await _loadSnapshots(user.id);
+      final newSnapshots = Map<int, Map<String, double>>.from(snapshots)
+        ..removeWhere((id, _) => !favoriteIds.contains(id));
 
       for (final station in stations) {
+        if (repo.currentUser?.id != user.id) return;
         if (!favoriteIds.contains(station.id)) continue;
 
         final price = station.priceFor(preferredFuel);
@@ -86,7 +88,7 @@ class PriceAlertService {
 
         debugPrint(
           '💰 PriceAlert: ${station.nombre} ${preferredFuel.name} '
-          'antes=${previousPrice?.toStringAsFixed(2)} ahora=${price.toStringAsFixed(2)}',
+          'antes=${previousPrice?.toStringAsFixed(3)} ahora=${price.toStringAsFixed(3)}',
         );
 
         newSnapshots[station.id] = {
@@ -97,25 +99,32 @@ class PriceAlertService {
         if (previousPrice != null && price < previousPrice) {
           final drop = previousPrice - price;
           await NotificationService.showNotification(
+            id: station.id,
             title: '⛽ ¡Bajó el precio!',
             body:
-                '${station.nombre}: ${preferredFuel.displayName} ahora a ${price.toStringAsFixed(2)} €/L '
-                '(bajó ${drop.toStringAsFixed(2)} €)',
+                '${station.nombre}: ${preferredFuel.displayName} ahora a ${price.toStringAsFixed(3)} €/L '
+                '(bajó ${drop.toStringAsFixed(3)} €)',
           );
-          debugPrint('🔔 PriceAlert: notificación enviada para ${station.nombre}');
+          debugPrint(
+            '🔔 PriceAlert: notificación enviada para ${station.nombre}',
+          );
         }
       }
 
-      await _saveSnapshots(newSnapshots);
+      if (repo.currentUser?.id == user.id) {
+        await _saveSnapshots(user.id, newSnapshots);
+      }
     } catch (e, stack) {
       debugPrint('❌ PriceAlert: error en checkPriceDrops: $e');
       debugPrint(stack.toString());
+    } finally {
+      _checking = false;
     }
   }
 
-  Future<Map<int, Map<String, double>>> _loadSnapshots() async {
+  Future<Map<int, Map<String, double>>> _loadSnapshots(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
+    final raw = prefs.getString('$_prefsKey:$userId');
     if (raw == null || raw.isEmpty) return {};
 
     try {
@@ -133,7 +142,10 @@ class PriceAlertService {
     }
   }
 
-  Future<void> _saveSnapshots(Map<int, Map<String, double>> snapshots) async {
+  Future<void> _saveSnapshots(
+    String userId,
+    Map<int, Map<String, double>> snapshots,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final encoded = snapshots.map(
       (id, fuelMap) => MapEntry(
@@ -141,6 +153,6 @@ class PriceAlertService {
         fuelMap.map((fuelName, price) => MapEntry(fuelName, price)),
       ),
     );
-    await prefs.setString(_prefsKey, jsonEncode(encoded));
+    await prefs.setString('$_prefsKey:$userId', jsonEncode(encoded));
   }
 }

@@ -1,4 +1,5 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -7,6 +8,8 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  StreamSubscription<dynamic>? _authSubscription;
 
   AuthBloc() : super(AuthInitial()) {
     // Handlers
@@ -17,7 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthErrorEvent>((event, emit) => emit(AuthError(event.message)));
 
     // Escuchar cambios de sesión
-    _supabase.auth.onAuthStateChange.listen((data) {
+    _authSubscription = _supabase.auth.onAuthStateChange.listen((data) {
       final AuthChangeEvent eventType = data.event;
       final session = data.session;
 
@@ -55,39 +58,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required String password,
   }) async {
     try {
-      print('🔵 Intentando registrar usuario: $email');
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
         //emailRedirectTo: 'http://localhost:3000/thank-you.html', // Para desarrollo local
-        emailRedirectTo: 'https://jadrdev.github.io/gasolineras_can/thank-you.html', // Para producción
+        emailRedirectTo:
+            'https://jadrdev.github.io/gasolineras_can/thank-you.html', // Para producción
       );
-      print('✅ Respuesta de registro: ${response.user?.id}');
-      print('📧 Email confirmado: ${response.user?.emailConfirmedAt}');
-      
+
       if (response.user != null) {
-        print('✅ Usuario creado exitosamente');
         add(RegistrationSuccessEvent());
       }
     } on AuthException catch (e) {
-      print('❌ Error de autenticación: ${e.message}');
-      print('❌ Código de error: ${e.statusCode}');
-      
       // Manejar error específico de envío de email
-      if (e.message.contains('Error sending confirmation email') || 
+      if (e.message.contains('Error sending confirmation email') ||
           e.statusCode == '500') {
-        add(AuthErrorEvent(
-          'No se pudo enviar el email de confirmación. '
-          'Por favor, contacta al administrador o desactiva la confirmación por email en Supabase. '
-          'Dashboard → Authentication → Providers → Email → Deshabilitar "Enable email confirmations"'
-        ));
+        add(
+          AuthErrorEvent(
+            'No se pudo enviar el email de confirmación. '
+            'Vuelve a intentarlo más tarde.',
+          ),
+        );
       } else {
         add(AuthErrorEvent('Error: ${e.message}'));
       }
     } catch (e) {
-      print('❌ Error inesperado: $e');
       add(AuthErrorEvent("Error inesperado: $e"));
     }
+  }
+
+  @override
+  Future<void> close() async {
+    await _authSubscription?.cancel();
+    return super.close();
   }
 
   // LOGOUT

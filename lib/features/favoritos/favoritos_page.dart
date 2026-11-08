@@ -1,3 +1,7 @@
+import 'package:geolocator/geolocator.dart';
+import 'dart:async';
+import '../auth/user_profile_repository.dart';
+import 'presentacion.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
@@ -21,42 +25,102 @@ class _FavoritesPageState extends State<FavoritesPage> {
   List<GasStation> _allStations = [];
   List<int> _favoriteIds = [];
   bool _isLoading = true;
+  bool _offline = false;
+  String? _error;
+  FuelType _fuel = FuelType.g95;
+  double _tankLiters = 50;
+  StreamSubscription<List<int>>? _favoritesSubscription;
+  StreamSubscription<void>? _profileSubscription;
+  int _generation = 0;
+  int _favoritesRevision = 0;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _favoritesSubscription = widget.repository.favoritesStream().listen(
+      (ids) {
+        if (!mounted) return;
+        _favoritesRevision++;
+        setState(() => _favoriteIds = ids);
+        if (ids.any((id) => !_allStations.any((station) => station.id == id))) {
+          _loadData(favoriteIds: ids);
+        }
+      },
+      onError: (Object error) {
+        if (mounted) {
+          setState(() => _error = 'No se pudieron actualizar los favoritos.');
+        }
+      },
+    );
+    _profileSubscription = UserProfileRepository.changes.listen(
+      (_) => _loadData(),
+    );
   }
 
-  Future<void> _loadData() async {
+  @override
+  void dispose() {
+    _favoritesSubscription?.cancel();
+    _profileSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadData({
+    bool forceRefresh = false,
+    List<int>? favoriteIds,
+  }) async {
+    final generation = ++_generation;
+    final favoritesRevision = _favoritesRevision;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
-      setState(() => _isLoading = true);
-
-      // Cargar favoritos y estaciones en paralelo.
-      final pos = await determinePosition();
-      final results = await Future.wait([
-        widget.repository.getFavorites(),
-        _gasStationRepo.fetchStations(
-          pos.latitude,
-          pos.longitude,
-          radiusKm: 300,
-          limit: 500,
-        ),
-      ]);
-
-      final favoriteIds = results[0] as List<int>;
-      final stations = results[1] as List<GasStation>;
-
-      if (mounted) {
-        setState(() {
-          _favoriteIds = favoriteIds;
-          _allStations = stations;
-          _isLoading = false;
-        });
+      final ids = favoriteIds ?? await widget.repository.getFavorites();
+      final catalog = ids.isEmpty
+          ? null
+          : await _gasStationRepo.fetchCatalog(forceRefresh: forceRefresh);
+      UserProfile? profile;
+      try {
+        profile = await UserProfileRepository().getProfile();
+      } catch (_) {
+        /* Keep preferences when offline. */
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      if (!mounted || generation != _generation) return;
+      setState(() {
+        // A newer realtime event (for example a deletion) wins over this request.
+        if (favoritesRevision == _favoritesRevision) _favoriteIds = ids;
+        _allStations = catalog?.stations ?? [];
+        _offline = catalog?.offline ?? false;
+        _fuel = profile?.preferredFuel ?? _fuel;
+        _tankLiters = profile?.tankLiters ?? _tankLiters;
+        _isLoading = false;
+      });
+      // GPS enriches distances but never blocks favorite retrieval.
+      if (ids.isEmpty) return;
+      try {
+        final permission = await Geolocator.checkPermission();
+        if (permission != LocationPermission.always &&
+            permission != LocationPermission.whileInUse) {
+          return;
+        }
+        final position = await determinePosition();
+        if (!mounted || generation != _generation) return;
+        setState(() {
+          for (final station in _allStations) {
+            station.calcularDistancia(position.latitude, position.longitude);
+          }
+        });
+      } catch (_) {
+        /* Distances are optional. */
+      }
+    } catch (_) {
+      if (mounted && generation == _generation) {
+        setState(() {
+          _isLoading = false;
+          _error =
+              'No se pudieron cargar tus favoritos. Comprueba la conexión y vuelve a intentarlo.';
+        });
       }
     }
   }
@@ -67,23 +131,18 @@ class _FavoritesPageState extends State<FavoritesPage> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(
-              Icons.star,
-              size: 20,
-            ),
+            const Icon(Icons.star, size: 20),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Mis Favoritos"),
-              ],
+              children: [const Text("Mis Favoritos")],
             ),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
+            onPressed: () => _loadData(forceRefresh: true),
           ),
         ],
       ),
@@ -91,10 +150,26 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ? const Center(child: CircularProgressIndicator())
           : Builder(
               builder: (context) {
+                if (_error != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(_error!, textAlign: TextAlign.center),
+                        TextButton(
+                          onPressed: () => _loadData(forceRefresh: true),
+                          child: const Text('Reintentar'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 final favoriteIds = _favoriteIds;
 
                 if (favoriteIds.isEmpty) {
-                  final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
+                  final mutedColor = Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant;
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -132,7 +207,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.warning_amber, size: 64, color: Colors.orange),
+                        Icon(
+                          Icons.warning_amber,
+                          size: 64,
+                          color: Colors.orange,
+                        ),
                         SizedBox(height: 16),
                         Text(
                           'No se encontraron las gasolineras favoritas',
@@ -144,9 +223,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   );
                 }
 
-                debugPrint('🎨 Renderizando ${favoriteStations.length} favoritos');
+                debugPrint(
+                  '🎨 Renderizando ${favoriteStations.length} favoritos',
+                );
                 return RefreshIndicator(
-                  onRefresh: _loadData,
+                  onRefresh: () => _loadData(forceRefresh: true),
                   child: ListView.builder(
                     itemCount: favoriteStations.length,
                     padding: const EdgeInsets.all(8),
@@ -159,16 +240,23 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         return '${(km * 1000).toStringAsFixed(0)} m';
                       }
 
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       final favoriteColor = isDark
                           ? Colors.amber.withValues(alpha: 0.15)
                           : Colors.amber.shade50;
 
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 6.0,
+                        ),
                         child: Card(
-                          color: favoriteColor, // Siempre resaltado porque son favoritos
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          color:
+                              favoriteColor, // Siempre resaltado porque son favoritos
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
                             onTap: () {
@@ -177,8 +265,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 MaterialPageRoute(
                                   builder: (_) => GasStationDetailPage(
                                     station: e,
+                                    preferredFuel: _fuel,
+                                    tankLiters: _tankLiters,
                                     favoriteRepository: widget.repository,
-                                    directionsRepository: DirectionsService(AppConfig.googleMapsApiKey),
+                                    directionsRepository: DirectionsService(
+                                      AppConfig.googleMapsApiKey,
+                                    ),
                                   ),
                                 ),
                               );
@@ -189,15 +281,20 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               e.nombre,
-                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -205,7 +302,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             Text(
                                               e.direccion,
                                               style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
                                                 fontSize: 13,
                                               ),
                                               maxLines: 1,
@@ -214,15 +313,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                           ],
                                         ),
                                       ),
+                                      FavoriteWidget(
+                                        station: e,
+                                        repository: widget.repository,
+                                      ),
                                       const SizedBox(width: 8),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            'Distancia',
+                                            'En línea recta',
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -231,13 +337,19 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
+                                  if (_offline)
+                                    const Text(
+                                      'Precios guardados: no se han podido actualizar.',
+                                    ),
                                   const SizedBox(height: 8),
                                   Wrap(
                                     spacing: 6,
@@ -247,56 +359,116 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         Tooltip(
                                           message: 'Gasolina 95',
                                           child: Chip(
-                                            backgroundColor: FuelColors.of(FuelType.g95),
-                                            visualDensity: VisualDensity.compact,
+                                            backgroundColor: FuelColors.of(
+                                              FuelType.g95,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('95', style: TextStyle(fontSize: 11, color: Colors.white)),
+                                              child: Text(
+                                                '95',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                            label: Text('${e.gasolina95!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                                            label: Text(
+                                              '${e.gasolina95!.toStringAsFixed(3)} €',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       if (e.gasolina98 != null)
                                         Tooltip(
                                           message: 'Gasolina 98',
                                           child: Chip(
-                                            backgroundColor: FuelColors.of(FuelType.g98),
-                                            visualDensity: VisualDensity.compact,
+                                            backgroundColor: FuelColors.of(
+                                              FuelType.g98,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('98', style: TextStyle(fontSize: 11, color: Colors.white)),
+                                              child: Text(
+                                                '98',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                            label: Text('${e.gasolina98!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                                            label: Text(
+                                              '${e.gasolina98!.toStringAsFixed(3)} €',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       if (e.diesel != null)
                                         Tooltip(
                                           message: 'Diésel',
                                           child: Chip(
-                                            backgroundColor: FuelColors.of(FuelType.diesel),
-                                            visualDensity: VisualDensity.compact,
+                                            backgroundColor: FuelColors.of(
+                                              FuelType.diesel,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('D', style: TextStyle(fontSize: 11, color: Colors.white)),
+                                              child: Text(
+                                                'D',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                            label: Text('${e.diesel!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                                            label: Text(
+                                              '${e.diesel!.toStringAsFixed(3)} €',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       if (e.dieselPremium != null)
                                         Tooltip(
                                           message: 'Diésel Premium',
                                           child: Chip(
-                                            backgroundColor: FuelColors.of(FuelType.dieselPremium),
-                                            visualDensity: VisualDensity.compact,
+                                            backgroundColor: FuelColors.of(
+                                              FuelType.dieselPremium,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             avatar: const CircleAvatar(
                                               radius: 10,
                                               backgroundColor: Colors.white24,
-                                              child: Text('DP', style: TextStyle(fontSize: 11, color: Colors.white)),
+                                              child: Text(
+                                                'DP',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                            label: Text('${e.dieselPremium!.toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                                            label: Text(
+                                              '${e.dieselPremium!.toStringAsFixed(3)} €',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                     ],

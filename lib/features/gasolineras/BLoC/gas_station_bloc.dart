@@ -1,17 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
-import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
+import '../models/gas_station.dart';
+import '../data/gas_station_repository.dart';
 
-// Eventos
 abstract class GasStationEvent {}
 
 class LoadStations extends GasStationEvent {
-  final double lat;
-  final double lng;
-  LoadStations({required this.lat, required this.lng});
+  final double? lat;
+  final double? lng;
+  final bool forceRefresh;
+  LoadStations({this.lat, this.lng, this.forceRefresh = false});
 }
 
-// Estados
 abstract class GasStationState {}
 
 class GasStationInitial extends GasStationState {}
@@ -20,7 +19,9 @@ class GasStationLoading extends GasStationState {}
 
 class GasStationLoaded extends GasStationState {
   final List<GasStation> stations;
-  GasStationLoaded(this.stations);
+  final bool offline;
+  final DateTime? fetchedAt;
+  GasStationLoaded(this.stations, {this.offline = false, this.fetchedAt});
 }
 
 class GasStationError extends GasStationState {
@@ -33,35 +34,45 @@ class GasStationLoadError extends GasStationEvent {
   GasStationLoadError(this.message);
 }
 
-// LoadStationsWithDistance eliminado: la UI debe despachar LoadStations(lat,lng)
-
-// BLoC
 class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
   final GasStationRepository repository;
-
+  int _generation = 0;
   GasStationBloc(this.repository) : super(GasStationInitial()) {
     on<LoadStations>((event, emit) async {
+      final generation = ++_generation;
       emit(GasStationLoading());
       try {
-        final stations = await repository.fetchStations(event.lat, event.lng);
-
-        // Calculamos distancia para cada estación
-        for (var e in stations) {
-          e.calcularDistancia(event.lat, event.lng);
+        final catalog = await repository.fetchCatalog(
+          forceRefresh: event.forceRefresh,
+        );
+        if (generation != _generation) return;
+        for (final station in catalog.stations) {
+          if (event.lat != null && event.lng != null) {
+            station.calcularDistancia(event.lat!, event.lng!);
+          } else {
+            station.distancia = null;
+          }
         }
-
-        emit(GasStationLoaded(stations));
-      } catch (e) {
-        emit(GasStationError(e.toString()));
+        emit(
+          GasStationLoaded(
+            catalog.stations,
+            offline: catalog.offline,
+            fetchedAt: catalog.fetchedAt,
+          ),
+        );
+      } catch (_) {
+        if (generation == _generation) {
+          emit(
+            GasStationError(
+              'No se pudieron cargar las gasolineras. Comprueba la conexión y vuelve a intentarlo.',
+            ),
+          );
+        }
       }
     });
-
-  // Todas las cargas se hacen a través de `LoadStations` y el repositorio
-    
-    // Handler para eventos de error lanzados desde la UI o repositorio
     on<GasStationLoadError>((event, emit) {
+      _generation++;
       emit(GasStationError(event.message));
     });
   }
 }
-

@@ -1,699 +1,582 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasolineras_can/core/directions_service.dart';
-import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
-import 'package:gasolineras_can/features/directions/data/mock_directions_repository.dart';
-import 'package:gasolineras_can/features/gasolineras/BLoC/gas_station_bloc.dart';
-import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
-import 'package:gasolineras_can/core/location.dart';
-import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
-import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
-import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
-import 'package:gasolineras_can/features/favoritos/data.dart';
-import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gasolineras_can/core/config.dart';
-
+import '../../../core/config.dart';
+import '../../../core/directions_service.dart';
+import '../../../core/location.dart';
+import '../../ads/banner_ad_widget.dart';
+import '../../auth/user_profile_repository.dart';
+import '../../favoritos/data.dart';
+import '../../favoritos/presentacion.dart';
+import '../BLoC/gas_station_bloc.dart';
+import '../data/gas_station_repository.dart';
+import '../data/station_search.dart';
+import 'widgets/station_price_summary.dart';
+import '../fuel_colors.dart';
+import '../models/gas_station.dart';
+import 'details/gas_station_details.dart';
+import 'map/gas_station_map_page.dart';
+import 'station_search_field.dart';
 
 enum SortBy { precio, distancia }
 
-  // 🔹 Cambia este flag para alternar entre MOCK y API real
-  const useMock = false;
-
-const _prefSortBy = 'sortBy';
-const _prefFuelType = 'fuelType';
-
 class GasStationListPage extends StatefulWidget {
-  const GasStationListPage({super.key});
-
+  final GasStationRepository? stationRepository;
+  final FavoriteRepository? favoriteRepository;
+  final Future<Position> Function()? locate;
+  final Future<UserProfile?> Function()? loadProfile;
+  final Widget banner;
+  const GasStationListPage({
+    super.key,
+    this.stationRepository,
+    this.favoriteRepository,
+    this.locate,
+    this.loadProfile,
+    this.banner = const BannerAdWidget(),
+  });
   @override
   State<GasStationListPage> createState() => _GasStationListPageState();
-
 }
 
 class _GasStationListPageState extends State<GasStationListPage> {
-late GasStationBloc bloc;
-late FavoriteRepository favoriteRepository;
-SortBy _sortBy = SortBy.precio;
-FuelType _activeFuel = FuelType.g95;
-double _tankLiters = 50;
-String _searchQuery = '';
+  late final GasStationBloc _bloc;
+  late final _favorites = widget.favoriteRepository ?? FavoriteRepository();
+  final _search = TextEditingController();
+  StreamSubscription<void>? _profileSubscription;
+  SortBy _sort = SortBy.precio;
+  FuelType _fuel = FuelType.g95;
+  double _tankLiters = 50;
+  Position? _position;
+  String _zone = 'nearby';
+  String _query = '';
+  bool _locating = false;
 
   @override
   void initState() {
     super.initState();
-    bloc = GasStationBloc(GasStationRepository());
-    favoriteRepository = FavoriteRepository();
-    _loadPreferences(); // 🔹 Cargamos preferencias
-    _loadStations(); // cargar al inicio
+    _bloc = GasStationBloc(widget.stationRepository ?? GasStationRepository());
+    _profileSubscription = UserProfileRepository.changes.listen(
+      (_) => _loadPreferences(),
+    );
+    _loadPreferences();
+    // Browsing/search does not wait for GPS permission or a location fix.
+    _bloc.add(LoadStations());
+    _locate();
   }
 
-Future<void> _loadStations({bool forceRefresh = false}) async {
-    // Si ya tenemos datos cargados y no se fuerza refresh, no hacer nada
-    if (!forceRefresh && bloc.state is GasStationLoaded) {
-      return;
-    }
-
+  Future<void> _locate({
+    bool forceRefresh = false,
+    bool requestPermission = false,
+  }) async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    Position? position;
     try {
-      final pos = await determinePosition(forceRefresh: forceRefresh);
-
-      // Despachamos la petición al BLoC para que se encargue de
-      // obtener las estaciones y calcular distancias.
-      bloc.add(LoadStations(lat: pos.latitude, lng: pos.longitude));
-    } catch (e) {
-      // Si falla la obtención de la posición, notificamos al BLoC
-      bloc.add(GasStationLoadError(e.toString()));
+      if (widget.locate == null && !requestPermission) {
+        final permission = await Geolocator.checkPermission();
+        if (permission != LocationPermission.always &&
+            permission != LocationPermission.whileInUse) {
+          if (mounted) setState(() => _locating = false);
+          return;
+        }
+      }
+      position =
+          await (widget.locate?.call() ??
+              determinePosition(forceRefresh: forceRefresh));
+    } catch (_) {
+      /* Manual search remains available. */
     }
+    if (!mounted) return;
+    setState(() {
+      _position = position;
+      _locating = false;
+      final state = _bloc.state;
+      if (position != null && state is GasStationLoaded) {
+        for (final station in state.stations) {
+          station.calcularDistancia(position.latitude, position.longitude);
+        }
+      }
+    });
   }
 
-  /// 🔹 Guardar preferencias en local
-  Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefSortBy, _sortBy.name);
-    await prefs.setString(_prefFuelType, _activeFuel.name);
-  }
-
-  /// 🔹 Cargar preferencias en local
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedSort = prefs.getString(_prefSortBy);
-    final savedFuel = prefs.getString(_prefFuelType);
-
-    FuelType? profileFuel;
-    if (Supabase.instance.client.auth.currentUser != null) {
-      final profile = await UserProfileRepository().getProfile();
-      profileFuel = profile?.preferredFuel;
+    final fuel = prefs.getString('fuelType');
+    UserProfile? profile;
+    try {
+      profile =
+          await (widget.loadProfile?.call() ??
+              UserProfileRepository().getProfile());
+    } catch (_) {
+      /* Use local settings. */
     }
+    if (!mounted) return;
+    setState(() {
+      _sort = SortBy.values.firstWhere(
+        (v) => v.name == prefs.getString('sortBy'),
+        orElse: () => SortBy.precio,
+      );
+      _fuel =
+          profile?.preferredFuel ??
+          FuelType.values.firstWhere(
+            (v) => v.name == fuel,
+            orElse: () => FuelType.g95,
+          );
+      _tankLiters = profile?.tankLiters ?? prefs.getDouble('tankLiters') ?? 50;
+    });
+  }
 
-    if (Supabase.instance.client.auth.currentUser != null) {
-      final profile = await UserProfileRepository().getProfile();
-      if (profile != null) {
-        _tankLiters = profile.tankLiters;
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fuelType', _fuel.name);
+    await prefs.setString('sortBy', _sort.name);
+  }
+
+  Future<void> _refresh() async {
+    unawaited(_locate(forceRefresh: true));
+    // Subscribe before dispatching and keep the refresh indicator until completion.
+    final done = _bloc.stream.firstWhere(
+      (s) => s is GasStationLoaded || s is GasStationError,
+    );
+    _bloc.add(
+      LoadStations(
+        lat: _position?.latitude,
+        lng: _position?.longitude,
+        forceRefresh: true,
+      ),
+    );
+    await done;
+  }
+
+  List<GasStation> _visibleStations(List<GasStation> stations) {
+    for (final station in stations) {
+      if (_position != null) {
+        station.calcularDistancia(_position!.latitude, _position!.longitude);
       }
     }
-
-    if (savedSort != null || savedFuel != null || profileFuel != null) {
-      setState(() {
-        if (savedSort != null) {
-          _sortBy = SortBy.values.firstWhere(
-            (e) => e.name == savedSort,
-            orElse: () => SortBy.precio,
-          );
-        }
-        _activeFuel = profileFuel ??
-            (savedFuel != null
-                ? FuelType.values.firstWhere(
-                    (e) => e.name == savedFuel,
-                    orElse: () => FuelType.g95,
-                  )
-                : FuelType.g95);
-      });
-    }
-  }
-
-    void _onSortChanged(SortBy value) {
-    setState(() {
-      _sortBy = value;
-    });
-    _savePreferences();
-  }
-
-  void _onFuelTypeChanged(FuelType value) {
-    setState(() {
-      _activeFuel = value;
-    });
-    _savePreferences();
-  }
-
-  Widget _buildFuelChips(BuildContext context, GasStation station) {
-    final availableFuels = FuelType.values
-        .where((f) => station.priceFor(f) != null)
-        .toList();
-
-    if (availableFuels.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    // Si el combustible activo no está disponible, mostrar el primero que sí.
-    final displayFuel = availableFuels.contains(_activeFuel)
-        ? _activeFuel
-        : availableFuels.first;
-    final displayPrice = station.priceFor(displayFuel)!;
-
-    final otherCount = availableFuels.length - 1;
-
-    Widget buildActiveChip() {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: FuelColors.of(displayFuel),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 10,
-              backgroundColor: Colors.white24,
-              child: Text(
-                '⛽',
-                style: TextStyle(fontSize: 11),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${displayPrice.toStringAsFixed(2)} €',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+    final filtered = stations.where((s) {
+      if (!matchesStation(s, _query)) return false;
+      if (_zone.startsWith('municipio:')) {
+        return s.municipio == _zone.substring(10);
+      }
+      // Typing searches every island; the 16 km radius must not hide matches.
+      if (_zone == 'nearby' && _query.trim().isEmpty && _position != null) {
+        return (s.distancia ?? double.infinity) <= 16;
+      }
+      return true;
+    }).toList();
+    filtered.sort((a, b) {
+      final comparison = _sort == SortBy.precio
+          ? (a.priceFor(_fuel) ?? double.infinity).compareTo(
+              b.priceFor(_fuel) ?? double.infinity,
+            )
+          : (a.distancia ?? double.infinity).compareTo(
+              b.distancia ?? double.infinity,
+            );
+      if (comparison != 0) return comparison;
+      final distance = (a.distancia ?? double.infinity).compareTo(
+        b.distancia ?? double.infinity,
       );
-    }
-
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      children: [
-        buildActiveChip(),
-        if (otherCount > 0)
-          ActionChip(
-            visualDensity: VisualDensity.compact,
-            avatar: const Icon(Icons.expand_more, size: 18),
-            label: Text('+${otherCount.toString()}'),
-            onPressed: () => _showAllFuelsBottomSheet(context, station),
-          ),
-      ],
-    );
-  }
-
-  void _showAllFuelsBottomSheet(BuildContext context, GasStation station) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        final fuels = FuelType.values
-            .where((f) => station.priceFor(f) != null)
-            .toList();
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  station.nombre,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Precios disponibles',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...fuels.map((fuel) {
-                  final price = station.priceFor(fuel)!;
-                  final isActive = fuel == _activeFuel;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: FuelColors.of(fuel),
-                      child: Text(
-                        fuel.shortLabel,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    title: Text(fuel.displayName),
-                    trailing: Text(
-                      '${price.toStringAsFixed(2)} €/L',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isActive ? FuelColors.of(fuel) : null,
-                      ),
-                    ),
-                    onTap: () {
-                      _onFuelTypeChanged(fuel);
-                      Navigator.pop(context);
-                    },
-                  );
-                }),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+      return distance != 0 ? distance : a.nombre.compareTo(b.nombre);
+    });
+    return filtered;
   }
 
   @override
   void dispose() {
-    bloc.close();
+    _profileSubscription?.cancel();
+    _search.dispose();
+    _bloc.close();
     super.dispose();
   }
 
-   @override
-  Widget build(BuildContext context) {
-     final directionsRepository = useMock
-        ? MockDirectionsRepository()
-        : DirectionsService(AppConfig.googleMapsApiKey);
-
-    return BlocProvider.value(
-      value: bloc,
-      child: Scaffold(
+  @override
+  Widget build(
+    BuildContext context,
+  ) => BlocBuilder<GasStationBloc, GasStationState>(
+    bloc: _bloc,
+    builder: (context, state) {
+      final stations = state is GasStationLoaded
+          ? state.stations
+          : <GasStation>[];
+      final filtered = _visibleStations(stations);
+      final municipalities =
+          stations
+              .map((s) => s.municipio)
+              .where((s) => s.isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort(
+              (a, b) =>
+                  normalizeStationText(a).compareTo(normalizeStationText(b)),
+            );
+      return Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              Icon(
-                _sortBy == SortBy.precio
-                    ? Icons.local_gas_station
-                    : Icons.location_on,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  "Gasolineras",
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+          title: const Text('Gasolineras'),
           actions: [
-            // Selector de tipo de combustible
-            PopupMenuButton<FuelType>(
-              initialValue: _activeFuel,
-              onSelected: _onFuelTypeChanged,
-              tooltip: 'Tipo de combustible',
-              itemBuilder: (context) => FuelType.values.map((fuel) {
-                final isSelected = fuel == _activeFuel;
-                return PopupMenuItem(
-                  value: fuel,
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 10,
-                        backgroundColor: FuelColors.of(fuel),
-                        child: Text(
-                          fuel.shortLabel,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text(fuel.displayName)),
-                      if (isSelected)
-                        const Icon(Icons.check, size: 18, color: Colors.blue),
-                    ],
-                  ),
-                );
-              }).toList(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: FuelColors.of(_activeFuel),
-                  child: Text(
-                    _activeFuel.shortLabel,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+            if (_position == null)
+              IconButton(
+                tooltip: 'Usar mi ubicación',
+                onPressed: _locating
+                    ? null
+                    : () =>
+                          _locate(forceRefresh: true, requestPermission: true),
+                icon: const Icon(Icons.my_location),
               ),
-            ),
-            PopupMenuButton<SortBy>(
-              initialValue: _sortBy,
-              onSelected: _onSortChanged,
-              tooltip: 'Ordenar por',
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: SortBy.precio,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.local_gas_station, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Text("Por precio (${_activeFuel.shortLabel})"),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: SortBy.distancia,
-                  child: Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.green),
-                      SizedBox(width: 8),
-                      Text("Por distancia"),
-                    ],
-                  ),
-                ),
-              ],
-              icon: const Icon(Icons.filter_alt),
+            IconButton(
+              tooltip: 'Actualizar precios',
+              onPressed: state is GasStationLoading ? null : _refresh,
+              icon: const Icon(Icons.refresh),
             ),
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: () => _loadStations(forceRefresh: true),
-          child: BlocBuilder<GasStationBloc, GasStationState>(
-            builder: (context, state) {
-              if (state is GasStationLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is GasStationError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.red),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _loadStations,
-                      child: const Text("Reintentar"),
-                    ),
-                  ],
-                ),
-                );
-
-              } else if (state is GasStationLoaded) {
-                final estaciones = List<GasStation>.from(state.stations);
-
-                return StreamBuilder<List<int>>(
-                  stream: favoriteRepository.favoritesStream(),
-                  builder: (context, snapshot) {
-                    final favorites = snapshot.data ?? [];
-
-                    // Filtrar por búsqueda
-                    final filtered = estaciones.where((s) {
-                      final q = _searchQuery.toLowerCase();
-                      if (q.isEmpty) return true;
-                      return (s.nombre.toLowerCase().contains(q) ||
-                          s.direccion.toLowerCase().contains(q) ||
-                          s.marca.toLowerCase().contains(q));
-                    }).toList();
-
-                    // Ordenar por precio (del combustible activo) o distancia
-                    if (_sortBy == SortBy.precio) {
-                      filtered.sort((a, b) {
-                        final aPrice = a.priceFor(_activeFuel) ?? double.infinity;
-                        final bPrice = b.priceFor(_activeFuel) ?? double.infinity;
-                        return aPrice.compareTo(bPrice);
-                      });
-                    } else {
-                      filtered.sort((a, b) {
-                        final aDist = a.distancia ?? double.infinity;
-                        final bDist = b.distancia ?? double.infinity;
-                        return aDist.compareTo(bDist);
-                      });
-                    }
-
-                    if (filtered.isEmpty) {
-                      return ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.local_gas_station,
-                                  size: 64,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(height: 12),
-                                const Text('No se han encontrado gasolineras', style: TextStyle(fontSize: 18)),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Prueba a actualizar o cambiar los filtros.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                                ),
-                              ],
-                            ),
-                          )
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: StationSearchField(
+                controller: _search,
+                onChanged: (value) => setState(() => _query = value),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value:
+                            _zone.startsWith('municipio:') &&
+                                !municipalities.contains(_zone.substring(10))
+                            ? null
+                            : _zone,
+                        hint: Text(_zone.replaceFirst('municipio:', '')),
+                        selectedItemBuilder: (_) => [
+                          _zoneLabel(
+                            _position == null || _query.trim().isNotEmpty
+                                ? 'Toda Canarias'
+                                : 'Cerca de mí · 16 km',
+                          ),
+                          _zoneLabel('Toda Canarias'),
+                          ...municipalities.map(_zoneLabel),
                         ],
-                      );
-                    }
-
-                    return CustomScrollView(
-                      slivers: [
-                        // Leyenda eliminada por preferencia del usuario
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    decoration: const InputDecoration(
-                                      hintText: 'Buscar por nombre, dirección o marca',
-                                      prefixIcon: Icon(Icons.search),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.grey),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.blue),
-                                      ),
-                                    ),
-                                    onChanged: (v) => setState(() {
-                                      _searchQuery = v;
-                                    }),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
+                        items: [
+                          const DropdownMenuItem(
+                            value: 'nearby',
+                            child: Text('Cerca de mí · 16 km'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'all',
+                            child: Text('Toda Canarias'),
+                          ),
+                          ...municipalities.map(
+                            (m) => DropdownMenuItem(
+                              value: 'municipio:$m',
+                              child: Text(m, overflow: TextOverflow.ellipsis),
                             ),
                           ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) setState(() => _zone = value);
+                          if (value == 'nearby') {
+                            _locate(
+                              forceRefresh: true,
+                              requestPermission: true,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PopupMenuButton<FuelType>(
+                    tooltip: 'Combustible: ${_fuel.displayName}',
+                    initialValue: _fuel,
+                    itemBuilder: (_) => FuelType.values
+                        .map(
+                          (fuel) => PopupMenuItem(
+                            value: fuel,
+                            child: Text(fuel.displayName),
+                          ),
+                        )
+                        .toList(),
+                    onSelected: (fuel) {
+                      setState(() => _fuel = fuel);
+                      _savePreferences();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _fuel.shortLabel,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<SortBy>(
+                    tooltip: 'Ordenar resultados',
+                    initialValue: _sort,
+                    icon: const Icon(Icons.sort),
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(
+                        value: SortBy.precio,
+                        child: Text('Por precio'),
+                      ),
+                      PopupMenuItem(
+                        value: SortBy.distancia,
+                        enabled: _position != null,
+                        child: const Text('Por distancia en línea recta'),
+                      ),
+                    ],
+                    onSelected: (sort) {
+                      setState(() => _sort = sort);
+                      _savePreferences();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            if (_zone == 'nearby' && _query.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Búsqueda por texto en toda Canarias',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ),
+            if (state is GasStationLoaded && state.offline)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  'No se pudieron actualizar los precios. Mostrando datos guardados del ${_date(state.fetchedAt)}.',
+                ),
+              ),
+            if (state is GasStationLoaded)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Text(
+                      '${filtered.length} gasolineras · ${_sort == SortBy.precio ? 'Precio' : 'Distancia'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    SegmentedButton<bool>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(
+                          value: false,
+                          label: const Text('Lista'),
+                          icon: MediaQuery.textScalerOf(context).scale(14) > 18
+                              ? null
+                              : const Icon(Icons.view_list_outlined),
                         ),
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final e = filtered[index];
-                              final isFavorite = favorites.contains(e.id);
-                              final isDark =
-                                  Theme.of(context).brightness == Brightness.dark;
-                              final favoriteColor = isDark
-                                  ? Colors.amber.withValues(alpha: 0.15)
-                                  : Colors.amber.shade50;
-
-                              String formatDistance(double? km) {
-                                if (km == null) return '-';
-                                if (km >= 1) return '${km.toStringAsFixed(1)} km';
-                                return '${(km * 1000).toStringAsFixed(0)} m';
-                              }
-
-                              String formatLastUpdate(DateTime? lastUpdate) {
-                                if (lastUpdate == null) return 'Sin actualizar';
-                                final now = DateTime.now();
-                                final difference = now.difference(lastUpdate);
-                                
-                                if (difference.inMinutes < 60) {
-                                  return 'Actualizado hace ${difference.inMinutes} min';
-                                } else if (difference.inHours < 24) {
-                                  return 'Actualizado hace ${difference.inHours} h';
-                                } else if (difference.inDays < 7) {
-                                  return 'Actualizado hace ${difference.inDays} días';
-                                } else {
-                                  return 'Actualizado el ${lastUpdate.day}/${lastUpdate.month}/${lastUpdate.year}';
-                                }
-                              }
-
-                              // Destaca el dato por el que se está ordenando (precio
-                              // del combustible activo o distancia).
-                              Widget buildHeadline() {
-                                final activePrice = e.priceFor(_activeFuel);
-                                if (_sortBy == SortBy.precio && activePrice != null) {
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        _activeFuel.displayName,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${activePrice.toStringAsFixed(2)} €',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: FuelColors.of(_activeFuel),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }
-
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'Distancia',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      formatDistance(e.distancia),
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                                child: Card(
-                                  color: isFavorite ? favoriteColor : null,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(10),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => GasStationDetailPage(
-                                            station: e,
-                                            favoriteRepository: favoriteRepository,
-                                            directionsRepository: directionsRepository,
-                                            preferredFuel: _activeFuel,
-                                            tankLiters: _tankLiters,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      e.nombre,
-                                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    Text(
-                                                      e.direccion,
-                                                      style: TextStyle(
-                                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                        fontSize: 13,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              buildHeadline(),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            children: [
-                                              if (_sortBy != SortBy.distancia) ...[
-                                                Icon(
-                                                  Icons.navigation,
-                                                  size: 12,
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  formatDistance(e.distancia),
-                                                  style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 10),
-                                              ],
-                                              Icon(
-                                                Icons.access_time,
-                                                size: 12,
-                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Expanded(
-                                                child: Text(
-                                                  formatLastUpdate(e.lastUpdate),
-                                                  style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                    fontSize: 12,
-                                                  ),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          _buildFuelChips(context, e),
-                                        ],
-                                      ),
-                                    ),
+                        ButtonSegment(
+                          value: true,
+                          label: const Text('Mapa'),
+                          icon: MediaQuery.textScalerOf(context).scale(14) > 18
+                              ? null
+                              : const Icon(Icons.map_outlined),
+                        ),
+                      ],
+                      selected: const {false},
+                      onSelectionChanged: filtered.isEmpty
+                          ? null
+                          : (selection) {
+                              if (!selection.first) return;
+                              FocusScope.of(context).unfocus();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => GasStationMapPage(
+                                    stations: filtered,
+                                    preferredFuel: _fuel,
+                                    tankLiters: _tankLiters,
                                   ),
                                 ),
                               );
                             },
-                            childCount: filtered.length,
-                          ),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                child: state is GasStationLoaded
+                    ? ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: filtered.isEmpty ? 1 : filtered.length,
+                        itemBuilder: (context, index) => filtered.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: [
+                                    const Icon(Icons.search_off, size: 40),
+                                    const Text(
+                                      'No se han encontrado gasolineras',
+                                    ),
+                                    const Text(
+                                      'Prueba con parte del nombre, otra marca o un municipio.',
+                                    ),
+                                    TextButton(
+                                      onPressed: () => setState(() {
+                                        _zone = 'all';
+                                        _query = '';
+                                        _search.clear();
+                                      }),
+                                      child: const Text(
+                                        'Borrar búsqueda y ver toda Canarias',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : _stationCard(filtered[index]),
+                      )
+                    : ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          const SizedBox(height: 40),
+                          if (state is GasStationError) ...[
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Center(
+                              child: FilledButton(
+                                onPressed: _refresh,
+                                child: const Text('Reintentar'),
+                              ),
+                            ),
+                          ] else
+                            const Center(child: CircularProgressIndicator()),
+                        ],
+                      ),
+              ),
+            ),
+            SafeArea(top: false, child: widget.banner),
+          ],
+        ),
+      );
+    },
+  );
+
+  Widget _zoneLabel(String label) => Align(
+    alignment: Alignment.centerLeft,
+    child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+  );
+
+  static String _date(DateTime? date) => date == null
+      ? 'fecha desconocida'
+      : '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+  Widget _stationCard(GasStation station) {
+    final price = station.priceFor(_fuel);
+    final stale =
+        station.lastUpdate == null ||
+        DateTime.now().difference(station.lastUpdate!).inHours >= 48;
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => GasStationDetailPage(
+              station: station,
+              favoriteRepository: _favorites,
+              directionsRepository: DirectionsService(
+                AppConfig.googleMapsApiKey,
+              ),
+              preferredFuel: _fuel,
+              tankLiters: _tankLiters,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          station.nombre,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        SliverToBoxAdapter(
-                          child: Column(
-                            children: const [
-                              SizedBox(height: 16),
-                              BannerAdWidget(),
-                              SizedBox(height: 100),
-                            ],
-                          ),
+                        Text(
+                          [
+                            station.municipio,
+                            station.direccion,
+                          ].where((part) => part.isNotEmpty).join(' · '),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
-                    );
-                  },
-                );
-              }
-              return const SizedBox();
-            },
+                    ),
+                  ),
+                  FavoriteWidget(
+                    key: ValueKey(station.id),
+                    station: station,
+                    repository: _favorites,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              StationPriceSummary(
+                fuel: _fuel,
+                price: price,
+                liters: _tankLiters,
+              ),
+              const SizedBox(height: 8),
+              if (station.distancia != null)
+                Text(
+                  '${station.distancia!.toStringAsFixed(1)} km en línea recta',
+                ),
+              Text(
+                '${stale ? 'Precio sin actualización reciente · ' : 'Actualizado · '}${_date(station.lastUpdate)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: stale ? Theme.of(context).colorScheme.error : null,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-

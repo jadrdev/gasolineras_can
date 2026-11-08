@@ -11,9 +11,9 @@ class NotificationService {
 
     // 🔹 Configuración iOS
     const iOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     // 🔹 Configuración general
@@ -21,17 +21,17 @@ class NotificationService {
 
     final initialized = await _notifications.initialize(settings);
 
-    // En iOS pedimos permisos de forma explícita. En Android 13+ también se
-    // solicita automáticamente por el plugin al mostrar la primera notificación
-    // si se configura el canal con importancia alta.
+    // Android 13+ requires an explicit runtime permission request.
     return initialized ?? false;
   }
 
   /// Solicita permisos de notificación de forma explícita.
   /// Devuelve `true` si el usuario concedió al menos permiso de alerta.
   static Future<bool> requestPermissions() async {
-    final iosImpl = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final iosImpl = _notifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (iosImpl != null) {
       final granted = await iosImpl.requestPermissions(
         alert: true,
@@ -41,8 +41,10 @@ class NotificationService {
       return granted ?? false;
     }
 
-    final macOsImpl = _notifications.resolvePlatformSpecificImplementation<
-        MacOSFlutterLocalNotificationsPlugin>();
+    final macOsImpl = _notifications
+        .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin
+        >();
     if (macOsImpl != null) {
       final granted = await macOsImpl.requestPermissions(
         alert: true,
@@ -52,8 +54,14 @@ class NotificationService {
       return granted ?? false;
     }
 
-    // En Android asumimos true; el canal se configura con alta importancia.
-    return true;
+    final androidImpl = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidImpl != null) {
+      return await androidImpl.requestNotificationsPermission() ?? false;
+    }
+    return false;
   }
 
   static Future<void> showNotification({
@@ -84,12 +92,7 @@ class NotificationService {
     );
 
     try {
-      await _notifications.show(
-        id,
-        title,
-        body,
-        platformDetails,
-      );
+      await _notifications.show(id, title, body, platformDetails);
       debugPrint('✅ Notificación mostrada correctamente (id=$id)');
     } catch (e, stack) {
       debugPrint('❌ Error mostrando notificación: $e');

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import '../../core/widgets/ios_glass_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/auth/profile_page.dart';
 import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
@@ -5,11 +7,6 @@ import 'package:gasolineras_can/features/gasolineras/presentacion/gas_station_li
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
-
-// NOTA: el `cupertino_native` original se ha quitado. Daba problemas de FFI
-// con iOS 26+. BottomNavigationBar de Material cubre el mismo caso de uso
-// en ambas plataformas. Si más adelante quieres look-and-feel nativo de
-// iOS, podemos volver a meterlo cuando esté estable.
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,34 +17,27 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final FavoriteRepository _favoriteRepository = FavoriteRepository();
+  FavoriteRepository _favorites = FavoriteRepository();
+  String? _userId = Supabase.instance.client.auth.currentUser?.id;
   StreamSubscription<AuthState>? _authSubscription;
-
-  // Páginas estables para que IndexedStack conserve su estado al cambiar de tab.
-  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    _pages = [
-      const GasStationListPage(key: PageStorageKey('gas_stations')),
-      FavoritesPage(
-        key: const PageStorageKey('favorites'),
-        repository: _favoriteRepository,
-      ),
-      const ProfilePage(key: PageStorageKey('profile')),
-    ];
-
     // Escuchar cambios en el estado de autenticación. Solo reseteamos a la
     // pestaña de inicio cuando el usuario CIERRA sesión, no en cada evento.
-    _authSubscription =
-        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      data,
+    ) {
       if (!mounted) return;
-      if (data.event == AuthChangeEvent.signedOut) {
-        setState(() {
-          _currentIndex = 0;
-        });
-      }
+      setState(() {
+        final userId = data.session?.user.id;
+        if (_userId != userId) {
+          _userId = userId;
+          _favorites = FavoriteRepository();
+        }
+        if (data.event == AuthChangeEvent.signedOut) _currentIndex = 0;
+      });
     });
   }
 
@@ -61,6 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final isLoggedIn = user != null;
+    final pages = <Widget>[
+      GasStationListPage(key: ValueKey('stations-${user?.id}')),
+      FavoritesPage(
+        key: ValueKey('favorites-${user?.id}'),
+        repository: _favorites,
+      ),
+      ProfilePage(key: ValueKey('profile-${user?.id}')),
+    ];
 
     final items = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
@@ -72,17 +70,14 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icon(Icons.star),
           label: 'Favoritos',
         ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Perfil',
-      ),
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
     ];
 
-    // Índice real dentro de _pages. Si no está logueado, la barra oculta
+    // Índice real dentro de pages. Si no está logueado, la barra oculta
     // favoritos, así que el índice 1 de la barra corresponde al índice 2
-    // de _pages (perfil).
+    // de pages (perfil).
     final pageIndex = isLoggedIn
-        ? (_currentIndex >= _pages.length ? 0 : _currentIndex)
+        ? (_currentIndex >= pages.length ? 0 : _currentIndex)
         : (_currentIndex == 2 ? 2 : 0);
 
     // Índice que ve la BottomNavigationBar (sin hueco de favoritos oculto).
@@ -90,19 +85,49 @@ class _HomeScreenState extends State<HomeScreen> {
         ? (pageIndex >= items.length ? 0 : pageIndex)
         : (pageIndex == 2 ? 1 : 0);
 
+    final ios = !kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
+    void select(int index) {
+      setState(() => _currentIndex = isLoggedIn ? index : (index == 1 ? 2 : 0));
+    }
+
     return Scaffold(
-      body: IndexedStack(index: pageIndex, children: _pages),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: bottomNavIndex,
-        onTap: (i) {
-          final targetPage = isLoggedIn ? i : (i == 1 ? 2 : 0);
-          setState(() => _currentIndex = targetPage);
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.red,
-        unselectedItemColor: Colors.grey,
-        items: items,
-      ),
+      extendBody: ios,
+      body: IndexedStack(index: pageIndex, children: pages),
+      bottomNavigationBar: ios
+          ? SafeArea(
+              top: false,
+              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: SizedBox(
+                height:
+                    68 +
+                    (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
+                      0,
+                      32,
+                    ),
+                child: IosGlassNavigationBar(
+                  labels: items.map((item) => item.label!).toList(),
+                  symbols: [
+                    'fuelpump',
+                    if (isLoggedIn) 'star',
+                    'person.crop.circle',
+                  ],
+                  selectedIndex: bottomNavIndex,
+                  onSelected: select,
+                ),
+              ),
+            )
+          : NavigationBar(
+              selectedIndex: bottomNavIndex,
+              onDestinationSelected: select,
+              destinations: items
+                  .map(
+                    (item) => NavigationDestination(
+                      icon: item.icon,
+                      label: item.label!,
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }
