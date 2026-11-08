@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="1024" android:viewportHeight="1024">
+    <!-- Display and handle remain transparent in adaptive and themed icons. -->
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M260,730 L260,298 Q260,232 326,232 L586,232 Q652,232 652,298 L652,730 L678,730 Q710,730 710,763 Q710,795 678,795 L235,795 Q202,795 202,763 Q202,730 235,730 Z M316,329 L316,399 Q316,440 349,440 L567,440 Q600,440 600,399 L600,329 Q600,288 567,288 L349,288 Q316,288 316,329 Z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="36" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M645,474 C727,474 717,535 717,623 C717,723 820,723 820,625 L810,480"/>
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M695,291 Q707,284 717,295 L788,355 Q797,361 805,377 L831,430 Q839,443 839,465 L839,479 Q839,497 822,497 L800,497 Q775,497 766,475 L731,401 Q718,378 728,363 L739,352 L697,315 Q682,303 695,291 Z M757,416 L777,457 Q782,467 792,462 L802,456 Q810,452 805,442 L785,406 Q778,394 768,400 L762,403 Q752,407 757,416 Z"/>
+</vector>
