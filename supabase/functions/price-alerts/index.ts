@@ -81,6 +81,7 @@ async function run(dry: boolean) {
 
   let sent = 0;
   let removed = 0;
+  const errors: string[] = [];
   if (!dry) {
     if (notifications.length) {
       const fcm = await FcmClient.fromEnv();
@@ -92,6 +93,8 @@ async function run(dry: boolean) {
         if (result === "invalid") {
           await db.from("push_tokens").delete().eq("token", n.token);
           removed++;
+        } else if (result !== "sent" && errors.length < 3) {
+          errors.push(result);
         }
       }
     }
@@ -113,6 +116,7 @@ async function run(dry: boolean) {
     notifications: notifications.length,
     sent,
     removedTokens: removed,
+    errors,
   };
   console.log(JSON.stringify(summary));
   return summary;
@@ -232,7 +236,7 @@ class FcmClient {
     title: string,
     body: string,
     data: Record<string, string>,
-  ): Promise<"sent" | "invalid" | "error"> {
+  ): Promise<"sent" | "invalid" | string> {
     const res = await fetch(
       `https://fcm.googleapis.com/v1/projects/${this.projectId}/messages:send`,
       {
@@ -259,7 +263,7 @@ class FcmClient {
     if (res.status === 404 || text.includes("UNREGISTERED") || text.includes("INVALID_ARGUMENT")) {
       return "invalid";
     }
-    return "error";
+    return `FCM ${res.status}: ${text.slice(0, 300)}`;
   }
 }
 
