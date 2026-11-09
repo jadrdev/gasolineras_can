@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:equatable/equatable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/notifications/push_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_event.dart';
@@ -160,6 +160,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   // LOGOUT
   Future<void> logout() async {
+    // Antes de cerrar sesión: después ya no hay usuario para quitar el token.
+    await PushService.unregister();
     await _supabase.auth.signOut();
   }
 
@@ -168,8 +170,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> deleteAccount() async {
     await _revokeAppleIfNeeded();
     await _supabase.rpc('delete_my_account');
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('priceAlertSnapshots');
+    // Los tokens se borran en cascada; aquí solo se invalida el del móvil.
+    await PushService.unregister();
     // El usuario ya no existe en el servidor: solo cerramos la sesión local.
     await _supabase.auth.signOut(scope: SignOutScope.local);
   }

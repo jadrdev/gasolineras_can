@@ -5,6 +5,13 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
+  static const _priceAlertsChannel = AndroidNotificationChannel(
+    'price_alerts',
+    'Bajadas de precio',
+    description: 'Avisos cuando baja el precio en tus gasolineras favoritas',
+    importance: Importance.high,
+  );
+
   static Future<bool> init() async {
     // 🔹 Configuración Android
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -21,7 +28,14 @@ class NotificationService {
 
     final initialized = await _notifications.initialize(settings);
 
-    // Android 13+ requires an explicit runtime permission request.
+    // Canal de las alertas de precio; la Edge Function price-alerts manda las
+    // push a este mismo canal (android.notification.channel_id).
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(_priceAlertsChannel);
+
     return initialized ?? false;
   }
 
@@ -71,10 +85,10 @@ class NotificationService {
   }) async {
     debugPrint('🔔 showNotification: title="$title" body="$body"');
 
-    const androidDetails = AndroidNotificationDetails(
-      'default_channel',
-      'General',
-      channelDescription: 'Notificaciones generales',
+    final androidDetails = AndroidNotificationDetails(
+      _priceAlertsChannel.id,
+      _priceAlertsChannel.name,
+      channelDescription: _priceAlertsChannel.description,
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -86,7 +100,7 @@ class NotificationService {
       interruptionLevel: InterruptionLevel.active,
     );
 
-    const platformDetails = NotificationDetails(
+    final platformDetails = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,
     );
