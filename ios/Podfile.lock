@@ -1,19 +1,19 @@
 PODS:
   - app_links (7.0.0):
     - Flutter
-  - Firebase/CoreOnly (12.19.0):
-    - FirebaseCore (~> 12.19.0)
-  - Firebase/Messaging (12.19.0):
+  - Firebase/CoreOnly (12.19.3):
+    - FirebaseCore (~> 12.19.3)
+  - Firebase/Messaging (12.19.3):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 12.19.0)
-  - firebase_core (4.15.0):
-    - Firebase/CoreOnly (= 12.19.0)
+  - firebase_core (4.15.2):
+    - Firebase/CoreOnly (= 12.19.3)
     - Flutter
-  - firebase_messaging (16.7.0):
-    - Firebase/Messaging (= 12.19.0)
+  - firebase_messaging (16.7.1):
+    - Firebase/Messaging (= 12.19.3)
     - firebase_core
     - Flutter
-  - FirebaseCore (12.19.0):
+  - FirebaseCore (12.19.3):
     - FirebaseCoreInternal (~> 12.19.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
@@ -58,28 +58,28 @@ PODS:
     - GoogleMaps/Maps (= 9.4.0)
   - GoogleMaps/Maps (9.4.0)
   - GoogleUserMessagingPlatform (3.1.0)
-  - GoogleUtilities/AppDelegateSwizzler (8.1.3):
+  - GoogleUtilities/AppDelegateSwizzler (8.1.5):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (8.1.3):
+  - GoogleUtilities/Environment (8.1.5):
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.1.3):
+  - GoogleUtilities/Logger (8.1.5):
     - GoogleUtilities/Environment
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (8.1.3):
+  - GoogleUtilities/Network (8.1.5):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (8.1.3)":
+  - "GoogleUtilities/NSData+zlib (8.1.5)":
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.1.3)
-  - GoogleUtilities/Reachability (8.1.3):
+  - GoogleUtilities/Privacy (8.1.5)
+  - GoogleUtilities/Reachability (8.1.5):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GoogleUtilities/UserDefaults (8.1.3):
+  - GoogleUtilities/UserDefaults (8.1.5):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - map_launcher (0.0.1):
@@ -162,10 +162,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
-  Firebase: 7ca191e43724142f79fae653547b3382c45413cc
-  firebase_core: 55de508663ceda7d1dc369a32b327a5655019ae2
-  firebase_messaging: df68cb5feefa02766144a50fa5348362a0127008
-  FirebaseCore: c990214798d7c568ad436a15ba7da25c7a278c9a
+  Firebase: e3c5ab38229ae085490d02398d97b9f5374bbe6e
+  firebase_core: 4d065e808a89f0eaa0df16660666783f9ea13d38
+  firebase_messaging: d66dd9b68ca259955678628aa4f3e4294d055790
+  FirebaseCore: ab948de5d99e69aeed3cd6f5ace263ce795b2559
   FirebaseCoreInternal: 656b1c2fd5a1c5976183dc54b73deda78fb26ee3
   FirebaseInstallations: f70a49eed611f5602f373e40974b3b01556ac217
   FirebaseMessaging: c15f48126adbe8b4d3238a5e1fa24bab3ad3e472
@@ -179,12 +179,12 @@ SPEC CHECKSUMS:
   GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
-  GoogleUtilities: 4e0c2ad9fa0d0d18b5c4df8bf57b461cba35b0bb
+  GoogleUtilities: 7dc09b3fa9ecb5c2298b952313d14628b61b9da3
   map_launcher: 8051ad5783913cafce93f2414c6858f2904fd8df
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  shared_preferences_foundation: a7c3904f2dedb3701dd1903cb152ef5e7df92422
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
 
