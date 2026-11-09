@@ -53,7 +53,18 @@ class PushService {
       if (data.event == AuthChangeEvent.signedIn) sync();
     });
 
-    await sync();
+    unawaited(_syncWithRetries());
+  }
+
+  /// Al arrancar, iOS puede tardar en entregar el token de APNs. Si no está,
+  /// se reintenta durante el primer minuto en vez de esperar a que el usuario
+  /// toque una favorita (que es cuando antes se registraba).
+  static Future<void> _syncWithRetries() async {
+    const delays = [0, 5, 15, 30, 60];
+    for (final seconds in delays) {
+      if (seconds > 0) await Future<void>.delayed(Duration(seconds: seconds));
+      if (await sync()) return;
+    }
   }
 
   /// Pide permiso (solo la primera vez sale el diálogo del sistema) y
@@ -67,21 +78,28 @@ class PushService {
 
   /// Registra el token de este dispositivo para el usuario con sesión, si ya
   /// hay permiso. No pregunta nada al usuario.
-  static Future<void> sync() async {
+  /// Devuelve `false` solo si había que registrar y no se pudo (sin token o
+  /// error), para que [_syncWithRetries] lo vuelva a intentar.
+  static Future<bool> sync() async {
     try {
-      if (_supabase.auth.currentUser == null) return;
+      if (_supabase.auth.currentUser == null) return true;
       final settings = await _messaging.getNotificationSettings();
-      if (!_isAllowed(settings.authorizationStatus)) return;
+      if (!_isAllowed(settings.authorizationStatus)) return true;
 
       final token = await _token();
-      if (token == null) return;
+      if (token == null) {
+        debugPrint('⏳ Push: todavía sin token de APNs');
+        return false;
+      }
       await _supabase.rpc(
         'register_push_token',
         params: {'p_token': token, 'p_platform': _platform},
       );
       debugPrint('🔔 Push: dispositivo registrado');
+      return true;
     } catch (e) {
       debugPrint('⚠️ Push: no se pudo registrar el dispositivo: $e');
+      return false;
     }
   }
 
@@ -104,8 +122,13 @@ class PushService {
 
   static Future<String?> _token() async {
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // En iOS el token FCM necesita antes el de APNs, que llega un poco
-      // después de conceder el permiso.
+      // En iOS el token FCM necesita antes el de APNs, que solo llega si la
+      // app se registra para notificaciones remotas. Eso lo hace
+      // requestPermission; con el permiso ya concedido no muestra ningún
+      // diálogo, solo vuelve a registrar.
+      if (await _messaging.getAPNSToken() == null) {
+        await _messaging.requestPermission();
+      }
       for (var i = 0; i < 10; i++) {
         if (await _messaging.getAPNSToken() != null) break;
         await Future<void>.delayed(const Duration(milliseconds: 500));
