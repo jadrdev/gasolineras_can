@@ -608,32 +608,47 @@ Widget _buildTextField({
   String? errorText,
   bool enabled = true,
 }) {
-  return TextField(
-    controller: controller,
-    keyboardType: keyboardType,
-    obscureText: obscureText,
-    enabled: enabled,
-    decoration: InputDecoration(
-      labelText: label,
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      hintText: label,
-      prefixIcon: Icon(icon),
-      helperText: helperText,
-      errorText: errorText,
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.blue, width: 2),
-      ),
-      filled: true,
-      fillColor: Colors.grey.shade50,
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-    ),
+  // El fondo del campo sigue al tema: en modo oscuro un fondo claro dejaba
+  // el texto (blanco) sin leerse.
+  return Builder(
+    builder: (context) {
+      final scheme = Theme.of(context).colorScheme;
+      final dark = Theme.of(context).brightness == Brightness.dark;
+      return TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        enabled: enabled,
+        decoration: InputDecoration(
+          labelText: label,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          hintText: label,
+          prefixIcon: Icon(icon),
+          helperText: helperText,
+          errorText: errorText,
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(
+              color: dark ? scheme.outline : Colors.grey.shade400,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide(color: scheme.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: dark
+              ? scheme.surfaceContainerHighest
+              : Colors.grey.shade50,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 16,
+          ),
+        ),
+      );
+    },
   );
 }
