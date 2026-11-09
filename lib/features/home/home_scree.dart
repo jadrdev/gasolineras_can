@@ -96,10 +96,10 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: ios
           ? SafeArea(
               top: false,
-              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              minimum: const EdgeInsets.fromLTRB(40, 0, 40, 8),
               child: SizedBox(
                 height:
-                    68 +
+                    52 +
                     (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
                       0,
                       32,

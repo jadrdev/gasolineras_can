@@ -29,7 +29,7 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
     super.init()
     root.backgroundColor = .clear
     surface.translatesAutoresizingMaskIntoConstraints = false
-    surface.layer.cornerRadius = 32
+    surface.layer.cornerRadius = 26
     surface.layer.cornerCurve = .continuous
     surface.clipsToBounds = true
     root.addSubview(surface)
@@ -45,8 +45,8 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       surface.bottomAnchor.constraint(equalTo: root.bottomAnchor),
       stack.leadingAnchor.constraint(equalTo: surface.contentView.leadingAnchor, constant: 6),
       stack.trailingAnchor.constraint(equalTo: surface.contentView.trailingAnchor, constant: -6),
-      stack.topAnchor.constraint(equalTo: surface.contentView.topAnchor, constant: 5),
-      stack.bottomAnchor.constraint(equalTo: surface.contentView.bottomAnchor, constant: -5),
+      stack.topAnchor.constraint(equalTo: surface.contentView.topAnchor, constant: 4),
+      stack.bottomAnchor.constraint(equalTo: surface.contentView.bottomAnchor, constant: -4),
     ])
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self else { result(nil); return }
@@ -95,16 +95,17 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       style.title = label
       style.image = UIImage(systemName: index < symbols.count ? symbols[index] : "circle")
       style.imagePlacement = .top
-      style.imagePadding = 3
-      style.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 21, weight: .medium)
+      style.imagePadding = 2
+      style.contentInsets = NSDirectionalEdgeInsets(top: 3, leading: 8, bottom: 3, trailing: 8)
+      style.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
       style.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
         var outgoing = incoming
-        outgoing.font = UIFont.preferredFont(forTextStyle: .caption1)
+        outgoing.font = UIFont.preferredFont(forTextStyle: .caption2)
         return outgoing
       }
       style.baseForegroundColor = index == selected ? tint : .secondaryLabel
       style.background.backgroundColor = index == selected ? tint.withAlphaComponent(0.14) : .clear
-      style.background.cornerRadius = 26
+      style.background.cornerRadius = 21
       button.configuration = style
       button.titleLabel?.adjustsFontForContentSizeCategory = true
       button.accessibilityLabel = label
