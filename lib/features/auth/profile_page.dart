@@ -195,6 +195,22 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
 
+                const SizedBox(height: 8),
+
+                // Borrar la cuenta (obligatorio en App Store)
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () => _showDeleteAccountConfirmation(context),
+                    icon: const Icon(Icons.delete_forever_outlined),
+                    label: const Text('Eliminar cuenta'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 16),
               ],
             ),
@@ -202,6 +218,59 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showDeleteAccountConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Eliminar cuenta'),
+        content: const Text(
+          'Se borrarán tu cuenta, tus gasolineras favoritas, tus alertas de '
+          'precio y los datos de tu vehículo. No se puede deshacer.',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final authBloc = context.read<AuthBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context, rootNavigator: true);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      await authBloc.deleteAccount();
+      navigator.pop();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Tu cuenta se ha eliminado')),
+      );
+    } catch (e) {
+      debugPrint('❌ Error al eliminar la cuenta: $e');
+      navigator.pop();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No se pudo eliminar la cuenta. Inténtalo de nuevo más tarde.',
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildVehicleCard(BuildContext context) => VehicleProfileCard(

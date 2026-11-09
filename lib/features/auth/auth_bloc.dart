@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:equatable/equatable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_event.dart';
@@ -96,5 +97,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   // LOGOUT
   Future<void> logout() async {
     await _supabase.auth.signOut();
+  }
+
+  // BORRAR CUENTA: la función delete_my_account (supabase/delete_my_account.sql)
+  // borra favoritos, perfil y el usuario de auth. Lanza si el servidor falla.
+  Future<void> deleteAccount() async {
+    await _supabase.rpc('delete_my_account');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('priceAlertSnapshots');
+    // El usuario ya no existe en el servidor: solo cerramos la sesión local.
+    await _supabase.auth.signOut(scope: SignOutScope.local);
   }
 }
