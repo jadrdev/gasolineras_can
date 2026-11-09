@@ -14,7 +14,7 @@ class NotificationService {
 
   static Future<bool> init() async {
     // 🔹 Configuración Android
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings('@drawable/ic_notification');
 
     // 🔹 Configuración iOS
     const iOS = DarwinInitializationSettings(

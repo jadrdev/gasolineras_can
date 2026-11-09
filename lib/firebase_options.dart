@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAXYu2M6eXVMZpYvlfqG1iSg3u_4IEPDnA',
-    appId: '1:786696478134:android:94468d950b998d3d0eb517',
+    appId: '1:786696478134:android:3a25e850c24a2af30eb517',
     messagingSenderId: '786696478134',
     projectId: 'gasolineras-can',
     storageBucket: 'gasolineras-can.firebasestorage.app',
