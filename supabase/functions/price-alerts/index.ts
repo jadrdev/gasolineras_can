@@ -1,7 +1,9 @@
 // Alertas de bajada de precio por push (FCM).
 //
 // La lanza el cron "price-alerts" cada hora (supabase/push_notifications.sql).
-// 1. Descarga los precios de Canarias del Ministerio (una sola llamada).
+// 1. Descarga de precioil.es (la misma fuente que la app) los precios de las
+//    gasolineras que alguien tiene en favoritos. La API del Ministerio corta
+//    la conexión desde los servidores de Supabase, por eso no se usa.
 // 2. Los compara con station_price_snapshots.
 // 3. A cada usuario con esa gasolinera en favoritos y ese combustible como
 //    preferido le manda una push a todos sus dispositivos.
@@ -17,18 +19,18 @@
 
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.49.4";
 
-const MINISTERIO_CANARIAS =
-  "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroCCAA/05";
+const PRECIOIL_DETALLES = "https://api.precioil.es/estaciones/detalles/";
+const CONCURRENCY = 5;
 
-// Combustible de la app (users.preferred_fuel) -> campo del Ministerio.
+// Combustible de la app (users.preferred_fuel) -> campo de precioil.es.
 const FUELS: Record<string, { field: string; label: string }> = {
-  g95: { field: "Precio Gasolina 95 E5", label: "Gasolina 95" },
-  g98: { field: "Precio Gasolina 98 E5", label: "Gasolina 98" },
-  diesel: { field: "Precio Gasoleo A", label: "Diésel" },
-  dieselPremium: { field: "Precio Gasoleo Premium", label: "Diésel Premium" },
+  g95: { field: "Gasolina95", label: "Gasolina 95" },
+  g98: { field: "Gasolina98", label: "Gasolina 98" },
+  diesel: { field: "Diesel", label: "Diésel" },
+  dieselPremium: { field: "DieselPremium", label: "Diésel Premium" },
 };
 
-// Por debajo de esto no se avisa (0,1 céntimos: redondeos del Ministerio).
+// Por debajo de esto no se avisa (0,1 céntimos: redondeos).
 const MIN_DROP = 0.001;
 
 type Station = { id: number; name: string; town: string; prices: Map<string, number> };
@@ -40,6 +42,15 @@ Deno.serve(async (req) => {
     return json({ error: "unauthorized" }, 401);
   }
   const dry = new URL(req.url).searchParams.get("dry") === "1";
+  try {
+    return json(await run(dry));
+  } catch (e) {
+    console.error(e);
+    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+  }
+});
+
+async function run(dry: boolean) {
 
   const db = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -47,7 +58,10 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } },
   );
 
-  const stations = await fetchStations();
+  const { data: favs, error: favsError } = await db.from("favorites").select("station_id");
+  if (favsError) throw favsError;
+  const ids = [...new Set((favs ?? []).map((f) => Number(f.station_id)))];
+  const stations = await fetchStations(ids);
   const previous = await loadSnapshots(db);
 
   const drops: Drop[] = [];
@@ -93,6 +107,7 @@ Deno.serve(async (req) => {
   const summary = {
     dry,
     stations: stations.size,
+    failed: ids.length - stations.size,
     firstRun: previous.size === 0,
     drops: drops.length,
     notifications: notifications.length,
@@ -100,33 +115,39 @@ Deno.serve(async (req) => {
     removedTokens: removed,
   };
   console.log(JSON.stringify(summary));
-  return json(summary);
-});
+  return summary;
+}
 
-async function fetchStations(): Promise<Map<number, Station>> {
-  const res = await fetch(MINISTERIO_CANARIAS, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`Ministerio respondió ${res.status}`);
-  const data = await res.json();
-  const list = data?.ListaEESSPrecio;
-  if (!Array.isArray(list) || list.length === 0) {
-    throw new Error("Respuesta del Ministerio sin estaciones");
-  }
+async function fetchStations(ids: number[]): Promise<Map<number, Station>> {
   const stations = new Map<number, Station>();
-  for (const e of list) {
-    const id = Number(e["IDEESS"]);
-    if (!Number.isInteger(id)) continue;
-    const prices = new Map<string, number>();
-    for (const [fuel, { field }] of Object.entries(FUELS)) {
-      const value = parsePrice(e[field]);
-      if (value !== null) prices.set(fuel, value);
+  const queue = [...ids];
+  const worker = async () => {
+    for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+      try {
+        const res = await fetch(PRECIOIL_DETALLES + id, {
+          headers: { Accept: "application/json" },
+          signal: AbortSignal.timeout(15000),
+        });
+        if (!res.ok) continue; // 404: la gasolinera ya no existe.
+        const e = await res.json();
+        const prices = new Map<string, number>();
+        for (const [fuel, { field }] of Object.entries(FUELS)) {
+          const value = parsePrice(e[field]);
+          if (value !== null) prices.set(fuel, value);
+        }
+        stations.set(id, {
+          id,
+          name: String(e.nombreEstacion ?? e.marca ?? "").trim() || "Tu gasolinera",
+          town: titleCase(String(e.localidad ?? "").trim()),
+          prices,
+        });
+      } catch (err) {
+        // Sin precio esta vuelta: no se compara ni se pisa el anterior.
+        console.error(`precioil ${id}: ${err}`);
+      }
     }
-    stations.set(id, {
-      id,
-      name: String(e["Rótulo"] ?? "").trim() || "Tu gasolinera",
-      town: titleCase(String(e["Municipio"] ?? "").trim()),
-      prices,
-    });
-  }
+  };
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
   return stations;
 }
 
@@ -280,6 +301,7 @@ async function googleAccessToken(sa: { client_email: string; private_key: string
 // --- utilidades ---------------------------------------------------------------
 
 function parsePrice(value: unknown): number | null {
+  if (typeof value === "number") return value > 0 ? value : null;
   if (typeof value !== "string" || !value.trim()) return null;
   const n = Number(value.replace(",", "."));
   return Number.isFinite(n) && n > 0 ? n : null;
