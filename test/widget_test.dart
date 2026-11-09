@@ -36,9 +36,8 @@ class TestFavorites extends FavoriteRepository {
 }
 
 class FailingFavorites extends TestFavorites {
-  FailingFavorites() {
-    cachedFavorites = [1];
-  }
+  @override
+  List<int> get cachedFavorites => [1];
   @override
   bool get isLoggedIn => true;
   @override
