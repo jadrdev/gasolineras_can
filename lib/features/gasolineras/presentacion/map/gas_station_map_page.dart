@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
-import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
@@ -370,13 +369,6 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                         _mapController = controller;
                         _fitResults();
                       },
-                    ),
-                  ),
-                  const SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: BannerAdWidget(),
                     ),
                   ),
                 ],

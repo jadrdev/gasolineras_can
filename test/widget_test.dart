@@ -83,7 +83,6 @@ void main() {
             );
           },
           loadProfile: () async => null,
-          banner: const SizedBox.shrink(),
         ),
       ),
     );
@@ -170,7 +169,6 @@ void main() {
             stationRepository: TestStationRepository(),
             favoriteRepository: TestFavorites(),
             loadProfile: () async => null,
-            banner: const SizedBox.shrink(),
           ),
         ),
       );

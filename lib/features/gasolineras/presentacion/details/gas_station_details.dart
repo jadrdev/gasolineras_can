@@ -2,7 +2,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/station_price_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gasolineras_can/features/ads/banner_ad_widget.dart';
 import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -697,7 +696,6 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const BannerAdWidget(),
           ],
         ),
       ),

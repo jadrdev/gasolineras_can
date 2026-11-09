@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config.dart';
 import '../../../core/directions_service.dart';
 import '../../../core/location.dart';
-import '../../ads/banner_ad_widget.dart';
 import '../../auth/user_profile_repository.dart';
 import '../../favoritos/data.dart';
 import '../../favoritos/presentacion.dart';
@@ -27,14 +26,12 @@ class GasStationListPage extends StatefulWidget {
   final FavoriteRepository? favoriteRepository;
   final Future<Position> Function()? locate;
   final Future<UserProfile?> Function()? loadProfile;
-  final Widget banner;
   const GasStationListPage({
     super.key,
     this.stationRepository,
     this.favoriteRepository,
     this.locate,
     this.loadProfile,
-    this.banner = const BannerAdWidget(),
   });
   @override
   State<GasStationListPage> createState() => _GasStationListPageState();
@@ -478,7 +475,6 @@ class _GasStationListPageState extends State<GasStationListPage> {
                       ),
               ),
             ),
-            SafeArea(top: false, child: widget.banner),
           ],
         ),
       );
