@@ -1,3 +1,4 @@
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/theme/theme_cubit.dart';
@@ -260,6 +261,18 @@ class ProfilePage extends StatelessWidget {
       messenger.showSnackBar(
         const SnackBar(content: Text('Tu cuenta se ha eliminado')),
       );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // Canceló la confirmación de Apple: no se ha borrado nada.
+      navigator.pop();
+      if (e.code != AuthorizationErrorCode.canceled) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Apple no pudo confirmar tu identidad. La cuenta sigue activa.',
+            ),
+          ),
+        );
+      }
     } catch (e) {
       debugPrint('❌ Error al eliminar la cuenta: $e');
       navigator.pop();

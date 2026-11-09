@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -94,6 +95,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Si la cuenta entró con Apple, Apple pide retirar el permiso al
+  /// eliminarla. Se pide un código nuevo (Face ID) y la función apple-revoke
+  /// lo canjea y lo revoca. Si el usuario cancela, no se borra nada; si falla
+  /// Apple, se sigue con el borrado para no dejar al usuario sin poder irse.
+  Future<void> _revokeAppleIfNeeded() async {
+    final providers =
+        (_supabase.auth.currentUser?.appMetadata['providers'] as List?) ?? [];
+    if (!providers.contains('apple') ||
+        defaultTargetPlatform != TargetPlatform.iOS) {
+      return;
+    }
+    final credential = await SignInWithApple.getAppleIDCredential(scopes: []);
+    try {
+      await _supabase.functions.invoke(
+        'apple-revoke',
+        body: {'authorizationCode': credential.authorizationCode},
+      );
+    } catch (e) {
+      debugPrint('⚠️ No se pudo retirar el permiso de Apple: $e');
+    }
+  }
+
   // REGISTER
   Future<void> register({
     required String email,
@@ -143,6 +166,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   // BORRAR CUENTA: la función delete_my_account (supabase/delete_my_account.sql)
   // borra favoritos, perfil y el usuario de auth. Lanza si el servidor falla.
   Future<void> deleteAccount() async {
+    await _revokeAppleIfNeeded();
     await _supabase.rpc('delete_my_account');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('priceAlertSnapshots');
