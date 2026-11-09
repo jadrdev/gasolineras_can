@@ -1,4 +1,4 @@
-import '../../core/notifications/notification_service.dart';
+import '../../core/notifications/push_service.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:go_router/go_router.dart';
@@ -40,7 +40,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
         await widget.repository.addFavorite(widget.station.id);
         // Ask in context, after a favorite has actually been saved.
         try {
-          await NotificationService.requestPermissions();
+          await PushService.requestPermissionAndSync();
         } catch (_) {
           // Notification availability does not change the saved favorite.
         }

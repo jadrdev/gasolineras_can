@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -5,10 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/router.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/notifications/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
-import 'features/favoritos/price_alert_service.dart';
+import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -20,11 +24,14 @@ Future<void> main() async {
     publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  // Notificaciones locales
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Notificaciones locales (canal de Android y push con la app abierta)
   await NotificationService.init();
 
-  // Alertas de precios para favoritos (cada 30 minutos en foreground)
-  PriceAlertService().start();
+  // Push de bajada de precio: las decide el servidor (price-alerts) cada hora.
+  // No bloquea el arranque: en iOS el token de APNs puede tardar un poco.
+  unawaited(PushService.init());
 
   final authBloc = AuthBloc();
   final themeCubit = ThemeCubit();
