@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -102,8 +103,8 @@ class PriceAlertService {
             id: station.id,
             title: '⛽ ¡Bajó el precio!',
             body:
-                '${station.nombre}: ${preferredFuel.displayName} ahora a ${price.toStringAsFixed(3)} €/L '
-                '(bajó ${drop.toStringAsFixed(3)} €)',
+                '${station.nombre}: ${preferredFuel.displayName} ahora a ${decimal(price, 3)} €/L '
+                '(bajó ${decimal(drop, 3)} €)',
           );
           debugPrint(
             '🔔 PriceAlert: notificación enviada para ${station.nombre}',

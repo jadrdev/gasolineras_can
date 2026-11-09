@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/station_price_summary.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +173,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         _litersController.text.replaceAll(',', '.'),
       );
       if (liters != null && liters > 0) {
-        _moneyController.text = (liters * price).toStringAsFixed(2);
+        _moneyController.text = decimal(liters * price, 2);
       }
     } else {
       // Pasamos de dinero a litros: pre-rellenamos con los litros equivalentes.
@@ -292,10 +293,9 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     final stationPrice = widget.station.priceFor(widget.preferredFuel);
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -362,7 +362,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           suffixText: '€',
           helperText: stationPrice == null
               ? 'No hay precio para ${widget.preferredFuel.displayName}'
-              : 'Precio ${widget.preferredFuel.displayName}: ${stationPrice.toStringAsFixed(3)} €/L',
+              : 'Precio ${widget.preferredFuel.displayName}: ${decimal(stationPrice, 3)} €/L',
         ),
         onChanged: (_) => setState(() {}),
       );
@@ -381,7 +381,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         suffixText: 'L',
         helperText: stationPrice == null
             ? 'No hay precio para ${widget.preferredFuel.displayName}'
-            : 'Precio ${widget.preferredFuel.displayName}: ${stationPrice.toStringAsFixed(3)} €/L',
+            : 'Precio ${widget.preferredFuel.displayName}: ${decimal(stationPrice, 3)} €/L',
       ),
       onChanged: (_) => setState(() {}),
       onSubmitted: _saveTankSize,
@@ -420,7 +420,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${costHere.toStringAsFixed(2)} €',
+            '${decimal(costHere, 2)} €',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -450,7 +450,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          '${costHere.toStringAsFixed(2)} €',
+          '${decimal(costHere, 2)} €',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -459,9 +459,9 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         ),
         const SizedBox(height: 8),
         _buildSavingsBox(
-          title: 'Ahorras ${savings.toStringAsFixed(2)} €',
+          title: 'Ahorras ${decimal(savings, 2)} €',
           subtitle:
-              'Frente al mayor precio a 16 km de tu ubicación (${maxPrice.toStringAsFixed(3)} €/L). No incluye desplazamiento.',
+              'Frente al mayor precio a 16 km de tu ubicación (${decimal(maxPrice, 3)} €/L). No incluye desplazamiento.',
         ),
       ],
     );
@@ -491,12 +491,12 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Con ${money.toStringAsFixed(2)} € obtienes:',
+            'Con ${decimal(money, 2)} € obtienes:',
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
-            '${litersHere.toStringAsFixed(2)} L',
+            '${decimal(litersHere, 2)} L',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -522,12 +522,12 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Con ${money.toStringAsFixed(2)} € obtienes:',
+          'Con ${decimal(money, 2)} € obtienes:',
           style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
         Text(
-          '${litersHere.toStringAsFixed(2)} L',
+          '${decimal(litersHere, 2)} L',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -536,9 +536,9 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         ),
         const SizedBox(height: 8),
         _buildSavingsBox(
-          title: 'Sacas ${savingsLiters.toStringAsFixed(2)} L más',
+          title: 'Sacas ${decimal(savingsLiters, 2)} L más',
           subtitle:
-              'Ahorro equivalente: ${savingsMoney.toStringAsFixed(2)} € · Frente a ${maxPrice.toStringAsFixed(3)} €/L',
+              'Ahorro equivalente: ${decimal(savingsMoney, 2)} € · Frente a ${decimal(maxPrice, 3)} €/L',
         ),
       ],
     );
@@ -598,9 +598,17 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           ),
         ],
       ),
+      // Sin SafeArea abajo: el contenido pasa por debajo del indicador de
+      // inicio en vez de cortarse en seco; el margen final lo compensa.
       body: SafeArea(
+        bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            16 + MediaQuery.paddingOf(context).bottom,
+          ),
           children: [
             Text(
               widget.station.nombre,
@@ -695,7 +703,6 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                       ),
               ),
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -736,13 +743,26 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${fuel.displayName}${active ? ' · Seleccionado' : ''}',
-                        style: theme.textTheme.labelLarge,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              fuel.displayName,
+                              style: theme.textTheme.labelLarge,
+                            ),
+                          ),
+                          if (active)
+                            Icon(
+                              Icons.check_circle,
+                              size: 18,
+                              color: theme.colorScheme.onPrimaryContainer,
+                              semanticLabel: 'Tu combustible',
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${widget.station.priceFor(fuel)!.toStringAsFixed(3)} €/L',
+                        '${decimal(widget.station.priceFor(fuel)!, 3)} €/L',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

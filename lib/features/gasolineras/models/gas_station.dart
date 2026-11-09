@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'dart:math';
 
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
@@ -58,14 +59,15 @@ class GasStation {
     }
     return GasStation(
       id: int.parse(json['idEstacion'].toString()),
-      nombre: json['nombreEstacion']?.toString() ?? '',
-      direccion: json['direccion']?.toString() ?? '',
+      nombre: nombrePropio(json['nombreEstacion']?.toString() ?? ''),
+      direccion: nombrePropio(json['direccion']?.toString() ?? ''),
       latitud: lat,
       longitud: lng,
-      marca: json['marca']?.toString() ?? '',
-      municipio:
-          (json['nombreMunicipio'] ?? json['municipio'])?.toString() ?? '',
-      localidad: json['localidad']?.toString() ?? '',
+      marca: nombrePropio(json['marca']?.toString() ?? ''),
+      municipio: nombrePropio(
+        (json['nombreMunicipio'] ?? json['municipio'])?.toString() ?? '',
+      ),
+      localidad: nombrePropio(json['localidad']?.toString() ?? ''),
       provincia:
           (json['provincia'] ?? json['provinciaDistrito'])?.toString() ?? '',
       gasolina95: _price(json['Gasolina95']),

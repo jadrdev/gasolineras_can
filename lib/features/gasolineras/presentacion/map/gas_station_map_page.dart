@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -104,7 +105,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
     for (final station in stations) {
       final price = station.priceFor(widget.preferredFuel);
 
-      final label = price?.toStringAsFixed(3) ?? '—';
+      final label = price == null ? '—' : decimal(price, 3);
       final icon = await (_icons[label] ??= _buildPriceMarker(
         label,
         FuelColors.of(widget.preferredFuel),
@@ -118,7 +119,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
           infoWindow: InfoWindow(
             title: station.nombre,
             snippet:
-                '${widget.preferredFuel.displayName}: ${price == null ? 'sin precio' : '${price.toStringAsFixed(3)} €/L'}',
+                '${widget.preferredFuel.displayName}: ${price == null ? 'sin precio' : '${decimal(price, 3)} €/L'}',
           ),
           onTap: () => _showStationBottomSheet(station, favoriteRepository),
         ),
@@ -173,7 +174,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${widget.preferredFuel.displayName}: ${price.toStringAsFixed(3)} €/L',
+                      '${widget.preferredFuel.displayName}: ${decimal(price, 3)} €/L',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -376,7 +377,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
                   runSpacing: 4,
                   children: [
                     Text(
-                      '${filtered.length} gasolineras · ${_sort == SortBy.precio ? 'Precio' : 'Distancia'}',
+                      '${filtered.length} gasolineras · por ${_sort == SortBy.precio ? 'precio' : 'distancia'}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     SegmentedButton<bool>(
@@ -560,9 +561,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
               ),
               const SizedBox(height: 8),
               if (station.distancia != null)
-                Text(
-                  '${station.distancia!.toStringAsFixed(1)} km en línea recta',
-                ),
+                Text('${decimal(station.distancia!, 1)} km en línea recta'),
               Text(
                 '${stale ? 'Precio sin actualización reciente · ' : 'Actualizado · '}${_date(station.lastUpdate)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

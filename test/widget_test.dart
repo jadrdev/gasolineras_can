@@ -100,11 +100,11 @@ void main() {
     expect(search, findsOneWidget);
     await tester.enterText(search, 'jose laguna');
     await tester.pumpAndSettle();
-    expect(find.text('DISA SAN JOSÉ'), findsOneWidget);
+    expect(find.text('Disa San José'), findsOneWidget);
     expect(find.text('No se han encontrado gasolineras'), findsNothing);
     await tester.tap(find.byTooltip('Borrar búsqueda'));
     await tester.pumpAndSettle();
-    expect(find.text('REPSOL ARRECIFE'), findsOneWidget);
+    expect(find.text('Repsol Arrecife'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -117,9 +117,9 @@ void main() {
       'arrecife',
     );
     await tester.pumpAndSettle();
-    expect(find.text('REPSOL ARRECIFE'), findsOneWidget);
-    expect(find.text('DISA SAN JOSÉ'), findsNothing);
-    expect(find.text('1.509 €/L', findRichText: true), findsOneWidget);
+    expect(find.text('Repsol Arrecife'), findsOneWidget);
+    expect(find.text('Disa San José'), findsNothing);
+    expect(find.text('1,509 €/L', findRichText: true), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -127,19 +127,19 @@ void main() {
     tester,
   ) async {
     await openList(tester, located: true);
-    expect(find.text('DISA SAN JOSÉ'), findsOneWidget);
-    expect(find.text('REPSOL ARRECIFE'), findsNothing);
+    expect(find.text('Disa San José'), findsOneWidget);
+    expect(find.text('Repsol Arrecife'), findsNothing);
     await tester.enterText(
       find.byKey(const ValueKey('station-search')),
       'repsol arrecife',
     );
     await tester.pumpAndSettle();
-    expect(find.text('REPSOL ARRECIFE'), findsOneWidget);
+    expect(find.text('Repsol Arrecife'), findsOneWidget);
     expect(find.text('Búsqueda por texto en toda Canarias'), findsOneWidget);
     await tester.tap(find.byTooltip('Borrar búsqueda'));
     await tester.pumpAndSettle();
-    expect(find.text('DISA SAN JOSÉ'), findsOneWidget);
-    expect(find.text('REPSOL ARRECIFE'), findsNothing);
+    expect(find.text('Disa San José'), findsOneWidget);
+    expect(find.text('Repsol Arrecife'), findsNothing);
   });
 
   testWidgets(
@@ -178,7 +178,7 @@ void main() {
       expect(find.text('Toda Canarias').hitTestable(), findsOneWidget);
       expect(find.text('Cerca de mí · 16 km').hitTestable(), findsNothing);
       expect(find.byKey(const ValueKey('station-search')), findsOneWidget);
-      expect(find.text('DISA SAN JOSÉ'), findsOneWidget);
+      expect(find.text('Disa San José'), findsOneWidget);
     },
   );
 
@@ -198,7 +198,7 @@ void main() {
         'arrecife',
       );
       await tester.pumpAndSettle();
-      expect(find.text('75.45 € para 50 L · estimado'), findsOneWidget);
+      expect(find.text('75,45 € para 50 L · estimado'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

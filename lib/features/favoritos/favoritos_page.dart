@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import '../auth/user_profile_repository.dart';
@@ -236,7 +237,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
                       String formatDistance(double? km) {
                         if (km == null) return '-';
-                        if (km >= 1) return '${km.toStringAsFixed(1)} km';
+                        if (km >= 1) return '${decimal(km, 1)} km';
                         return '${(km * 1000).toStringAsFixed(0)} m';
                       }
 
@@ -376,7 +377,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${e.gasolina95!.toStringAsFixed(3)} €',
+                                              '${decimal(e.gasolina95!, 3)} €',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -405,7 +406,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${e.gasolina98!.toStringAsFixed(3)} €',
+                                              '${decimal(e.gasolina98!, 3)} €',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -434,7 +435,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${e.diesel!.toStringAsFixed(3)} €',
+                                              '${decimal(e.diesel!, 3)} €',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -463,7 +464,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${e.dieselPremium!.toStringAsFixed(3)} €',
+                                              '${decimal(e.dieselPremium!, 3)} €',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,

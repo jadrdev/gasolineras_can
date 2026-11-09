@@ -38,7 +38,7 @@ void main() {
         }),
       );
       final catalog = await repo.fetchCatalog();
-      expect(catalog.stations.single.nombre, 'DISA SAN JOSÉ');
+      expect(catalog.stations.single.nombre, 'Disa San José');
       expect(catalog.offline, isFalse);
     },
   );

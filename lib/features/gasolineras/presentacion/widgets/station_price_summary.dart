@@ -1,3 +1,4 @@
+import 'package:gasolineras_can/core/format.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 
@@ -26,12 +27,11 @@ class StationPriceSummary extends StatelessWidget {
           const Text('Sin precio disponible')
         else ...[
           Semantics(
-            label:
-                '${fuel.displayName}: ${price!.toStringAsFixed(3)} euros por litro',
+            label: '${fuel.displayName}: ${decimal(price!, 3)} euros por litro',
             excludeSemantics: true,
             child: Text.rich(
               TextSpan(
-                text: price!.toStringAsFixed(3),
+                text: decimal(price!, 3),
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onSurface,
@@ -44,7 +44,7 @@ class StationPriceSummary extends StatelessWidget {
           ),
           if (liters.isFinite && liters > 0)
             Text(
-              '${(price! * liters).toStringAsFixed(2)} € para ${liters.toStringAsFixed(liters == liters.roundToDouble() ? 0 : 1)} L · estimado',
+              '${decimal(price! * liters, 2)} € para ${decimal(liters, liters == liters.roundToDouble() ? 0 : 1)} L · estimado',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
