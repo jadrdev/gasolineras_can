@@ -32,10 +32,19 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
   late final Future<Set<Marker>> _markers = _buildMarkers(widget.stations);
   final Map<String, Future<BitmapDescriptor>> _icons = {};
 
+  // Los marcadores se agrupan cuando se solapan: de lejos se ve una burbuja
+  // con el número de gasolineras y, al acercar, se separan en precios.
+  static const _cluster = ClusterManagerId('gasolineras');
+
+  /// Ancho del marcador en puntos de pantalla. El dibujo se hace a 3x para
+  /// que se vea nítido; antes se mostraba a 90 puntos y se tapaban unos a otros.
+  static const _markerWidth = 56.0;
+  static const _drawScale = 3 * _markerWidth / 90;
+
   Future<BitmapDescriptor> _buildPriceMarker(String text, Color color) async {
     final pictureRecorder = ui.PictureRecorder();
-    final canvas = Canvas(pictureRecorder);
-    final size = 90.0;
+    final canvas = Canvas(pictureRecorder)..scale(_drawScale);
+    const size = 90.0;
     final paint = Paint()..color = color;
     final borderPaint = Paint()
       ..color = Colors.white
@@ -90,12 +99,17 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
     );
 
     final picture = pictureRecorder.endRecording();
-    final image = await picture.toImage(size.toInt(), size.toInt());
+    final pixels = (size * _drawScale).round();
+    final image = await picture.toImage(pixels, pixels);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final png = bytes!.buffer.asUint8List();
     image.dispose();
     picture.dispose();
-    return BitmapDescriptor.bytes(png);
+    return BitmapDescriptor.bytes(
+      png,
+      width: _markerWidth,
+      height: _markerWidth,
+    );
   }
 
   Future<Set<Marker>> _buildMarkers(List<GasStation> stations) async {
@@ -114,6 +128,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
       markers.add(
         Marker(
           markerId: MarkerId('station-${station.id}'),
+          clusterManagerId: _cluster,
           position: LatLng(station.latitud, station.longitud),
           icon: icon,
           infoWindow: InfoWindow(
@@ -365,7 +380,25 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                         zoom: 12,
                       ),
                       markers: snapshot.data!,
+                      clusterManagers: {
+                        ClusterManager(
+                          clusterManagerId: _cluster,
+                          // Tocar un grupo acerca el mapa hasta separarlo.
+                          onClusterTap: (cluster) =>
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLngBounds(
+                                  cluster.bounds,
+                                  80,
+                                ),
+                              ),
+                        ),
+                      },
                       mapToolbarEnabled: false,
+                      // Sube los botones de Google por encima del de
+                      // «Ver todos los resultados», que antes los tapaba.
+                      padding: EdgeInsets.only(
+                        bottom: 72 + MediaQuery.paddingOf(context).bottom,
+                      ),
                       onMapCreated: (controller) {
                         _mapController = controller;
                         _fitResults();
