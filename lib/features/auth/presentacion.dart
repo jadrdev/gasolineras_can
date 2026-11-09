@@ -1,3 +1,4 @@
+import 'apple_sign_in_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -66,6 +67,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           );
+        } else if (state is Authenticated) {
+          // Entrada con Apple desde la pantalla de registro.
+          context.go('/home');
         } else if (state is RegistrationSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -253,6 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                           ),
+                          const AppleSignInSection(),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -521,6 +526,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                               ),
                             ),
+                            AppleSignInSection(enabled: !isLoading),
                             if (errorMessage != null) ...[
                               const SizedBox(height: 16),
                               Container(

@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -50,6 +54,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       add(AuthErrorEvent(e.message));
     } catch (_) {
       add(AuthErrorEvent("Error inesperado al iniciar sesión"));
+    }
+  }
+
+  // APPLE (solo iOS): Apple da un identityToken y Supabase crea o recupera
+  // la cuenta. El nonce evita que se reutilice un token interceptado:
+  // a Apple se le pasa su SHA-256 y a Supabase el valor original.
+  Future<void> signInWithApple() async {
+    try {
+      add(AuthLoadingEvent());
+      final random = Random.secure();
+      final rawNonce = base64Url.encode(
+        List<int>.generate(32, (_) => random.nextInt(256)),
+      );
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email],
+        nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
+      );
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw const AuthException('Apple no devolvió la identidad');
+      }
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // Cancelar el diálogo de Apple no es un error.
+      if (e.code == AuthorizationErrorCode.canceled) {
+        add(AuthLoggedOut());
+      } else {
+        add(AuthErrorEvent('No se pudo iniciar sesión con Apple'));
+      }
+    } on AuthException catch (e) {
+      add(AuthErrorEvent('No se pudo iniciar sesión con Apple: ${e.message}'));
+    } catch (_) {
+      add(AuthErrorEvent('No se pudo iniciar sesión con Apple'));
     }
   }
 
