@@ -136,6 +136,16 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.menu_book_outlined),
+                    title: const Text('Cómo usar GasoCan'),
+                    subtitle: const Text('Vuelve a consultar la guía'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/guide'),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 _buildThemeCard(context),
                 const SizedBox(height: 16),
                 _buildVehicleCard(context),
@@ -339,6 +349,12 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/guide'),
+              icon: const Icon(Icons.menu_book_outlined),
+              label: const Text('Cómo usar GasoCan'),
+            ),
+            const SizedBox(height: 16),
             _buildThemeCard(context),
           ],
         ),

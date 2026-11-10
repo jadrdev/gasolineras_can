@@ -3,6 +3,7 @@ import 'package:gasolineras_can/core/splash_screen.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/auth/presentacion.dart';
 import 'package:gasolineras_can/features/home/home_scree.dart';
+import 'package:gasolineras_can/features/guide/guide_page.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
@@ -60,7 +61,13 @@ GoRouter createRouter(AuthBloc authBloc) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeScreen(),
-      )
+      ),
+      GoRoute(
+        path: '/guide',
+        builder: (context, state) => GuidePage(
+          firstLaunch: state.uri.queryParameters['first'] == '1',
+        ),
+      ),
     ],
   );
 }

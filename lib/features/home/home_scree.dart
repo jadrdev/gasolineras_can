@@ -6,6 +6,9 @@ import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/gas_station_list_page.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
+import 'package:gasolineras_can/features/guide/guide_page.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -20,10 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
   FavoriteRepository _favorites = FavoriteRepository();
   String? _userId = Supabase.instance.client.auth.currentUser?.id;
   StreamSubscription<AuthState>? _authSubscription;
+  bool _guideCheckStarted = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showGuideOnFirstLaunch(),
+    );
     // Escuchar cambios en el estado de autenticación. Solo reseteamos a la
     // pestaña de inicio cuando el usuario CIERRA sesión, no en cada evento.
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
@@ -39,6 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
         if (data.event == AuthChangeEvent.signedOut) _currentIndex = 0;
       });
     });
+  }
+
+  Future<void> _showGuideOnFirstLaunch() async {
+    if (_guideCheckStarted || !mounted) return;
+    _guideCheckStarted = true;
+    final preferences = await SharedPreferences.getInstance();
+    if (!mounted || preferences.getBool(GuidePage.seenKey) == true) return;
+    await context.push('/guide?first=1');
   }
 
   @override
