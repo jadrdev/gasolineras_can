@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../gasolineras/fuel_colors.dart';
 import 'user_profile_repository.dart';
+import '../../l10n/l10n.dart';
 
 class VehicleProfileCard extends StatefulWidget {
   const VehicleProfileCard({super.key});
@@ -24,11 +25,11 @@ class _VehicleProfileCardState extends State<VehicleProfileCard> {
       if (snapshot.hasError) {
         return Column(
           children: [
-            const Text('No se pudieron cargar los datos del vehículo.'),
+            Text(context.l10n.authErrorCargarVehiculo),
             TextButton(
               onPressed: () =>
                   setState(() => _profile = _repository.getProfile()),
-              child: const Text('Reintentar'),
+              child: Text(context.l10n.authReintentar),
             ),
           ],
         );
@@ -84,16 +85,12 @@ class _VehiclePreferencesFormState extends State<VehiclePreferencesForm> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos del vehículo guardados')),
+        SnackBar(content: Text(context.l10n.authVehiculoGuardado)),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'No se pudieron guardar los datos. Puedes volver a intentarlo.',
-          ),
-        ),
+        SnackBar(content: Text(context.l10n.authErrorGuardarVehiculo)),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -116,20 +113,23 @@ class _VehiclePreferencesFormState extends State<VehiclePreferencesForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Mi vehículo', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              context.l10n.authMiVehiculo,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             DropdownButtonFormField<FuelType>(
               key: const ValueKey('vehicle-fuel'),
               initialValue: _fuel,
-              decoration: const InputDecoration(
-                labelText: 'Combustible habitual',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.authCombustibleHabitual,
+                border: const OutlineInputBorder(),
               ),
               items: FuelType.values
                   .map(
                     (fuel) => DropdownMenuItem(
                       value: fuel,
-                      child: Text(fuel.displayName),
+                      child: Text(fuel.label(context.l10n)),
                     ),
                   )
                   .toList(),
@@ -147,10 +147,10 @@ class _VehiclePreferencesFormState extends State<VehiclePreferencesForm> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Litros del depósito',
+              decoration: InputDecoration(
+                labelText: context.l10n.authLitrosDeposito,
                 suffixText: 'L',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               validator: (text) {
                 final liters = double.tryParse(
@@ -160,7 +160,7 @@ class _VehiclePreferencesFormState extends State<VehiclePreferencesForm> {
                         !liters.isFinite ||
                         liters <= 0 ||
                         liters > 1000
-                    ? 'Introduce una capacidad entre 0 y 1000 litros, mayor que cero.'
+                    ? context.l10n.authLitrosNoValidos
                     : null;
               },
             ),
@@ -171,18 +171,20 @@ class _VehiclePreferencesFormState extends State<VehiclePreferencesForm> {
               enabled: !_saving,
               textCapitalization: TextCapitalization.characters,
               maxLength: 15,
-              decoration: const InputDecoration(
-                labelText: 'Matrícula (opcional)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.authMatriculaOpcional,
+                border: const OutlineInputBorder(),
               ),
             ),
-            const Text('Los cambios se aplican al pulsar Guardar.'),
+            Text(context.l10n.authCambiosAlGuardar),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _saving ? null : _save,
               icon: const Icon(Icons.save),
               label: Text(
-                _saving ? 'Guardando…' : 'Guardar datos del vehículo',
+                _saving
+                    ? context.l10n.authGuardando
+                    : context.l10n.authGuardarVehiculo,
               ),
             ),
           ],

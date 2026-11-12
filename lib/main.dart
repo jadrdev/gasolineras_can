@@ -13,7 +13,8 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
 import 'firebase_options.dart';
-import 'l10n/app_localizations.dart';
+import 'core/format.dart';
+import 'l10n/l10n.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,13 +70,17 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeMode) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Gasolineras de Canarias',
+          onGenerateTitle: (context) => context.l10n.appTitle,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
           routerConfig: _router,
+          builder: (context, child) {
+            usarIdiomaParaNumeros(Localizations.localeOf(context).languageCode);
+            return child!;
+          },
         );
       },
     );

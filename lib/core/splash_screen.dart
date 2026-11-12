@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 /// Splash de arranque con identidad de la app. Se muestra mientras se inicializa
 /// Supabase, AdMob y el estado de autenticación.
@@ -23,12 +24,10 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutBack,
-      ),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -98,9 +97,9 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 32),
-                  const Text(
-                    'Gasolineras de Canarias',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.splashTitle,
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -108,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Encuentra el mejor precio cerca de ti',
+                    context.l10n.splashSubtitle,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.9),

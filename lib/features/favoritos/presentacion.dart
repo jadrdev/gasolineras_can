@@ -2,6 +2,7 @@ import '../../core/notifications/push_service.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 import '../gasolineras/models/gas_station.dart';
 
 class FavoriteWidget extends StatefulWidget {
@@ -48,9 +49,9 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _optimisticFavorite = currentlyFavorite);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo actualizar el favorito')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.favToggleError)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -61,21 +62,21 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.lock_outline, color: Colors.orange),
-            SizedBox(width: 12),
-            Expanded(child: Text('Inicia sesión')),
+            const Icon(Icons.lock_outline, color: Colors.orange),
+            const SizedBox(width: 12),
+            Expanded(child: Text(context.l10n.favLoginTitle)),
           ],
         ),
-        content: const Text(
-          'Necesitas iniciar sesión para guardar gasolineras en tus favoritos.',
-          style: TextStyle(fontSize: 16),
+        content: Text(
+          context.l10n.favLoginMessage,
+          style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.favLoginCancel),
           ),
           FilledButton.icon(
             onPressed: () {
@@ -83,7 +84,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               context.go('/login');
             },
             icon: const Icon(Icons.login),
-            label: const Text('Iniciar sesión'),
+            label: Text(context.l10n.favLoginAction),
           ),
         ],
       ),
@@ -113,7 +114,9 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
         return IconButton(
           icon: Icon(isFavorite ? Icons.star : Icons.star_border),
           color: isFavorite ? Colors.amber : null,
-          tooltip: isFavorite ? 'Quitar de favoritos' : 'Guardar favorito',
+          tooltip: isFavorite
+              ? context.l10n.favRemoveTooltip
+              : context.l10n.favAddTooltip,
           onPressed: _saving
               ? null
               : () {

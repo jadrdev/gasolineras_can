@@ -1,0 +1,4 @@
+/* Textos de permisos que muestra iOS, en español. */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Necesitamos tu ubicación para mostrar gasolineras cercanas.";
+"NSLocationWhenInUseUsageDescription" = "Necesitamos tu ubicación para mostrar gasolineras cercanas.";
+"NSUserNotificationUsageDescription" = "Te avisaremos cuando baje el precio del combustible en tus gasolineras favoritas.";

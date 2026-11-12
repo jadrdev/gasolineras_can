@@ -1,0 +1,4 @@
+/* Permission texts shown by iOS, in English. */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "We need your location to show nearby petrol stations.";
+"NSLocationWhenInUseUsageDescription" = "We need your location to show nearby petrol stations.";
+"NSUserNotificationUsageDescription" = "We'll let you know when fuel prices drop at your favourite petrol stations.";

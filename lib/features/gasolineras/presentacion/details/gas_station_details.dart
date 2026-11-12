@@ -13,6 +13,7 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -106,7 +107,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
             content: Text(e.message),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
-              label: 'Configuración',
+              label: context.l10n.stationSettings,
               onPressed: () => Geolocator.openAppSettings(),
             ),
           ),
@@ -191,9 +192,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
       if (availableMaps.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No hay aplicaciones de mapas instaladas'),
-          ),
+          SnackBar(content: Text(context.l10n.stationNoMapsInstalled)),
         );
         return;
       }
@@ -215,16 +214,16 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           content: Text(e.message),
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
-            label: 'Configuración',
+            label: context.l10n.stationSettings,
             onPressed: () => Geolocator.openAppSettings(),
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al abrir el mapa: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.stationMapOpenError('$e'))),
+      );
     }
   }
 
@@ -239,11 +238,14 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Selecciona una app de mapas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  context.l10n.stationChooseMapApp,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ...availableMaps.map((map) {
@@ -291,6 +293,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final fuelColor = FuelColors.of(widget.preferredFuel);
     final stationPrice = widget.station.priceFor(widget.preferredFuel);
+    final l10n = context.l10n;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -305,7 +308,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Calcula tu repostaje',
+                    l10n.stationCalculateRefuel,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -317,16 +320,16 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
             ),
             const SizedBox(height: 12),
             SegmentedButton<bool>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: false,
-                  label: Text('Litros a €'),
-                  icon: Icon(Icons.local_gas_station),
+                  label: Text(l10n.stationLitresToEuros),
+                  icon: const Icon(Icons.local_gas_station),
                 ),
                 ButtonSegment(
                   value: true,
-                  label: Text('€ a litros'),
-                  icon: Icon(Icons.euro),
+                  label: Text(l10n.stationEurosToLitres),
+                  icon: const Icon(Icons.euro),
                 ),
               ],
               selected: {_isMoneyToLiters},
@@ -348,6 +351,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
   }
 
   Widget _buildCalculatorInput(double? stationPrice) {
+    final l10n = context.l10n;
+    final fuelName = widget.preferredFuel.label(l10n);
+    final helperText = stationPrice == null
+        ? l10n.stationNoPriceFor(fuelName)
+        : l10n.stationPriceFor(fuelName, decimal(stationPrice, 3));
     if (_isMoneyToLiters) {
       return TextField(
         controller: _moneyController,
@@ -356,13 +364,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*[.,]?[0-9]*')),
         ],
         decoration: InputDecoration(
-          labelText: 'Dinero disponible',
+          labelText: l10n.stationMoneyAvailable,
           prefixIcon: const Icon(Icons.euro),
           border: const OutlineInputBorder(),
           suffixText: '€',
-          helperText: stationPrice == null
-              ? 'No hay precio para ${widget.preferredFuel.displayName}'
-              : 'Precio ${widget.preferredFuel.displayName}: ${decimal(stationPrice, 3)} €/L',
+          helperText: helperText,
         ),
         onChanged: (_) => setState(() {}),
       );
@@ -375,13 +381,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*[.,]?[0-9]*')),
       ],
       decoration: InputDecoration(
-        labelText: 'Litros del depósito',
+        labelText: l10n.stationTankLitres,
         prefixIcon: const Icon(Icons.local_gas_station),
         border: const OutlineInputBorder(),
         suffixText: 'L',
-        helperText: stationPrice == null
-            ? 'No hay precio para ${widget.preferredFuel.displayName}'
-            : 'Precio ${widget.preferredFuel.displayName}: ${decimal(stationPrice, 3)} €/L',
+        helperText: helperText,
       ),
       onChanged: (_) => setState(() {}),
       onSubmitted: _saveTankSize,
@@ -400,10 +404,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     final maxPrice = _maxNearbyPrice();
     final colorScheme = Theme.of(context).colorScheme;
     final fuelColor = FuelColors.of(widget.preferredFuel);
+    final l10n = context.l10n;
 
     if (liters == null || liters <= 0 || stationPrice == null) {
       return Text(
-        'Introduce los litros de tu depósito para ver el ahorro estimado.',
+        l10n.stationEnterLitresHint,
         style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
       );
     }
@@ -415,12 +420,12 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Llenar ${liters.toStringAsFixed(0)} L te costaría:',
+            l10n.stationFillCost(liters.toStringAsFixed(0)),
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
-            '${decimal(costHere, 2)} €',
+            euros(costHere, 2),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -430,8 +435,8 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           const SizedBox(height: 4),
           Text(
             _loadingSavings
-                ? 'Consultando precios cercanos…'
-                : 'Estimación del combustible; no incluye desplazamiento.',
+                ? l10n.stationCheckingNearby
+                : l10n.stationEstimateNote,
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
         ],
@@ -445,12 +450,12 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Llenar ${liters.toStringAsFixed(0)} L te costaría:',
+          l10n.stationFillCost(liters.toStringAsFixed(0)),
           style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
         Text(
-          '${decimal(costHere, 2)} €',
+          euros(costHere, 2),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -459,9 +464,8 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         ),
         const SizedBox(height: 8),
         _buildSavingsBox(
-          title: 'Ahorras ${decimal(savings, 2)} €',
-          subtitle:
-              'Frente al mayor precio a 16 km de tu ubicación (${decimal(maxPrice, 3)} €/L). No incluye desplazamiento.',
+          title: l10n.stationYouSave(decimal(savings, 2)),
+          subtitle: l10n.stationSavingsVsMax(decimal(maxPrice, 3)),
         ),
       ],
     );
@@ -473,13 +477,14 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
     final maxPrice = _maxNearbyPrice();
     final colorScheme = Theme.of(context).colorScheme;
     final fuelColor = FuelColors.of(widget.preferredFuel);
+    final l10n = context.l10n;
 
     if (money == null ||
         money <= 0 ||
         stationPrice == null ||
         stationPrice <= 0) {
       return Text(
-        'Introduce la cantidad de dinero para ver cuántos litros obtienes.',
+        l10n.stationEnterMoneyHint,
         style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
       );
     }
@@ -491,7 +496,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Con ${decimal(money, 2)} € obtienes:',
+            l10n.stationWithMoneyYouGet(decimal(money, 2)),
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
@@ -506,8 +511,8 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
           const SizedBox(height: 4),
           Text(
             _loadingSavings
-                ? 'Consultando precios cercanos…'
-                : 'Estimación del combustible; no incluye desplazamiento.',
+                ? l10n.stationCheckingNearby
+                : l10n.stationEstimateNote,
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
         ],
@@ -522,7 +527,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Con ${decimal(money, 2)} € obtienes:',
+          l10n.stationWithMoneyYouGet(decimal(money, 2)),
           style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
@@ -536,9 +541,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         ),
         const SizedBox(height: 8),
         _buildSavingsBox(
-          title: 'Sacas ${decimal(savingsLiters, 2)} L más',
-          subtitle:
-              'Ahorro equivalente: ${decimal(savingsMoney, 2)} € · Frente a ${decimal(maxPrice, 3)} €/L',
+          title: l10n.stationExtraLitres(decimal(savingsLiters, 2)),
+          subtitle: l10n.stationEquivalentSavings(
+            decimal(savingsMoney, 2),
+            decimal(maxPrice, 3),
+          ),
         ),
       ],
     );
@@ -587,10 +594,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final liters = double.tryParse(_litersController.text.replaceAll(',', '.'));
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalle de gasolinera'),
+        title: Text(l10n.stationDetailTitle),
         actions: [
           FavoriteWidget(
             station: widget.station,
@@ -642,7 +650,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
             FilledButton.icon(
               onPressed: _launchMaps,
               icon: const Icon(Icons.directions_outlined),
-              label: const Text('Cómo llegar'),
+              label: Text(l10n.stationDirections),
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
@@ -650,11 +658,11 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
             const SizedBox(height: 20),
             _buildSavingsCard(),
             const SizedBox(height: 24),
-            Text('Precios por combustible', style: theme.textTheme.titleMedium),
+            Text(l10n.stationPricesByFuel, style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
             _buildFuelPriceGrid(),
             const SizedBox(height: 24),
-            Text('Ubicación', style: theme.textTheme.titleMedium),
+            Text(l10n.stationLocation, style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
             SizedBox(
               height: 220,
@@ -686,8 +694,8 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                             Marker(
                               markerId: const MarkerId('user'),
                               position: _userPosition!,
-                              infoWindow: const InfoWindow(
-                                title: 'Tu ubicación',
+                              infoWindow: InfoWindow(
+                                title: l10n.stationYourLocation,
                               ),
                             ),
                         },
@@ -711,11 +719,12 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
 
   Widget _buildFuelPriceGrid() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final fuels = FuelType.values
         .where((f) => widget.station.priceFor(f) != null)
         .toList();
     if (fuels.isEmpty) {
-      return const Text('No hay precios disponibles para esta estación.');
+      return Text(l10n.stationNoPricesAvailable);
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -747,7 +756,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              fuel.displayName,
+                              fuel.label(l10n),
                               style: theme.textTheme.labelLarge,
                             ),
                           ),
@@ -756,7 +765,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
                               Icons.check_circle,
                               size: 18,
                               color: theme.colorScheme.onPrimaryContainer,
-                              semanticLabel: 'Tu combustible',
+                              semanticLabel: l10n.stationYourFuel,
                             ),
                         ],
                       ),

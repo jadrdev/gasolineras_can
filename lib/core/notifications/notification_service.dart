@@ -1,16 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  static const _priceAlertsChannel = AndroidNotificationChannel(
-    'price_alerts',
-    'Bajadas de precio',
-    description: 'Avisos cuando baja el precio en tus gasolineras favoritas',
-    importance: Importance.high,
-  );
+  // Nombre y descripción en el idioma del móvil; Android los actualiza cada
+  // vez que se vuelve a crear el canal con el mismo id.
+  static AndroidNotificationChannel get _priceAlertsChannel =>
+      AndroidNotificationChannel(
+        'price_alerts',
+        l10nSistema.notifChannelName,
+        description: l10nSistema.notifChannelDescription,
+        importance: Importance.high,
+      );
 
   static Future<bool> init() async {
     // 🔹 Configuración Android
@@ -85,10 +89,11 @@ class NotificationService {
   }) async {
     debugPrint('🔔 showNotification: title="$title" body="$body"');
 
+    final channel = _priceAlertsChannel;
     final androidDetails = AndroidNotificationDetails(
-      _priceAlertsChannel.id,
-      _priceAlertsChannel.name,
-      channelDescription: _priceAlertsChannel.description,
+      channel.id,
+      channel.name,
+      channelDescription: channel.description,
       importance: Importance.high,
       priority: Priority.high,
     );

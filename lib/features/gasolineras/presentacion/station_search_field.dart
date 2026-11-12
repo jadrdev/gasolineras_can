@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 /// Kept outside the result list so zero matches never removes the input/focus.
 class StationSearchField extends StatelessWidget {
@@ -16,7 +17,7 @@ class StationSearchField extends StatelessWidget {
     controller: controller,
     textInputAction: TextInputAction.search,
     decoration: InputDecoration(
-      hintText: 'Marca, dirección o municipio',
+      hintText: context.l10n.stationSearchHint,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       prefixIcon: const Icon(Icons.search),
       border: OutlineInputBorder(
@@ -26,7 +27,7 @@ class StationSearchField extends StatelessWidget {
       suffixIcon: controller.text.isEmpty
           ? null
           : IconButton(
-              tooltip: 'Borrar búsqueda',
+              tooltip: context.l10n.stationClearSearch,
               icon: const Icon(Icons.clear),
               onPressed: () {
                 controller.clear();

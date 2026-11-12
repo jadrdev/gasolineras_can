@@ -1,7 +1,23 @@
-/// Formato de números para mostrar en pantalla, a la española: coma decimal
-/// (1,345 €/L). Para leer lo que escribe el usuario ya se acepta coma o punto.
-String decimal(num value, int digits) =>
-    value.toStringAsFixed(digits).replaceAll('.', ',');
+/// Si los números llevan punto decimal (inglés) en vez de coma (español,
+/// alemán). Lo fija la app según el idioma con [usarIdiomaParaNumeros].
+var _puntoDecimal = false;
+
+/// Ajusta el separador decimal al idioma de la app ('en' usa punto).
+void usarIdiomaParaNumeros(String languageCode) =>
+    _puntoDecimal = languageCode == 'en';
+
+/// Formato de números para mostrar en pantalla: coma decimal en español y
+/// alemán (1,345 €/L), punto en inglés (1.345 €/L). Para leer lo que escribe
+/// el usuario ya se acepta coma o punto.
+String decimal(num value, int digits) {
+  final texto = value.toStringAsFixed(digits);
+  return _puntoDecimal ? texto : texto.replaceAll('.', ',');
+}
+
+/// Importe en euros: «66,50 €» en español y alemán, «€66.50» en inglés.
+String euros(num value, int digits) => _puntoDecimal
+    ? '€${decimal(value, digits)}'
+    : '${decimal(value, digits)} €';
 
 const _minusculas = {'de', 'del', 'y', 'e', 'en', 'a', 'al', 'por'};
 // Artículos: en minúscula solo detrás de "de" (Avenida de los Álamos); en

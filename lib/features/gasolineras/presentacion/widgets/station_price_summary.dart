@@ -1,6 +1,7 @@
 import 'package:gasolineras_can/core/format.dart';
 import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 /// A readable price hierarchy shared by the list and station detail.
 class StationPriceSummary extends StatelessWidget {
@@ -18,16 +19,21 @@ class StationPriceSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final fuelName = fuel.label(l10n);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(fuel.displayName, style: theme.textTheme.labelLarge),
+        Text(fuelName, style: theme.textTheme.labelLarge),
         const SizedBox(height: 2),
         if (price == null)
-          const Text('Sin precio disponible')
+          Text(l10n.stationNoPrice)
         else ...[
           Semantics(
-            label: '${fuel.displayName}: ${decimal(price!, 3)} euros por litro',
+            label: l10n.stationPricePerLitreSemantics(
+              fuelName,
+              decimal(price!, 3),
+            ),
             excludeSemantics: true,
             child: Text.rich(
               TextSpan(
@@ -44,7 +50,10 @@ class StationPriceSummary extends StatelessWidget {
           ),
           if (liters.isFinite && liters > 0)
             Text(
-              '${decimal(price! * liters, 2)} € para ${decimal(liters, liters == liters.roundToDouble() ? 0 : 1)} L · estimado',
+              l10n.stationTankEstimate(
+                decimal(price! * liters, 2),
+                decimal(liters, liters == liters.roundToDouble() ? 0 : 1),
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

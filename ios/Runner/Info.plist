@@ -17,6 +17,8 @@
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>es</string>
+		<string>en</string>
+		<string>de</string>
 	</array>
 	<key>CFBundleName</key>
 	<string>GasoCan</string>

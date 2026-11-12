@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 class GuidePage extends StatefulWidget {
   const GuidePage({super.key, this.firstLaunch = false});
@@ -18,34 +19,31 @@ class _GuidePageState extends State<GuidePage> {
   final _controller = PageController();
   int _index = 0;
 
-  static const _steps = <_GuideStep>[
+  /// Los pasos se montan en cada build para que salgan en el idioma actual.
+  static List<_GuideStep> _steps(AppLocalizations l10n) => [
     _GuideStep(
       icon: Icons.search,
-      title: 'Encuentra gasolineras',
-      description:
-          'Busca por nombre, marca o municipio. Puedes explorar Canarias aunque no compartas tu ubicación.',
-      color: Color(0xff087be8),
+      title: l10n.guideStep1Title,
+      description: l10n.guideStep1Body,
+      color: const Color(0xff087be8),
     ),
     _GuideStep(
       icon: Icons.price_check,
-      title: 'Compara precios',
-      description:
-          'Consulta los precios por tipo de combustible y fíjate en la fecha de actualización para saber cuándo se comunicaron.',
-      color: Color(0xff16855b),
+      title: l10n.guideStep2Title,
+      description: l10n.guideStep2Body,
+      color: const Color(0xff16855b),
     ),
     _GuideStep(
       icon: Icons.map_outlined,
-      title: 'Elige cómo llegar',
-      description:
-          'Cambia entre lista y mapa para situar las estaciones. En la ficha, toca “Cómo llegar” para abrir una app de navegación.',
-      color: Color(0xff8056c7),
+      title: l10n.guideStep3Title,
+      description: l10n.guideStep3Body,
+      color: const Color(0xff8056c7),
     ),
     _GuideStep(
       icon: Icons.star_outline,
-      title: 'Guarda tus preferidas',
-      description:
-          'Inicia sesión para guardar gasolineras favoritas. En tu perfil puedes configurar el vehículo y los litros para estimar el coste.',
-      color: Color(0xffd88418),
+      title: l10n.guideStep4Title,
+      description: l10n.guideStep4Body,
+      color: const Color(0xffd88418),
     ),
   ];
 
@@ -69,7 +67,8 @@ class _GuidePageState extends State<GuidePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLast = _index == _steps.length - 1;
+    final steps = _steps(context.l10n);
+    final isLast = _index == steps.length - 1;
 
     // Cerrar con el gesto o botón de atrás del sistema también cuenta como
     // vista; si no, la guía volvería a aparecer en cada arranque.
@@ -79,17 +78,20 @@ class _GuidePageState extends State<GuidePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Cómo usar GasoCan'),
+          title: Text(context.l10n.guideTitle),
           leading: widget.firstLaunch
               ? const SizedBox.shrink()
               : IconButton(
-                  tooltip: 'Cerrar guía',
+                  tooltip: context.l10n.guideClose,
                   onPressed: _finish,
                   icon: const Icon(Icons.close),
                 ),
           actions: [
             if (!isLast)
-              TextButton(onPressed: _finish, child: const Text('Omitir')),
+              TextButton(
+                onPressed: _finish,
+                child: Text(context.l10n.guideSkip),
+              ),
           ],
         ),
         body: SafeArea(
@@ -99,10 +101,10 @@ class _GuidePageState extends State<GuidePage> {
               Expanded(
                 child: PageView.builder(
                   controller: _controller,
-                  itemCount: _steps.length,
+                  itemCount: steps.length,
                   onPageChanged: (value) => setState(() => _index = value),
                   itemBuilder: (context, index) {
-                    final item = _steps[index];
+                    final item = steps[index];
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(28, 20, 28, 16),
                       child: Column(
@@ -146,7 +148,7 @@ class _GuidePageState extends State<GuidePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  _steps.length,
+                  steps.length,
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -178,7 +180,11 @@ class _GuidePageState extends State<GuidePage> {
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 13),
-                      child: Text(isLast ? 'Empezar' : 'Siguiente'),
+                      child: Text(
+                        isLast
+                            ? context.l10n.guideStart
+                            : context.l10n.guideNext,
+                      ),
                     ),
                   ),
                 ),

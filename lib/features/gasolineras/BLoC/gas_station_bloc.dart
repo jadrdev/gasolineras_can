@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/gas_station.dart';
 import '../data/gas_station_repository.dart';
+import '../../../l10n/l10n.dart';
 
 abstract class GasStationEvent {}
 
@@ -62,11 +63,7 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
         );
       } catch (_) {
         if (generation == _generation) {
-          emit(
-            GasStationError(
-              'No se pudieron cargar las gasolineras. Comprueba la conexión y vuelve a intentarlo.',
-            ),
-          );
+          emit(GasStationError(l10nSistema.stationLoadError));
         }
       }
     });

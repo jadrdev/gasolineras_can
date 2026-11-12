@@ -1,0 +1,4 @@
+/* Berechtigungstexte von iOS, auf Deutsch. */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Wir benötigen deinen Standort, um Tankstellen in der Nähe anzuzeigen.";
+"NSLocationWhenInUseUsageDescription" = "Wir benötigen deinen Standort, um Tankstellen in der Nähe anzuzeigen.";
+"NSUserNotificationUsageDescription" = "Wir benachrichtigen dich, wenn der Spritpreis an deinen Lieblingstankstellen sinkt.";

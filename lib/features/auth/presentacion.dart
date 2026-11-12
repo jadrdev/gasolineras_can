@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_bloc.dart';
+import '../../l10n/l10n.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -72,13 +73,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           context.go('/home');
         } else if (state is RegistrationSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '✅ ¡Registro exitoso! Si la confirmación por email está habilitada, '
-                'revisa tu bandeja de entrada. En caso contrario, ya puedes iniciar sesión.',
-              ),
+            SnackBar(
+              content: Text(context.l10n.authRegistroExitoso),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 6),
+              duration: const Duration(seconds: 6),
             ),
           );
           Future.delayed(const Duration(seconds: 2), () {
@@ -123,22 +121,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Crear cuenta',
-                              style: TextStyle(
+                              context.l10n.authCrearCuenta,
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              'Gasolineras de Canarias',
-                              style: TextStyle(
+                              context.l10n.authGasolinerasDeCanarias,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white70,
                               ),
@@ -165,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Únete y ahorra',
+                            context.l10n.authUneteYAhorra,
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -174,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Guarda tus gasolineras favoritas y recibe alertas de precios.',
+                            context.l10n.authRegistroSubtitulo,
                             style: TextStyle(
                               fontSize: 14,
                               color: colorScheme.onSurfaceVariant,
@@ -183,38 +181,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 24),
                           _buildTextField(
                             controller: emailController,
-                            label: 'Correo electrónico',
+                            label: context.l10n.authCorreoElectronico,
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             errorText:
                                 _submitted &&
                                     emailController.text.trim().isEmpty
-                                ? 'El correo es obligatorio'
+                                ? context.l10n.authCorreoObligatorio
                                 : emailController.text.isNotEmpty &&
                                       !_isEmailValid
-                                ? 'Correo electrónico no válido'
+                                ? context.l10n.authCorreoNoValido
                                 : null,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
                             controller: passwordController,
-                            label: 'Contraseña',
+                            label: context.l10n.authContrasena,
                             icon: Icons.lock_outline,
                             obscureText: true,
-                            helperText: 'Mínimo 6 caracteres',
+                            helperText: context.l10n.authMinimoCaracteres,
                             errorText:
                                 _submitted &&
                                     passwordController.text.trim().isEmpty
-                                ? 'La contraseña es obligatoria'
+                                ? context.l10n.authContrasenaObligatoria
                                 : passwordController.text.isNotEmpty &&
                                       passwordController.text.length < 6
-                                ? 'La contraseña debe tener al menos 6 caracteres'
+                                ? context.l10n.authContrasenaCorta
                                 : null,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
                             controller: confirmPasswordController,
-                            label: 'Confirmar contraseña',
+                            label: context.l10n.authConfirmarContrasena,
                             icon: Icons.lock_outline,
                             obscureText: true,
                             errorText:
@@ -222,7 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     confirmPasswordController.text.isNotEmpty &&
                                     passwordController.text !=
                                         confirmPasswordController.text
-                                ? 'Las contraseñas no coinciden'
+                                ? context.l10n.authContrasenasNoCoinciden
                                 : null,
                           ),
                           const SizedBox(height: 24),
@@ -248,9 +246,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Crear cuenta',
-                                style: TextStyle(
+                              child: Text(
+                                context.l10n.authCrearCuenta,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -263,14 +261,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '¿Ya tienes cuenta?',
+                                context.l10n.authYaTienesCuenta,
                                 style: TextStyle(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               TextButton(
                                 onPressed: () => context.go('/login'),
-                                child: const Text('Inicia sesión'),
+                                child: Text(context.l10n.authIniciaSesion),
                               ),
                             ],
                           ),
@@ -294,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: TextButton.icon(
         onPressed: () => context.go('/home'),
         icon: const Icon(Icons.arrow_back),
-        label: const Text('Volver al inicio'),
+        label: Text(context.l10n.authVolverAlInicio),
       ),
     );
   }
@@ -386,22 +384,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Bienvenido',
-                                style: TextStyle(
+                                context.l10n.authBienvenido,
+                                style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                'Gasolineras de Canarias',
-                                style: TextStyle(
+                                context.l10n.authGasolinerasDeCanarias,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.white70,
                                 ),
@@ -428,7 +426,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Inicia sesión',
+                              context.l10n.authIniciaSesion,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -437,7 +435,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Accede a tus favoritos y preferencias de vehículo.',
+                              context.l10n.authLoginSubtitulo,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colorScheme.onSurfaceVariant,
@@ -446,30 +444,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             _buildTextField(
                               controller: emailController,
-                              label: 'Correo electrónico',
+                              label: context.l10n.authCorreoElectronico,
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               enabled: !isLoading,
                               errorText:
                                   _submitted &&
                                       emailController.text.trim().isEmpty
-                                  ? 'El correo es obligatorio'
+                                  ? context.l10n.authCorreoObligatorio
                                   : emailController.text.isNotEmpty &&
                                         !_isEmailValid
-                                  ? 'Correo electrónico no válido'
+                                  ? context.l10n.authCorreoNoValido
                                   : null,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
                               controller: passwordController,
-                              label: 'Contraseña',
+                              label: context.l10n.authContrasena,
                               icon: Icons.lock_outline,
                               obscureText: true,
                               enabled: !isLoading,
                               errorText:
                                   _submitted &&
                                       passwordController.text.trim().isEmpty
-                                  ? 'La contraseña es obligatoria'
+                                  ? context.l10n.authContrasenaObligatoria
                                   : null,
                             ),
                             const SizedBox(height: 8),
@@ -477,7 +475,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               alignment: Alignment.centerRight,
                               child: TextButton(
                                 onPressed: isLoading ? null : () {},
-                                child: const Text('¿Olvidaste tu contraseña?'),
+                                child: Text(
+                                  context.l10n.authOlvidasteContrasena,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -517,9 +517,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : const Text(
-                                        'Iniciar sesión',
-                                        style: TextStyle(
+                                    : Text(
+                                        context.l10n.authIniciarSesion,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -564,7 +564,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  '¿No tienes cuenta?',
+                                  context.l10n.authNoTienesCuenta,
                                   style: TextStyle(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -573,7 +573,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   onPressed: isLoading
                                       ? null
                                       : () => context.go('/register'),
-                                  child: const Text('Regístrate'),
+                                  child: Text(context.l10n.authRegistrate),
                                 ),
                               ],
                             ),
@@ -598,7 +598,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: TextButton.icon(
         onPressed: () => context.go('/home'),
         icon: const Icon(Icons.arrow_back),
-        label: const Text('Volver al inicio'),
+        label: Text(context.l10n.authVolverAlInicio),
       ),
     );
   }

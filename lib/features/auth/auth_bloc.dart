@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:equatable/equatable.dart';
 import '../../core/notifications/push_service.dart';
+import '../../l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_event.dart';
@@ -54,7 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on AuthException catch (e) {
       add(AuthErrorEvent(e.message));
     } catch (_) {
-      add(AuthErrorEvent("Error inesperado al iniciar sesión"));
+      add(AuthErrorEvent(l10nSistema.authErrorInesperadoLogin));
     }
   }
 
@@ -74,7 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       final idToken = credential.identityToken;
       if (idToken == null) {
-        throw const AuthException('Apple no devolvió la identidad');
+        throw AuthException(l10nSistema.authAppleSinIdentidad);
       }
       await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
@@ -86,12 +87,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (e.code == AuthorizationErrorCode.canceled) {
         add(AuthLoggedOut());
       } else {
-        add(AuthErrorEvent('No se pudo iniciar sesión con Apple'));
+        add(AuthErrorEvent(l10nSistema.authErrorApple));
       }
     } on AuthException catch (e) {
-      add(AuthErrorEvent('No se pudo iniciar sesión con Apple: ${e.message}'));
+      add(AuthErrorEvent(l10nSistema.authErrorAppleDetalle(e.message)));
     } catch (_) {
-      add(AuthErrorEvent('No se pudo iniciar sesión con Apple'));
+      add(AuthErrorEvent(l10nSistema.authErrorApple));
     }
   }
 
@@ -138,17 +139,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Manejar error específico de envío de email
       if (e.message.contains('Error sending confirmation email') ||
           e.statusCode == '500') {
-        add(
-          AuthErrorEvent(
-            'No se pudo enviar el email de confirmación. '
-            'Vuelve a intentarlo más tarde.',
-          ),
-        );
+        add(AuthErrorEvent(l10nSistema.authErrorEmailConfirmacion));
       } else {
-        add(AuthErrorEvent('Error: ${e.message}'));
+        add(AuthErrorEvent(l10nSistema.authErrorDetalle(e.message)));
       }
     } catch (e) {
-      add(AuthErrorEvent("Error inesperado: $e"));
+      add(AuthErrorEvent(l10nSistema.authErrorInesperado(e.toString())));
     }
   }
 

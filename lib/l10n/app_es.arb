@@ -1,328 +1,371 @@
 {
   "@@locale": "es",
-  
   "appTitle": "Gasolineras de Canarias",
-  "@appTitle": {
-    "description": "Title of the application"
-  },
-
-  "tabGasStations": "Gasolineras",
-  "@tabGasStations": {
-    "description": "Tab label for gas stations list"
-  },
-
-  "tabFavorites": "Favoritos",
-  "@tabFavorites": {
-    "description": "Tab label for favorites"
-  },
-
-  "tabProfile": "Perfil",
-  "@tabProfile": {
-    "description": "Tab label for profile"
-  },
-
-  "sortByPrice": "Ordenar por precio",
-  "@sortByPrice": {
-    "description": "Menu option to sort by price"
-  },
-
-  "sortByDistance": "Ordenar por distancia",
-  "@sortByDistance": {
-    "description": "Menu option to sort by distance"
-  },
-
-  "searchHint": "Buscar por nombre, dirección o marca",
-  "@searchHint": {
-    "description": "Hint text for search field"
-  },
-
-  "noGasStationsFound": "No se han encontrado gasolineras",
-  "@noGasStationsFound": {
-    "description": "Message when no gas stations are found"
-  },
-
-  "tryRefreshOrChangeFilters": "Prueba a actualizar o cambiar los filtros.",
-  "@tryRefreshOrChangeFilters": {
-    "description": "Suggestion when no results found"
-  },
-
-  "retry": "Reintentar",
-  "@retry": {
-    "description": "Button to retry an action"
-  },
-
-  "updatedMinutesAgo": "Actualizado hace {minutes} min",
-  "@updatedMinutesAgo": {
-    "description": "Last update time in minutes",
+  "authRegistroExitoso": "✅ ¡Registro exitoso! Si la confirmación por email está habilitada, revisa tu bandeja de entrada. En caso contrario, ya puedes iniciar sesión.",
+  "authCrearCuenta": "Crear cuenta",
+  "authGasolinerasDeCanarias": "Gasolineras de Canarias",
+  "authUneteYAhorra": "Únete y ahorra",
+  "authRegistroSubtitulo": "Guarda tus gasolineras favoritas y recibe alertas de precios.",
+  "authCorreoElectronico": "Correo electrónico",
+  "authCorreoObligatorio": "El correo es obligatorio",
+  "authCorreoNoValido": "Correo electrónico no válido",
+  "authContrasena": "Contraseña",
+  "authMinimoCaracteres": "Mínimo 6 caracteres",
+  "authContrasenaObligatoria": "La contraseña es obligatoria",
+  "authContrasenaCorta": "La contraseña debe tener al menos 6 caracteres",
+  "authConfirmarContrasena": "Confirmar contraseña",
+  "authContrasenasNoCoinciden": "Las contraseñas no coinciden",
+  "authYaTienesCuenta": "¿Ya tienes cuenta?",
+  "authIniciaSesion": "Inicia sesión",
+  "authVolverAlInicio": "Volver al inicio",
+  "authBienvenido": "Bienvenido",
+  "authLoginSubtitulo": "Accede a tus favoritos y preferencias de vehículo.",
+  "authOlvidasteContrasena": "¿Olvidaste tu contraseña?",
+  "authIniciarSesion": "Iniciar sesión",
+  "authNoTienesCuenta": "¿No tienes cuenta?",
+  "authRegistrate": "Regístrate",
+  "authO": "o",
+  "authIniciarSesionApple": "Iniciar sesión con Apple",
+  "authCerrarSesion": "Cerrar sesión",
+  "authCerrarSesionPregunta": "¿Estás seguro de que deseas cerrar sesión?",
+  "authCancelar": "Cancelar",
+  "authUsuarioDesconocido": "Usuario desconocido",
+  "authMiembroActivo": "Miembro activo",
+  "authComoUsarGasoCan": "Cómo usar GasoCan",
+  "authConsultarGuia": "Vuelve a consultar la guía",
+  "authInformacionCuenta": "Información de la cuenta",
+  "authEmail": "Email",
+  "authNoDisponible": "No disponible",
+  "authIdUsuario": "ID de usuario",
+  "authMiembroDesde": "Miembro desde",
+  "authEliminarCuenta": "Eliminar cuenta",
+  "authEliminarCuentaAviso": "Se borrarán tu cuenta, tus gasolineras favoritas, tus alertas de precio y los datos de tu vehículo. No se puede deshacer.",
+  "authEliminar": "Eliminar",
+  "authCuentaEliminada": "Tu cuenta se ha eliminado",
+  "authAppleNoConfirmo": "Apple no pudo confirmar tu identidad. La cuenta sigue activa.",
+  "authErrorEliminarCuenta": "No se pudo eliminar la cuenta. Inténtalo de nuevo más tarde.",
+  "authPerfilNoDisponible": "Perfil no disponible",
+  "authPerfilIniciaSesion": "Inicia sesión para ver tu perfil y acceder a funciones adicionales",
+  "authApariencia": "Apariencia",
+  "authTemaAuto": "Auto",
+  "authTemaClaro": "Claro",
+  "authTemaOscuro": "Oscuro",
+  "authErrorCargarVehiculo": "No se pudieron cargar los datos del vehículo.",
+  "authReintentar": "Reintentar",
+  "authVehiculoGuardado": "Datos del vehículo guardados",
+  "authErrorGuardarVehiculo": "No se pudieron guardar los datos. Puedes volver a intentarlo.",
+  "authMiVehiculo": "Mi vehículo",
+  "authCombustibleHabitual": "Combustible habitual",
+  "authLitrosDeposito": "Litros del depósito",
+  "authLitrosNoValidos": "Introduce una capacidad entre 0 y 1000 litros, mayor que cero.",
+  "authMatriculaOpcional": "Matrícula (opcional)",
+  "authCambiosAlGuardar": "Los cambios se aplican al pulsar Guardar.",
+  "authGuardando": "Guardando…",
+  "authGuardarVehiculo": "Guardar datos del vehículo",
+  "authErrorInesperadoLogin": "Error inesperado al iniciar sesión",
+  "authAppleSinIdentidad": "Apple no devolvió la identidad",
+  "authErrorApple": "No se pudo iniciar sesión con Apple",
+  "authErrorAppleDetalle": "No se pudo iniciar sesión con Apple: {detalle}",
+  "@authErrorAppleDetalle": {
     "placeholders": {
-      "minutes": {
-        "type": "int"
+      "detalle": {
+        "type": "String"
       }
     }
   },
-
-  "updatedHoursAgo": "Actualizado hace {hours} h",
-  "@updatedHoursAgo": {
-    "description": "Last update time in hours",
+  "authErrorEmailConfirmacion": "No se pudo enviar el email de confirmación. Vuelve a intentarlo más tarde.",
+  "authErrorDetalle": "Error: {detalle}",
+  "@authErrorDetalle": {
     "placeholders": {
-      "hours": {
-        "type": "int"
+      "detalle": {
+        "type": "String"
       }
     }
   },
-
-  "updatedDaysAgo": "Actualizado hace {days} días",
-  "@updatedDaysAgo": {
-    "description": "Last update time in days",
+  "authErrorInesperado": "Error inesperado: {detalle}",
+  "@authErrorInesperado": {
     "placeholders": {
-      "days": {
-        "type": "int"
+      "detalle": {
+        "type": "String"
       }
     }
   },
-
-  "updatedOn": "Actualizado el {date}",
-  "@updatedOn": {
-    "description": "Last update date",
+  "fuelGasoline95": "Gasolina 95",
+  "fuelGasoline98": "Gasolina 98",
+  "fuelDiesel": "Diésel",
+  "fuelDieselPremium": "Diésel Premium",
+  "stationWelcome": "🏝 Bienvenido a Gasolineras Canarias",
+  "stationListTitle": "Gasolineras",
+  "stationUseMyLocation": "Usar mi ubicación",
+  "stationRefreshPrices": "Actualizar precios",
+  "stationZoneAll": "Toda Canarias",
+  "stationZoneNearby": "Cerca de mí · 16 km",
+  "stationFuelTooltip": "Combustible: {fuel}",
+  "@stationFuelTooltip": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      }
+    }
+  },
+  "stationSortTooltip": "Ordenar resultados",
+  "stationSortByPrice": "Por precio",
+  "stationSortByDistance": "Por distancia en línea recta",
+  "stationTextSearchAllIslands": "Búsqueda por texto en toda Canarias",
+  "stationOfflineNotice": "No se pudieron actualizar los precios. Mostrando datos guardados del {date}.",
+  "@stationOfflineNotice": {
     "placeholders": {
       "date": {
         "type": "String"
       }
     }
   },
-
-  "notUpdated": "Sin actualizar",
-  "@notUpdated": {
-    "description": "When there's no update information"
+  "stationCountByPrice": "{count, plural, =1{1 gasolinera · por precio} other{{count} gasolineras · por precio}}",
+  "@stationCountByPrice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
-  "gasoline95": "Gasolina 95",
-  "@gasoline95": {
-    "description": "Gasoline 95 fuel type"
+  "stationCountByDistance": "{count, plural, =1{1 gasolinera · por distancia} other{{count} gasolineras · por distancia}}",
+  "@stationCountByDistance": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
-  "gasoline98": "Gasolina 98",
-  "@gasoline98": {
-    "description": "Gasoline 98 fuel type"
+  "stationViewList": "Lista",
+  "stationViewMap": "Mapa",
+  "stationNoResults": "No se han encontrado gasolineras",
+  "stationNoResultsHint": "Prueba con parte del nombre, otra marca o un municipio.",
+  "stationClearSearchAll": "Borrar búsqueda y ver toda Canarias",
+  "stationRetry": "Reintentar",
+  "stationUnknownDate": "fecha desconocida",
+  "stationStraightLineKm": "{km} km en línea recta",
+  "@stationStraightLineKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
   },
-
-  "diesel": "Diésel",
-  "@diesel": {
-    "description": "Diesel fuel type"
+  "stationUpdatedAt": "Actualizado · {date}",
+  "@stationUpdatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-
-  "dieselPremium": "Diésel Premium",
-  "@dieselPremium": {
-    "description": "Premium diesel fuel type"
+  "stationStalePriceAt": "Precio sin actualización reciente · {date}",
+  "@stationStalePriceAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-
-  "yourLocation": "Tu ubicación",
-  "@yourLocation": {
-    "description": "Label for user's current location"
+  "stationLoadError": "No se pudieron cargar las gasolineras. Comprueba la conexión y vuelve a intentarlo.",
+  "stationSearchHint": "Marca, dirección o municipio",
+  "stationClearSearch": "Borrar búsqueda",
+  "stationNoPrice": "Sin precio disponible",
+  "stationPricePerLitreSemantics": "{fuel}: {price} euros por litro",
+  "@stationPricePerLitreSemantics": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
   },
-
-  "howToGetThere": "Cómo llegar",
-  "@howToGetThere": {
-    "description": "Button to get directions"
+  "stationTankEstimate": "{total} € para {liters} L · estimado",
+  "@stationTankEstimate": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "liters": {
+        "type": "String"
+      }
+    }
   },
-
-  "selectMapApp": "Selecciona una app de mapas",
-  "@selectMapApp": {
-    "description": "Title for map app selector"
+  "stationFuelPrice": "{fuel}: {price} €/L",
+  "@stationFuelPrice": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
   },
-
-  "noMapAppsInstalled": "No hay aplicaciones de mapas instaladas",
-  "@noMapAppsInstalled": {
-    "description": "Message when no map apps are available"
+  "stationFuelNoPrice": "{fuel}: sin precio",
+  "@stationFuelNoPrice": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      }
+    }
   },
-
-  "address": "Dirección:",
-  "@address": {
-    "description": "Address label"
+  "stationViewDetail": "Ver detalle",
+  "stationDirections": "Cómo llegar",
+  "stationChooseMapApp": "Selecciona una app de mapas",
+  "stationNoMapsInstalled": "No hay aplicaciones de mapas instaladas",
+  "stationMapOpenError": "Error al abrir el mapa: {error}",
+  "@stationMapOpenError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
-
-  "brand": "Marca:",
-  "@brand": {
-    "description": "Brand label"
+  "stationMapTitle": "{count, plural, =1{Mapa · 1 gasolinera} other{Mapa · {count} gasolineras}}",
+  "@stationMapTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
-  "myFavorites": "Mis Favoritos",
-  "@myFavorites": {
-    "description": "Title for favorites page"
+  "stationNoStationsToShow": "No hay gasolineras para mostrar.",
+  "stationMapLoadError": "No se pudo cargar el mapa. Vuelve a la lista e inténtalo de nuevo.",
+  "stationShowAllResults": "Ver todos los resultados",
+  "stationSettings": "Configuración",
+  "stationCalculateRefuel": "Calcula tu repostaje",
+  "stationLitresToEuros": "Litros a €",
+  "stationEurosToLitres": "€ a litros",
+  "stationMoneyAvailable": "Dinero disponible",
+  "stationNoPriceFor": "No hay precio para {fuel}",
+  "@stationNoPriceFor": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      }
+    }
   },
-
-  "noFavorites": "No tienes favoritos",
-  "@noFavorites": {
-    "description": "Message when user has no favorites"
+  "stationPriceFor": "Precio {fuel}: {price} €/L",
+  "@stationPriceFor": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
   },
-
-  "addFavoritesFromMainList": "Agrega gasolineras a favoritos desde la lista principal",
-  "@addFavoritesFromMainList": {
-    "description": "Instruction to add favorites"
+  "stationTankLitres": "Litros del depósito",
+  "stationEnterLitresHint": "Introduce los litros de tu depósito para ver el ahorro estimado.",
+  "stationFillCost": "Llenar {liters} L te costaría:",
+  "@stationFillCost": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
   },
-
-  "favoriteStationsNotFound": "No se encontraron las gasolineras favoritas",
-  "@favoriteStationsNotFound": {
-    "description": "Message when favorite stations can't be found"
+  "stationCheckingNearby": "Consultando precios cercanos…",
+  "stationEstimateNote": "Estimación del combustible; no incluye desplazamiento.",
+  "stationYouSave": "Ahorras {amount} €",
+  "@stationYouSave": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
-
-  "logout": "Cerrar sesión",
-  "@logout": {
-    "description": "Logout button text"
+  "stationSavingsVsMax": "Frente al mayor precio a 16 km de tu ubicación ({price} €/L). No incluye desplazamiento.",
+  "@stationSavingsVsMax": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
   },
-
-  "logoutConfirmation": "¿Estás seguro de que deseas cerrar sesión?",
-  "@logoutConfirmation": {
-    "description": "Logout confirmation message"
+  "stationEnterMoneyHint": "Introduce la cantidad de dinero para ver cuántos litros obtienes.",
+  "stationWithMoneyYouGet": "Con {amount} € obtienes:",
+  "@stationWithMoneyYouGet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
-
-  "cancel": "Cancelar",
-  "@cancel": {
-    "description": "Cancel button text"
+  "stationExtraLitres": "Sacas {liters} L más",
+  "@stationExtraLitres": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
   },
-
-  "activeMember": "Miembro activo",
-  "@activeMember": {
-    "description": "Active member status"
+  "stationEquivalentSavings": "Ahorro equivalente: {amount} € · Frente a {price} €/L",
+  "@stationEquivalentSavings": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
   },
-
-  "accountInformation": "Información de la cuenta",
-  "@accountInformation": {
-    "description": "Account information section title"
-  },
-
-  "email": "Email",
-  "@email": {
-    "description": "Email label"
-  },
-
-  "userId": "ID de usuario",
-  "@userId": {
-    "description": "User ID label"
-  },
-
-  "memberSince": "Miembro desde",
-  "@memberSince": {
-    "description": "Member since label"
-  },
-
-  "profileNotAvailable": "Perfil no disponible",
-  "@profileNotAvailable": {
-    "description": "Profile not available title"
-  },
-
-  "loginToViewProfile": "Inicia sesión para ver tu perfil y acceder a funciones adicionales",
-  "@loginToViewProfile": {
-    "description": "Message prompting user to login"
-  },
-
-  "login": "Iniciar sesión",
-  "@login": {
-    "description": "Login button text"
-  },
-
-  "loginPrompt": "Inicia sesión para continuar",
-  "@loginPrompt": {
-    "description": "Login prompt message"
-  },
-
-  "password": "Contraseña",
-  "@password": {
-    "description": "Password field label"
-  },
-
-  "noAccount": "¿No tienes cuenta?",
-  "@noAccount": {
-    "description": "Prompt for users without account"
-  },
-
-  "register": "Regístrate",
-  "@register": {
-    "description": "Register button text"
-  },
-
-  "createAccount": "Crear cuenta",
-  "@createAccount": {
-    "description": "Create account title"
-  },
-
-  "registration": "Registro",
-  "@registration": {
-    "description": "Registration title"
-  },
-
-  "createAccountToSaveFavorites": "Crea tu cuenta para guardar tus gasolineras favoritas",
-  "@createAccountToSaveFavorites": {
-    "description": "Registration subtitle"
-  },
-
-  "emailAddress": "Correo electrónico",
-  "@emailAddress": {
-    "description": "Email address field label"
-  },
-
-  "minimumCharacters": "Mínimo 6 caracteres",
-  "@minimumCharacters": {
-    "description": "Password minimum length hint"
-  },
-
-  "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
-  "@passwordTooShort": {
-    "description": "Password too short error"
-  },
-
-  "confirmPassword": "Confirmar contraseña",
-  "@confirmPassword": {
-    "description": "Confirm password field label"
-  },
-
-  "passwordsDoNotMatch": "Las contraseñas no coinciden",
-  "@passwordsDoNotMatch": {
-    "description": "Passwords don't match error"
-  },
-
-  "alreadyHaveAccount": "¿Ya tienes cuenta?",
-  "@alreadyHaveAccount": {
-    "description": "Prompt for users with existing account"
-  },
-
-  "registrationSuccess": "✅ ¡Gracias por registrarte! Te hemos enviado un email para confirmar tu registro. Por favor, revisa tu bandeja de entrada.",
-  "@registrationSuccess": {
-    "description": "Registration success message"
-  },
-
-  "invalidEmail": "Correo electrónico no válido",
-  "@invalidEmail": {
-    "description": "Invalid email error"
-  },
-
-  "settings": "Configuración",
-  "@settings": {
-    "description": "Settings section title"
-  },
-
-  "language": "Idioma",
-  "@language": {
-    "description": "Language setting label"
-  },
-
-  "selectLanguage": "Seleccionar idioma",
-  "@selectLanguage": {
-    "description": "Select language dialog title"
-  },
-
-  "spanish": "Español",
-  "@spanish": {
-    "description": "Spanish language option"
-  },
-
-  "english": "English",
-  "@english": {
-    "description": "English language option"
-  },
-
-  "german": "Deutsch",
-  "@german": {
-    "description": "German language option"
+  "stationDetailTitle": "Detalle de gasolinera",
+  "stationPricesByFuel": "Precios por combustible",
+  "stationLocation": "Ubicación",
+  "stationYourLocation": "Tu ubicación",
+  "stationNoPricesAvailable": "No hay precios disponibles para esta estación.",
+  "stationYourFuel": "Tu combustible",
+  "favTitle": "Mis Favoritos",
+  "favRetry": "Reintentar",
+  "favUpdateError": "No se pudieron actualizar los favoritos.",
+  "favLoadError": "No se pudieron cargar tus favoritos. Comprueba la conexión y vuelve a intentarlo.",
+  "favEmptyTitle": "No tienes favoritos",
+  "favEmptyHint": "Agrega gasolineras a favoritos desde la lista principal",
+  "favNotFound": "No se encontraron las gasolineras favoritas",
+  "favStraightLine": "En línea recta",
+  "favOfflinePrices": "Precios guardados: no se han podido actualizar.",
+  "favToggleError": "No se pudo actualizar el favorito",
+  "favLoginTitle": "Inicia sesión",
+  "favLoginMessage": "Necesitas iniciar sesión para guardar gasolineras en tus favoritos.",
+  "favLoginCancel": "Cancelar",
+  "favLoginAction": "Iniciar sesión",
+  "favRemoveTooltip": "Quitar de favoritos",
+  "favAddTooltip": "Guardar favorito",
+  "guideTitle": "Cómo usar GasoCan",
+  "guideClose": "Cerrar guía",
+  "guideSkip": "Omitir",
+  "guideNext": "Siguiente",
+  "guideStart": "Empezar",
+  "guideStep1Title": "Encuentra gasolineras",
+  "guideStep1Body": "Busca por nombre, marca o municipio. Puedes explorar Canarias aunque no compartas tu ubicación.",
+  "guideStep2Title": "Compara precios",
+  "guideStep2Body": "Consulta los precios por tipo de combustible y fíjate en la fecha de actualización para saber cuándo se comunicaron.",
+  "guideStep3Title": "Elige cómo llegar",
+  "guideStep3Body": "Cambia entre lista y mapa para situar las estaciones. En la ficha, toca “Cómo llegar” para abrir una app de navegación.",
+  "guideStep4Title": "Guarda tus preferidas",
+  "guideStep4Body": "Inicia sesión para guardar gasolineras favoritas. En tu perfil puedes configurar el vehículo y los litros para estimar el coste.",
+  "navStations": "Gasolineras",
+  "navFavorites": "Favoritos",
+  "navProfile": "Perfil",
+  "splashTitle": "Gasolineras de Canarias",
+  "splashSubtitle": "Encuentra el mejor precio cerca de ti",
+  "notifChannelName": "Bajadas de precio",
+  "notifChannelDescription": "Avisos cuando baja el precio en tus gasolineras favoritas",
+  "locationServicesOff": "Los servicios de ubicación están desactivados. Por favor, activa el GPS en tu dispositivo.",
+  "locationDenied": "Permiso de ubicación denegado. Por favor, permite el acceso a la ubicación para continuar.",
+  "locationDeniedForever": "Permiso de ubicación denegado permanentemente. Ve a configuración y permite el acceso a la ubicación para esta aplicación.",
+  "locationError": "Error al obtener la ubicación: {detalle}",
+  "@locationError": {
+    "placeholders": {
+      "detalle": {
+        "type": "String"
+      }
+    }
   }
 }

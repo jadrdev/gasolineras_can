@@ -8,6 +8,14 @@ void main() {
     expect(decimal(50, 0), '50');
   });
 
+  test('decimal usa punto en inglés y coma en alemán', () {
+    usarIdiomaParaNumeros('en');
+    expect(decimal(1.345, 3), '1.345');
+    usarIdiomaParaNumeros('de');
+    expect(decimal(1.345, 3), '1,345');
+    usarIdiomaParaNumeros('es');
+  });
+
   test('nombrePropio pasa a formato normal los textos en mayúsculas', () {
     const casos = {
       'DISA CARRIZAL': 'Disa Carrizal',

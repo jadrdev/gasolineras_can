@@ -7,6 +7,7 @@ import 'vehicle_profile_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -16,21 +17,21 @@ class ProfilePage extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.logout, color: Colors.orange),
-            SizedBox(width: 12),
-            Text('Cerrar sesión'),
+            const Icon(Icons.logout, color: Colors.orange),
+            const SizedBox(width: 12),
+            Text(context.l10n.authCerrarSesion),
           ],
         ),
-        content: const Text(
-          '¿Estás seguro de que deseas cerrar sesión?',
-          style: TextStyle(fontSize: 16),
+        content: Text(
+          context.l10n.authCerrarSesionPregunta,
+          style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.authCancelar),
           ),
           FilledButton(
             onPressed: () {
@@ -38,7 +39,7 @@ class ProfilePage extends StatelessWidget {
               context.read<AuthBloc>().logout();
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Cerrar sesión'),
+            child: Text(context.l10n.authCerrarSesion),
           ),
         ],
       ),
@@ -108,7 +109,7 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 16),
                     // Email del usuario
                     Text(
-                      user.email ?? 'Usuario desconocido',
+                      user.email ?? context.l10n.authUsuarioDesconocido,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -118,7 +119,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Miembro activo',
+                      context.l10n.authMiembroActivo,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -139,8 +140,8 @@ class ProfilePage extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.menu_book_outlined),
-                    title: const Text('Cómo usar GasoCan'),
-                    subtitle: const Text('Vuelve a consultar la guía'),
+                    title: Text(context.l10n.authComoUsarGasoCan),
+                    subtitle: Text(context.l10n.authConsultarGuia),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/guide'),
                   ),
@@ -154,27 +155,28 @@ class ProfilePage extends StatelessWidget {
                 // Tarjeta de información del usuario
                 _buildInfoCard(
                   context,
-                  title: 'Información de la cuenta',
+                  title: context.l10n.authInformacionCuenta,
                   children: [
                     _buildInfoRow(
                       icon: Icons.email_outlined,
-                      label: 'Email',
-                      value: user.email ?? 'No disponible',
+                      label: context.l10n.authEmail,
+                      value: user.email ?? context.l10n.authNoDisponible,
                       color: colorScheme.primary,
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
                       icon: Icons.fingerprint,
-                      label: 'ID de usuario',
+                      label: context.l10n.authIdUsuario,
                       value: user.id.substring(0, 8),
                       color: colorScheme.secondary,
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
                       icon: Icons.calendar_today,
-                      label: 'Miembro desde',
+                      label: context.l10n.authMiembroDesde,
                       value: DateFormat(
                         'dd/MM/yyyy',
+                        context.l10n.localeName,
                       ).format(DateTime.parse(user.createdAt)),
                       color: colorScheme.tertiary,
                     ),
@@ -189,9 +191,9 @@ class ProfilePage extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () => _showLogoutConfirmation(context),
                     icon: const Icon(Icons.logout),
-                    label: const Text(
-                      'Cerrar sesión',
-                      style: TextStyle(
+                    label: Text(
+                      context.l10n.authCerrarSesion,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -214,7 +216,7 @@ class ProfilePage extends StatelessWidget {
                   child: TextButton.icon(
                     onPressed: () => _showDeleteAccountConfirmation(context),
                     icon: const Icon(Icons.delete_forever_outlined),
-                    label: const Text('Eliminar cuenta'),
+                    label: Text(context.l10n.authEliminarCuenta),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red,
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -232,25 +234,26 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<void> _showDeleteAccountConfirmation(BuildContext context) async {
+    // Se guarda antes de los await: luego el context puede no estar montado.
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Eliminar cuenta'),
-        content: const Text(
-          'Se borrarán tu cuenta, tus gasolineras favoritas, tus alertas de '
-          'precio y los datos de tu vehículo. No se puede deshacer.',
-          style: TextStyle(fontSize: 16),
+        title: Text(l10n.authEliminarCuenta),
+        content: Text(
+          l10n.authEliminarCuentaAviso,
+          style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.authCancelar),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar'),
+            child: Text(l10n.authEliminar),
           ),
         ],
       ),
@@ -268,30 +271,20 @@ class ProfilePage extends StatelessWidget {
     try {
       await authBloc.deleteAccount();
       navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Tu cuenta se ha eliminado')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.authCuentaEliminada)));
     } on SignInWithAppleAuthorizationException catch (e) {
       // Canceló la confirmación de Apple: no se ha borrado nada.
       navigator.pop();
       if (e.code != AuthorizationErrorCode.canceled) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Apple no pudo confirmar tu identidad. La cuenta sigue activa.',
-            ),
-          ),
+          SnackBar(content: Text(l10n.authAppleNoConfirmo)),
         );
       }
     } catch (e) {
       debugPrint('❌ Error al eliminar la cuenta: $e');
       navigator.pop();
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'No se pudo eliminar la cuenta. Inténtalo de nuevo más tarde.',
-          ),
-        ),
+        SnackBar(content: Text(l10n.authErrorEliminarCuenta)),
       );
     }
   }
@@ -314,7 +307,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Perfil no disponible',
+              context.l10n.authPerfilNoDisponible,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -323,7 +316,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Inicia sesión para ver tu perfil y acceder a funciones adicionales',
+              context.l10n.authPerfilIniciaSesion,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
@@ -333,9 +326,12 @@ class ProfilePage extends StatelessWidget {
                 context.go('/login');
               },
               icon: const Icon(Icons.login),
-              label: const Text(
-                'Iniciar sesión',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              label: Text(
+                context.l10n.authIniciarSesion,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
@@ -352,7 +348,7 @@ class ProfilePage extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => context.push('/guide'),
               icon: const Icon(Icons.menu_book_outlined),
-              label: const Text('Cómo usar GasoCan'),
+              label: Text(context.l10n.authComoUsarGasoCan),
             ),
             const SizedBox(height: 16),
             _buildThemeCard(context),
@@ -373,27 +369,42 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Apariencia',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.authApariencia,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SegmentedButton<ThemeMode>(
-              segments: const [
+              // Sin ✓ en la opción marcada y el texto en una línea (se reduce si
+              // no cabe): en iPhone estrechos «Oscuro» se partía en dos.
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              segments: [
                 ButtonSegment(
                   value: ThemeMode.system,
-                  icon: Icon(Icons.brightness_auto),
-                  label: Text('Auto'),
+                  icon: const Icon(Icons.brightness_auto),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(context.l10n.authTemaAuto, maxLines: 1),
+                  ),
                 ),
                 ButtonSegment(
                   value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode),
-                  label: Text('Claro'),
+                  icon: const Icon(Icons.light_mode),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(context.l10n.authTemaClaro, maxLines: 1),
+                  ),
                 ),
                 ButtonSegment(
                   value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode),
-                  label: Text('Oscuro'),
+                  icon: const Icon(Icons.dark_mode),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(context.l10n.authTemaOscuro, maxLines: 1),
+                  ),
                 ),
               ],
               selected: {themeMode},

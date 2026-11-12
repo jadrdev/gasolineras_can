@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 enum FuelType { g95, g98, diesel, dieselPremium }
 
 extension FuelTypeName on FuelType {
-  String get displayName {
+  /// Nombre traducido del combustible con los textos de [l10n]. En las
+  /// pantallas: `fuel.label(context.l10n)`.
+  String label(AppLocalizations l10n) {
     switch (this) {
       case FuelType.g95:
-        return 'Gasolina 95';
+        return l10n.fuelGasoline95;
       case FuelType.g98:
-        return 'Gasolina 98';
+        return l10n.fuelGasoline98;
       case FuelType.diesel:
-        return 'Diésel';
+        return l10n.fuelDiesel;
       case FuelType.dieselPremium:
-        return 'Diésel Premium';
+        return l10n.fuelDieselPremium;
     }
   }
 

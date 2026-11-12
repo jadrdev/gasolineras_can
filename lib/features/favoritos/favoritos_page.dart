@@ -12,6 +12,7 @@ import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_st
 import 'package:gasolineras_can/core/directions_service.dart';
 import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/core/location.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 
 class FavoritesPage extends StatefulWidget {
   final FavoriteRepository repository;
@@ -50,7 +51,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       },
       onError: (Object error) {
         if (mounted) {
-          setState(() => _error = 'No se pudieron actualizar los favoritos.');
+          setState(() => _error = context.l10n.favUpdateError);
         }
       },
     );
@@ -119,8 +120,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       if (mounted && generation == _generation) {
         setState(() {
           _isLoading = false;
-          _error =
-              'No se pudieron cargar tus favoritos. Comprueba la conexión y vuelve a intentarlo.';
+          _error = context.l10n.favLoadError;
         });
       }
     }
@@ -136,7 +136,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [const Text("Mis Favoritos")],
+              children: [Text(context.l10n.favTitle)],
             ),
           ],
         ),
@@ -159,7 +159,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         Text(_error!, textAlign: TextAlign.center),
                         TextButton(
                           onPressed: () => _loadData(forceRefresh: true),
-                          child: const Text('Reintentar'),
+                          child: Text(context.l10n.favRetry),
                         ),
                       ],
                     ),
@@ -178,12 +178,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         Icon(Icons.star_border, size: 64, color: mutedColor),
                         const SizedBox(height: 16),
                         Text(
-                          'No tienes favoritos',
+                          context.l10n.favEmptyTitle,
                           style: TextStyle(fontSize: 18, color: mutedColor),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Agrega gasolineras a favoritos desde la lista principal',
+                          context.l10n.favEmptyHint,
                           textAlign: TextAlign.center,
                           style: TextStyle(color: mutedColor),
                         ),
@@ -207,16 +207,16 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.warning_amber,
                           size: 64,
                           color: Colors.orange,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
-                          'No se encontraron las gasolineras favoritas',
-                          style: TextStyle(fontSize: 16),
+                          context.l10n.favNotFound,
+                          style: const TextStyle(fontSize: 16),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -324,7 +324,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            'En línea recta',
+                                            context.l10n.favStraightLine,
                                             style: TextStyle(
                                               fontSize: 11,
                                               color: Theme.of(
@@ -348,9 +348,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                     ],
                                   ),
                                   if (_offline)
-                                    const Text(
-                                      'Precios guardados: no se han podido actualizar.',
-                                    ),
+                                    Text(context.l10n.favOfflinePrices),
                                   const SizedBox(height: 8),
                                   Wrap(
                                     spacing: 6,
@@ -358,7 +356,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                     children: [
                                       if (e.gasolina95 != null)
                                         Tooltip(
-                                          message: 'Gasolina 95',
+                                          message: context.l10n.fuelGasoline95,
                                           child: Chip(
                                             backgroundColor: FuelColors.of(
                                               FuelType.g95,
@@ -377,7 +375,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${decimal(e.gasolina95!, 3)} €',
+                                              euros(e.gasolina95!, 3),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -387,7 +385,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         ),
                                       if (e.gasolina98 != null)
                                         Tooltip(
-                                          message: 'Gasolina 98',
+                                          message: context.l10n.fuelGasoline98,
                                           child: Chip(
                                             backgroundColor: FuelColors.of(
                                               FuelType.g98,
@@ -406,7 +404,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${decimal(e.gasolina98!, 3)} €',
+                                              euros(e.gasolina98!, 3),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -416,7 +414,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         ),
                                       if (e.diesel != null)
                                         Tooltip(
-                                          message: 'Diésel',
+                                          message: context.l10n.fuelDiesel,
                                           child: Chip(
                                             backgroundColor: FuelColors.of(
                                               FuelType.diesel,
@@ -435,7 +433,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${decimal(e.diesel!, 3)} €',
+                                              euros(e.diesel!, 3),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,
@@ -445,7 +443,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         ),
                                       if (e.dieselPremium != null)
                                         Tooltip(
-                                          message: 'Diésel Premium',
+                                          message:
+                                              context.l10n.fuelDieselPremium,
                                           child: Chip(
                                             backgroundColor: FuelColors.of(
                                               FuelType.dieselPremium,
@@ -464,7 +463,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                               ),
                                             ),
                                             label: Text(
-                                              '${decimal(e.dieselPremium!, 3)} €',
+                                              euros(e.dieselPremium!, 3),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 13,

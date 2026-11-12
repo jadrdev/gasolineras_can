@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 import 'package:gasolineras_can/features/auth/vehicle_profile_card.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 
@@ -11,6 +12,9 @@ void main() {
       double? savedLiters;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('es'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: VehiclePreferencesForm(
               initialFuel: FuelType.g95,
@@ -45,6 +49,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: VehiclePreferencesForm(
             initialFuel: FuelType.g95,
@@ -72,6 +79,9 @@ void main() {
     var saves = 0;
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: VehiclePreferencesForm(
             initialFuel: FuelType.g95,

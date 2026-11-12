@@ -1,5 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 
+import '../l10n/l10n.dart';
+
 class LocationPermissionException implements Exception {
   final String message;
   LocationPermissionException(this.message);
@@ -12,20 +14,20 @@ class LocationPermissionException implements Exception {
 class _LocationCache {
   Position? position;
   DateTime? timestamp;
-  
+
   bool isValid() {
     if (position == null || timestamp == null) return false;
-    
+
     // Cache válido solo si tiene menos de 2 minutos
     final age = DateTime.now().difference(timestamp!);
     return age.inMinutes < 2;
   }
-  
+
   void update(Position pos) {
     position = pos;
     timestamp = DateTime.now();
   }
-  
+
   void clear() {
     position = null;
     timestamp = null;
@@ -54,7 +56,7 @@ Future<Position> determinePosition({bool forceRefresh = false}) async {
     if (_locationCache.position != null) {
       return _locationCache.position!;
     }
-    throw LocationPermissionException("Los servicios de ubicación están desactivados. Por favor, activa el GPS en tu dispositivo.");
+    throw LocationPermissionException(l10nSistema.locationServicesOff);
   }
 
   permission = await Geolocator.checkPermission();
@@ -65,18 +67,16 @@ Future<Position> determinePosition({bool forceRefresh = false}) async {
       if (_locationCache.position != null) {
         return _locationCache.position!;
       }
-      throw LocationPermissionException("Permiso de ubicación denegado. Por favor, permite el acceso a la ubicación para continuar.");
+      throw LocationPermissionException(l10nSistema.locationDenied);
     }
   }
-  
+
   if (permission == LocationPermission.deniedForever) {
     // Si hay caché, devolverlo aunque esté expirado
     if (_locationCache.position != null) {
       return _locationCache.position!;
     }
-    throw LocationPermissionException(
-      "Permiso de ubicación denegado permanentemente. Ve a configuración y permite el acceso a la ubicación para esta aplicación.",
-    );
+    throw LocationPermissionException(l10nSistema.locationDeniedForever);
   }
 
   try {
@@ -86,7 +86,7 @@ Future<Position> determinePosition({bool forceRefresh = false}) async {
         timeLimit: Duration(seconds: 15),
       ),
     );
-    
+
     // Actualizar caché con la nueva posición
     _locationCache.update(position);
     return position;
@@ -95,7 +95,7 @@ Future<Position> determinePosition({bool forceRefresh = false}) async {
     if (_locationCache.position != null) {
       return _locationCache.position!;
     }
-    throw LocationPermissionException("Error al obtener la ubicación: ${e.toString()}");
+    throw LocationPermissionException(l10nSistema.locationError(e.toString()));
   }
 }
 
@@ -108,7 +108,7 @@ void _updateCacheInBackground() async {
         timeLimit: Duration(seconds: 10),
       ),
     );
-    
+
     // Solo actualizar si el usuario se ha movido significativamente (>500m)
     if (_locationCache.position != null) {
       final distance = Geolocator.distanceBetween(
@@ -117,7 +117,7 @@ void _updateCacheInBackground() async {
         position.latitude,
         position.longitude,
       );
-      
+
       // Si se movió más de 500m, actualizar caché
       if (distance > 500) {
         _locationCache.update(position);

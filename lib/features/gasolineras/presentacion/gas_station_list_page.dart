@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config.dart';
 import '../../../core/directions_service.dart';
 import '../../../core/location.dart';
+import '../../../l10n/l10n.dart';
 import '../../auth/user_profile_repository.dart';
 import '../../favoritos/data.dart';
 import '../../favoritos/presentacion.dart';
@@ -210,13 +212,14 @@ class _GasStationListPageState extends State<GasStationListPage> {
               (a, b) =>
                   normalizeStationText(a).compareTo(normalizeStationText(b)),
             );
+      final l10n = context.l10n;
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Gasolineras'),
+          title: Text(l10n.stationListTitle),
           actions: [
             if (_position == null)
               IconButton(
-                tooltip: 'Usar mi ubicación',
+                tooltip: l10n.stationUseMyLocation,
                 onPressed: _locating
                     ? null
                     : () =>
@@ -224,7 +227,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
                 icon: const Icon(Icons.my_location),
               ),
             IconButton(
-              tooltip: 'Actualizar precios',
+              tooltip: l10n.stationRefreshPrices,
               onPressed: state is GasStationLoading ? null : _refresh,
               icon: const Icon(Icons.refresh),
             ),
@@ -256,20 +259,20 @@ class _GasStationListPageState extends State<GasStationListPage> {
                         selectedItemBuilder: (_) => [
                           _zoneLabel(
                             _position == null || _query.trim().isNotEmpty
-                                ? 'Toda Canarias'
-                                : 'Cerca de mí · 16 km',
+                                ? l10n.stationZoneAll
+                                : l10n.stationZoneNearby,
                           ),
-                          _zoneLabel('Toda Canarias'),
+                          _zoneLabel(l10n.stationZoneAll),
                           ...municipalities.map(_zoneLabel),
                         ],
                         items: [
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: 'nearby',
-                            child: Text('Cerca de mí · 16 km'),
+                            child: Text(l10n.stationZoneNearby),
                           ),
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: 'all',
-                            child: Text('Toda Canarias'),
+                            child: Text(l10n.stationZoneAll),
                           ),
                           ...municipalities.map(
                             (m) => DropdownMenuItem(
@@ -292,13 +295,13 @@ class _GasStationListPageState extends State<GasStationListPage> {
                   ),
                   const SizedBox(width: 8),
                   PopupMenuButton<FuelType>(
-                    tooltip: 'Combustible: ${_fuel.displayName}',
+                    tooltip: l10n.stationFuelTooltip(_fuel.label(l10n)),
                     initialValue: _fuel,
                     itemBuilder: (_) => FuelType.values
                         .map(
                           (fuel) => PopupMenuItem(
                             value: fuel,
-                            child: Text(fuel.displayName),
+                            child: Text(fuel.label(l10n)),
                           ),
                         )
                         .toList(),
@@ -324,18 +327,18 @@ class _GasStationListPageState extends State<GasStationListPage> {
                     ),
                   ),
                   PopupMenuButton<SortBy>(
-                    tooltip: 'Ordenar resultados',
+                    tooltip: l10n.stationSortTooltip,
                     initialValue: _sort,
                     icon: const Icon(Icons.sort),
                     itemBuilder: (_) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: SortBy.precio,
-                        child: Text('Por precio'),
+                        child: Text(l10n.stationSortByPrice),
                       ),
                       PopupMenuItem(
                         value: SortBy.distancia,
                         enabled: _position != null,
-                        child: const Text('Por distancia en línea recta'),
+                        child: Text(l10n.stationSortByDistance),
                       ),
                     ],
                     onSelected: (sort) {
@@ -352,7 +355,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Búsqueda por texto en toda Canarias',
+                    l10n.stationTextSearchAllIslands,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -361,7 +364,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  'No se pudieron actualizar los precios. Mostrando datos guardados del ${_date(state.fetchedAt)}.',
+                  l10n.stationOfflineNotice(_date(l10n, state.fetchedAt)),
                 ),
               ),
             if (state is GasStationLoaded)
@@ -377,7 +380,9 @@ class _GasStationListPageState extends State<GasStationListPage> {
                   runSpacing: 4,
                   children: [
                     Text(
-                      '${filtered.length} gasolineras · por ${_sort == SortBy.precio ? 'precio' : 'distancia'}',
+                      _sort == SortBy.precio
+                          ? l10n.stationCountByPrice(filtered.length)
+                          : l10n.stationCountByDistance(filtered.length),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     SegmentedButton<bool>(
@@ -385,14 +390,14 @@ class _GasStationListPageState extends State<GasStationListPage> {
                       segments: [
                         ButtonSegment(
                           value: false,
-                          label: const Text('Lista'),
+                          label: Text(l10n.stationViewList),
                           icon: MediaQuery.textScalerOf(context).scale(14) > 18
                               ? null
                               : const Icon(Icons.view_list_outlined),
                         ),
                         ButtonSegment(
                           value: true,
-                          label: const Text('Mapa'),
+                          label: Text(l10n.stationViewMap),
                           icon: MediaQuery.textScalerOf(context).scale(14) > 18
                               ? null
                               : const Icon(Icons.map_outlined),
@@ -431,21 +436,15 @@ class _GasStationListPageState extends State<GasStationListPage> {
                                 child: Column(
                                   children: [
                                     const Icon(Icons.search_off, size: 40),
-                                    const Text(
-                                      'No se han encontrado gasolineras',
-                                    ),
-                                    const Text(
-                                      'Prueba con parte del nombre, otra marca o un municipio.',
-                                    ),
+                                    Text(l10n.stationNoResults),
+                                    Text(l10n.stationNoResultsHint),
                                     TextButton(
                                       onPressed: () => setState(() {
                                         _zone = 'all';
                                         _query = '';
                                         _search.clear();
                                       }),
-                                      child: const Text(
-                                        'Borrar búsqueda y ver toda Canarias',
-                                      ),
+                                      child: Text(l10n.stationClearSearchAll),
                                     ),
                                   ],
                                 ),
@@ -467,7 +466,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
                             Center(
                               child: FilledButton(
                                 onPressed: _refresh,
-                                child: const Text('Reintentar'),
+                                child: Text(l10n.stationRetry),
                               ),
                             ),
                           ] else
@@ -487,11 +486,17 @@ class _GasStationListPageState extends State<GasStationListPage> {
     child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
   );
 
-  static String _date(DateTime? date) => date == null
-      ? 'fecha desconocida'
-      : '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  /// Fecha y hora con el formato del idioma: «10/11/2026 14:14» en español,
+  /// «10.11.2026 14:14» en alemán. En inglés se usa el formato británico
+  /// (día/mes) y no el de Estados Unidos.
+  static String _date(AppLocalizations l10n, DateTime? date) {
+    if (date == null) return l10n.stationUnknownDate;
+    final locale = l10n.localeName == 'en' ? 'en_GB' : l10n.localeName;
+    return DateFormat.yMd(locale).add_Hm().format(date);
+  }
 
   Widget _stationCard(GasStation station) {
+    final l10n = context.l10n;
     final price = station.priceFor(_fuel);
     final stale =
         station.lastUpdate == null ||
@@ -561,9 +566,13 @@ class _GasStationListPageState extends State<GasStationListPage> {
               ),
               const SizedBox(height: 8),
               if (station.distancia != null)
-                Text('${decimal(station.distancia!, 1)} km en línea recta'),
+                Text(
+                  l10n.stationStraightLineKm(decimal(station.distancia!, 1)),
+                ),
               Text(
-                '${stale ? 'Precio sin actualización reciente · ' : 'Actualizado · '}${_date(station.lastUpdate)}',
+                stale
+                    ? l10n.stationStalePriceAt(_date(l10n, station.lastUpdate))
+                    : l10n.stationUpdatedAt(_date(l10n, station.lastUpdate)),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: stale ? Theme.of(context).colorScheme.error : null,
                 ),

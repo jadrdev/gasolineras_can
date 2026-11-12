@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gasolineras_can/features/guide/guide_page.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -75,17 +76,21 @@ class _HomeScreenState extends State<HomeScreen> {
       ProfilePage(key: ValueKey('profile-${user?.id}')),
     ];
 
+    // Los títulos van traducidos; en iOS la barra nativa los recibe de aquí.
     final items = <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.local_gas_station),
-        label: 'Gasolineras',
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.local_gas_station),
+        label: context.l10n.navStations,
       ),
       if (isLoggedIn)
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.star),
-          label: 'Favoritos',
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.star),
+          label: context.l10n.navFavorites,
         ),
-      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.person),
+        label: context.l10n.navProfile,
+      ),
     ];
 
     // Índice real dentro de pages. Si no está logueado, la barra oculta

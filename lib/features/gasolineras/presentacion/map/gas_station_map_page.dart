@@ -8,6 +8,7 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/details/gas_station_details.dart';
+import 'package:gasolineras_can/l10n/l10n.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_launcher/map_launcher.dart';
 
@@ -113,6 +114,9 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
   }
 
   Future<Set<Marker>> _buildMarkers(List<GasStation> stations) async {
+    // Se lee antes de cualquier await: _markers se crea en el primer build.
+    final l10n = context.l10n;
+    final fuelName = widget.preferredFuel.label(l10n);
     final favoriteRepository = FavoriteRepository();
     final markers = <Marker>{};
 
@@ -133,8 +137,9 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
           icon: icon,
           infoWindow: InfoWindow(
             title: station.nombre,
-            snippet:
-                '${widget.preferredFuel.displayName}: ${price == null ? 'sin precio' : '${decimal(price, 3)} €/L'}',
+            snippet: price == null
+                ? l10n.stationFuelNoPrice(fuelName)
+                : l10n.stationFuelPrice(fuelName, decimal(price, 3)),
           ),
           onTap: () => _showStationBottomSheet(station, favoriteRepository),
         ),
@@ -154,6 +159,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
+        final l10n = context.l10n;
         final price = station.priceFor(widget.preferredFuel);
         return SafeArea(
           child: Padding(
@@ -189,7 +195,10 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${widget.preferredFuel.displayName}: ${decimal(price, 3)} €/L',
+                      l10n.stationFuelPrice(
+                        widget.preferredFuel.label(l10n),
+                        decimal(price, 3),
+                      ),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -205,7 +214,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                         onPressed: () =>
                             _openStationDetail(station, favoriteRepository),
                         icon: const Icon(Icons.info_outline),
-                        label: const Text('Ver detalle'),
+                        label: Text(l10n.stationViewDetail),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -213,7 +222,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
                       child: FilledButton.icon(
                         onPressed: () => _launchDirections(station),
                         icon: const Icon(Icons.directions),
-                        label: const Text('Cómo llegar'),
+                        label: Text(l10n.stationDirections),
                       ),
                     ),
                   ],
@@ -251,9 +260,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
       if (availableMaps.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No hay aplicaciones de mapas instaladas'),
-          ),
+          SnackBar(content: Text(context.l10n.stationNoMapsInstalled)),
         );
         return;
       }
@@ -273,11 +280,14 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Selecciona una app de mapas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  context.l10n.stationChooseMapApp,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ...availableMaps.map(
@@ -304,9 +314,9 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al abrir el mapa: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.stationMapOpenError('$e'))),
+      );
     }
   }
 
@@ -344,26 +354,22 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text('Mapa · ${widget.stations.length} gasolineras'),
+      title: Text(context.l10n.stationMapTitle(widget.stations.length)),
       actions: [
         TextButton.icon(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.view_list_outlined),
-          label: const Text('Lista'),
+          label: Text(context.l10n.stationViewList),
         ),
       ],
     ),
     body: widget.stations.isEmpty
-        ? const Center(child: Text('No hay gasolineras para mostrar.'))
+        ? Center(child: Text(context.l10n.stationNoStationsToShow))
         : FutureBuilder<Set<Marker>>(
             future: _markers,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(
-                  child: Text(
-                    'No se pudo cargar el mapa. Vuelve a la lista e inténtalo de nuevo.',
-                  ),
-                );
+                return Center(child: Text(context.l10n.stationMapLoadError));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -412,7 +418,7 @@ class _GasStationMapPageState extends State<GasStationMapPage> {
     floatingActionButton: widget.stations.isEmpty
         ? null
         : FloatingActionButton.small(
-            tooltip: 'Ver todos los resultados',
+            tooltip: context.l10n.stationShowAllResults,
             onPressed: _fitResults,
             child: const Icon(Icons.zoom_out_map),
           ),

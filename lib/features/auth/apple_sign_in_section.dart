@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'auth_bloc.dart';
+import '../../l10n/l10n.dart';
 
 /// «o» + botón oficial «Iniciar sesión con Apple». Solo en iOS: en Android
 /// haría falta el flujo web de Apple, que no está configurado.
@@ -27,7 +28,7 @@ class AppleSignInSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'o',
+                context.l10n.authO,
                 style: TextStyle(color: scheme.onSurfaceVariant),
               ),
             ),
@@ -40,7 +41,7 @@ class AppleSignInSection extends StatelessWidget {
           child: Opacity(
             opacity: enabled ? 1 : 0.5,
             child: SignInWithAppleButton(
-              text: 'Iniciar sesión con Apple',
+              text: context.l10n.authIniciarSesionApple,
               height: 52,
               borderRadius: const BorderRadius.all(Radius.circular(12)),
               // Guía de Apple: botón blanco sobre fondo oscuro y negro sobre claro.
