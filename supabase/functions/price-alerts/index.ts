@@ -23,11 +23,36 @@ const PRECIOIL_DETALLES = "https://api.precioil.es/estaciones/detalles/";
 const CONCURRENCY = 5;
 
 // Combustible de la app (users.preferred_fuel) -> campo de precioil.es.
-const FUELS: Record<string, { field: string; label: string }> = {
-  g95: { field: "Gasolina95", label: "Gasolina 95" },
-  g98: { field: "Gasolina98", label: "Gasolina 98" },
-  diesel: { field: "Diesel", label: "Diésel" },
-  dieselPremium: { field: "DieselPremium", label: "Diésel Premium" },
+const FUELS: Record<string, { field: string }> = {
+  g95: { field: "Gasolina95" },
+  g98: { field: "Gasolina98" },
+  diesel: { field: "Diesel" },
+  dieselPremium: { field: "DieselPremium" },
+};
+
+// Textos del aviso en cada idioma de la app (push_tokens.locale). Los nombres
+// de combustible son los mismos que en la app (lib/l10n/app_*.arb).
+type Locale = "es" | "en" | "de";
+const TEXTS: Record<Locale, {
+  title: string;
+  fuels: Record<string, string>;
+  body: (where: string, fuel: string, now: string, drop: string) => string;
+}> = {
+  es: {
+    title: "⛽ ¡Bajó el precio!",
+    fuels: { g95: "Gasolina 95", g98: "Gasolina 98", diesel: "Diésel", dieselPremium: "Diésel Premium" },
+    body: (where, fuel, now, drop) => `${where}: ${fuel} a ${now} €/L (bajó ${drop} €)`,
+  },
+  en: {
+    title: "⛽ Price drop!",
+    fuels: { g95: "Unleaded 95", g98: "Super Unleaded 98", diesel: "Diesel", dieselPremium: "Premium Diesel" },
+    body: (where, fuel, now, drop) => `${where}: ${fuel} now ${now} €/L (down €${drop})`,
+  },
+  de: {
+    title: "⛽ Preis gesunken!",
+    fuels: { g95: "Super 95", g98: "Super Plus 98", diesel: "Diesel", dieselPremium: "Premium-Diesel" },
+    body: (where, fuel, now, drop) => `${where}: ${fuel} jetzt ${now} €/L (${drop} € günstiger)`,
+  },
 };
 
 // Por debajo de esto no se avisa (0,1 céntimos: redondeos).
@@ -189,15 +214,19 @@ async function buildNotifications(
   const [{ data: users, error: usersError }, { data: tokens, error: tokensError }] =
     await Promise.all([
       db.from("users").select("id, preferred_fuel").in("id", userIds),
-      db.from("push_tokens").select("token, user_id").in("user_id", userIds),
+      db.from("push_tokens").select("token, user_id, locale").in("user_id", userIds),
     ]);
   if (usersError) throw usersError;
   if (tokensError) throw tokensError;
 
   const fuelOf = new Map((users ?? []).map((u) => [u.id as string, (u.preferred_fuel as string) ?? "g95"]));
-  const tokensOf = new Map<string, string[]>();
+  const tokensOf = new Map<string, { token: string; locale: Locale }[]>();
   for (const t of tokens ?? []) {
-    tokensOf.set(t.user_id as string, [...(tokensOf.get(t.user_id as string) ?? []), t.token as string]);
+    const locale = ((t.locale as string) in TEXTS ? t.locale : "es") as Locale;
+    tokensOf.set(t.user_id as string, [
+      ...(tokensOf.get(t.user_id as string) ?? []),
+      { token: t.token as string, locale },
+    ]);
   }
   const dropOf = new Map(drops.map((d) => [`${d.station.id}:${d.fuel}`, d]));
 
@@ -209,11 +238,16 @@ async function buildNotifications(
     const drop = dropOf.get(`${f.station_id}:${fuel}`);
     if (!drop) continue;
     const where = drop.station.town ? `${drop.station.name} (${drop.station.town})` : drop.station.name;
-    const body =
-      `${where}: ${FUELS[fuel].label} a ${euros(drop.now)} €/L ` +
-      `(bajó ${euros(drop.before - drop.now)} €)`;
-    for (const token of tokensOf.get(userId) ?? []) {
-      out.push({ token, stationId: drop.station.id, title: "⛽ ¡Bajó el precio!", body });
+    // Cada dispositivo recibe el aviso en el idioma de su app.
+    for (const { token, locale } of tokensOf.get(userId) ?? []) {
+      const t = TEXTS[locale];
+      const body = t.body(
+        where,
+        t.fuels[fuel],
+        euros(drop.now, locale),
+        euros(drop.before - drop.now, locale),
+      );
+      out.push({ token, stationId: drop.station.id, title: t.title, body });
     }
   }
   return out;
@@ -311,8 +345,10 @@ function parsePrice(value: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-function euros(n: number) {
-  return n.toFixed(3).replace(".", ",");
+// Precio con tres decimales: coma en español y alemán, punto en inglés.
+function euros(n: number, locale: Locale = "es") {
+  const text = n.toFixed(3);
+  return locale === "en" ? text : text.replace(".", ",");
 }
 
 function titleCase(s: string) {

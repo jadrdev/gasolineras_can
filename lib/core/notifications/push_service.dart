@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../l10n/l10n.dart';
 import 'notification_service.dart';
 
 /// Notificaciones push de bajada de precio.
@@ -93,7 +94,12 @@ class PushService {
       }
       await _supabase.rpc(
         'register_push_token',
-        params: {'p_token': token, 'p_platform': _platform},
+        params: {
+          'p_token': token,
+          'p_platform': _platform,
+          // Idioma de la app: el servidor escribe los avisos en él.
+          'p_locale': l10nSistema.localeName,
+        },
       );
       debugPrint('🔔 Push: dispositivo registrado');
       return true;

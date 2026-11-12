@@ -1,18 +1,19 @@
 """Capturas de tienda con título y marco de móvil.
 
 Uso: python3 store/generar_capturas.py
-Lee las pantallas reales de store/pantallas/ (simulador iPhone 6,9") y genera:
-  store/marketing/app-store-6.9/  (1320x2868, iPhone 6,9")
-  store/marketing/app-store-6.3/  (1206x2622, iPhone 6,3")
-  store/marketing/google-play/    (1080x2160, máximo 2:1 que admite Play)
-  store/marketing/google-play-tablet/ (1080x1920, 9:16 para tablets de 7" y 10")
+Lee las pantallas reales del simulador (store/pantallas/ en español,
+store/pantallas-en/ y store/pantallas-de/) y genera, en cada idioma:
+  app-store-6.9/  (1320x2868, iPhone 6,9")
+  app-store-6.3/  (1206x2622, iPhone 6,3")
+  google-play/    (1080x2160, máximo 2:1 que admite Play) + grafico-destacado.png
+  google-play-tablet/ (1080x1920, 9:16 para tablets de 7" y 10")
+El español va en store/marketing/; inglés y alemán en store/marketing/en|de/.
 """
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 RAIZ = Path(__file__).resolve().parent
-PANTALLAS = RAIZ / "pantallas"
 ICONO = RAIZ.parent / "assets" / "icon" / "app_icon.png"
 SALIDA = RAIZ / "marketing"
 FUENTE = "/System/Library/Fonts/SFNS.ttf"
@@ -21,18 +22,65 @@ EMOJI = "/System/Library/Fonts/Apple Color Emoji.ttc"
 AZUL = (8, 123, 232)
 AZUL_OSCURO = (4, 70, 150)
 
-CAPTURAS = [
-    ("01-lista.png", "Encuentra la gasolina\nmás barata", "Precios de hoy, ordenados de menor a mayor", None),
-    ("03-mapa.png", "Todas las gasolineras\nde Canarias", "En el mapa, cerca de ti o en cualquier isla", None),
-    ("02-detalle.png", "Calcula cuánto pagas\ny cuánto ahorras", "Con los litros de tu depósito", None),
-    (
-        "01-lista.png",
-        "Te avisamos cuando\nbaje el precio",
-        "En tus gasolineras favoritas",
-        ("⛽ ¡Bajó el precio!", "E.S. Océano Santa Cruz (Santa Cruz de Tenerife): Gasolina 95 a 1,360 €/L (bajó 0,025 €)"),
-    ),
-    ("04-oscuro.png", "También en\nmodo oscuro", "Se adapta a tu iPhone", None),
-]
+# Por idioma: carpeta de pantallas, carpeta de salida, capturas (pantalla,
+# título, subtítulo, aviso) y textos del gráfico destacado de Play.
+# «iPhone» se cambia por la palabra de móvil en las capturas de Play.
+IDIOMAS = {
+    "es": {
+        "pantallas": RAIZ / "pantallas",
+        "salida": RAIZ / "marketing",
+        "movil": ("tu iPhone", "tu móvil"),
+        "capturas": [
+            ("01-lista.png", "Encuentra la gasolina\nmás barata", "Precios de hoy, ordenados de menor a mayor", None),
+            ("03-mapa.png", "Todas las gasolineras\nde Canarias", "En el mapa, cerca de ti o en cualquier isla", None),
+            ("02-detalle.png", "Calcula cuánto pagas\ny cuánto ahorras", "Con los litros de tu depósito", None),
+            (
+                "01-lista.png",
+                "Te avisamos cuando\nbaje el precio",
+                "En tus gasolineras favoritas",
+                ("⛽ ¡Bajó el precio!", "E.S. Océano Santa Cruz (Santa Cruz de Tenerife): Gasolina 95 a 1,360 €/L (bajó 0,025 €)"),
+            ),
+            ("04-oscuro.png", "También en\nmodo oscuro", "Se adapta a tu iPhone", None),
+        ],
+        "destacado": (("Gasolineras", "de Canarias"), "La gasolina más barata cerca de ti"),
+    },
+    "en": {
+        "pantallas": RAIZ / "pantallas-en",
+        "salida": RAIZ / "marketing" / "en",
+        "movil": ("your iPhone", "your phone"),
+        "capturas": [
+            ("01-lista.png", "Find the cheapest\npetrol near you", "Today's prices, cheapest first", None),
+            ("03-mapa.png", "Every petrol station\nin the Canaries", "On the map, near you or on any island", None),
+            ("02-detalle.png", "See what you pay\nand what you save", "Based on your tank size", None),
+            (
+                "01-lista.png",
+                "We'll tell you when\nprices drop",
+                "At your favourite stations",
+                ("⛽ Price drop!", "Canary Oil, S.L. (Las Palmas de Gran Canaria): Unleaded 95 now 1.330 €/L (down €0.025)", "now"),
+            ),
+            ("04-oscuro.png", "Dark mode\nincluded", "Follows your iPhone", None),
+        ],
+        "destacado": (("Canary Islands", "Fuel Prices"), "The cheapest petrol near you"),
+    },
+    "de": {
+        "pantallas": RAIZ / "pantallas-de",
+        "salida": RAIZ / "marketing" / "de",
+        "movil": ("deinem iPhone", "deinem Handy"),
+        "capturas": [
+            ("01-lista.png", "Günstig tanken\nin deiner Nähe", "Heutige Preise, die günstigsten zuerst", None),
+            ("03-mapa.png", "Alle Tankstellen\nder Kanaren", "Auf der Karte, in der Nähe oder auf jeder Insel", None),
+            ("02-detalle.png", "Sieh, was du zahlst\nund was du sparst", "Passend zu deinem Tank", None),
+            (
+                "01-lista.png",
+                "Wir melden uns, wenn\nder Preis sinkt",
+                "An deinen Lieblingstankstellen",
+                ("⛽ Preis gesunken!", "Canary Oil, S.L. (Las Palmas de Gran Canaria): Super 95 jetzt 1,330 €/L (0,025 € günstiger)", "jetzt"),
+            ),
+            ("04-oscuro.png", "Auch im\nDunkelmodus", "Passt sich deinem iPhone an", None),
+        ],
+        "destacado": (("Spritpreise", "Kanaren"), "Günstig tanken in deiner Nähe"),
+    },
+}
 
 SALIDAS = {
     "app-store-6.9": (1320, 2868),
@@ -113,7 +161,7 @@ def envolver(texto, f, ancho, draw):
     return lineas
 
 
-def notificacion(ancho, titulo, cuerpo):
+def notificacion(ancho, titulo, cuerpo, ahora="ahora"):
     """Banner de notificación de iOS (claro)."""
     pad = round(ancho * 0.045)
     icono_t = round(ancho * 0.095)
@@ -142,7 +190,6 @@ def notificacion(ancho, titulo, cuerpo):
         x += emoji.width + round(f_tit.size * 0.3)
         titulo = titulo[1:].strip()
     d.text((x, y), titulo, font=f_tit, fill=(0, 0, 0))
-    ahora = "ahora"
     d.text((ancho - pad - d.textlength(ahora, font=f_app), y + 4), ahora, font=f_app, fill=(130, 130, 136))
     y += f_tit.size + round(pad * 0.3)
     for linea in lineas:
@@ -151,7 +198,7 @@ def notificacion(ancho, titulo, cuerpo):
     return banner
 
 
-def componer(archivo, titulo, subtitulo, aviso, w, h):
+def componer(pantallas, archivo, titulo, subtitulo, aviso, w, h):
     lienzo = fondo(w, h)
     d = ImageDraw.Draw(lienzo)
     margen = round(w * 0.07)
@@ -168,7 +215,7 @@ def componer(archivo, titulo, subtitulo, aviso, w, h):
         d.text(((w - tw) / 2, y), linea, font=f_sub, fill=(220, 236, 255))
         y += round(f_sub.size * 1.3)
 
-    tel = movil(Image.open(PANTALLAS / archivo), round(w * 0.78))
+    tel = movil(Image.open(pantallas / archivo), round(w * 0.78))
     tx = (w - tel.width) // 2
     ty = y + round(h * 0.035)
     sm = sombra(tel, round(w * 0.02), round(w * 0.03))
@@ -184,8 +231,9 @@ def componer(archivo, titulo, subtitulo, aviso, w, h):
     return lienzo.convert("RGB")
 
 
-def grafico_destacado():
+def grafico_destacado(idioma):
     """Gráfico destacado de Google Play (1024x500)."""
+    nombre, lema = idioma["destacado"]
     w, h = 1024, 500
     lienzo = fondo(w, h)
     d = ImageDraw.Draw(lienzo)
@@ -198,33 +246,39 @@ def grafico_destacado():
     lienzo.alpha_composite(esquinas(icono, 27), (x, iy))
     y = iy + icono_t + 30
     f_nom = fuente(50, "Bold")
-    for linea in ("Gasolineras", "de Canarias"):
+    for linea in nombre:
         d.text((x, y), linea, font=f_nom, fill=(255, 255, 255))
         y += 58
     y += 14
-    d.text((x, y), "La gasolina más barata cerca de ti", font=fuente(26, "Medium"), fill=(220, 236, 255))
+    d.text((x, y), lema, font=fuente(26, "Medium"), fill=(220, 236, 255))
     # Móvil a la derecha, cortado por abajo.
-    tel = movil(Image.open(PANTALLAS / "01-lista.png"), 300)
+    tel = movil(Image.open(idioma["pantallas"] / "01-lista.png"), 300)
     tx, ty = w - tel.width - 70, 48
     lienzo.alpha_composite(sombra(tel, 8, 14), (tx - 28, ty - 28))
     lienzo.alpha_composite(tel, (tx, ty))
-    destino = SALIDA / "google-play" / "grafico-destacado.png"
+    destino = idioma["salida"] / "google-play" / "grafico-destacado.png"
+    destino.parent.mkdir(parents=True, exist_ok=True)
     lienzo.convert("RGB").save(destino, optimize=True)
     print(destino, (w, h))
 
 
 def main():
-    grafico_destacado()
-    for carpeta, (w, h) in SALIDAS.items():
-        destino = SALIDA / carpeta
-        destino.mkdir(parents=True, exist_ok=True)
-        for i, (archivo, titulo, subtitulo, aviso) in enumerate(CAPTURAS, 1):
-            if carpeta.startswith("google-play"):
-                subtitulo = subtitulo.replace("tu iPhone", "tu móvil")
-            img = componer(archivo, titulo, subtitulo, aviso, w, h)
-            nombre = f"{i:02d}-{Path(archivo).stem.split('-', 1)[1]}{'-aviso' if aviso else ''}.png"
-            img.save(destino / nombre, optimize=True)
-            print(destino / nombre, img.size)
+    for idioma in IDIOMAS.values():
+        grafico_destacado(idioma)
+        for carpeta, (w, h) in SALIDAS.items():
+            generar(idioma, carpeta, w, h)
+
+
+def generar(idioma, carpeta, w, h):
+    destino = idioma["salida"] / carpeta
+    destino.mkdir(parents=True, exist_ok=True)
+    for i, (archivo, titulo, subtitulo, aviso) in enumerate(idioma["capturas"], 1):
+        if carpeta.startswith("google-play"):
+            subtitulo = subtitulo.replace(*idioma["movil"])
+        img = componer(idioma["pantallas"], archivo, titulo, subtitulo, aviso, w, h)
+        nombre = f"{i:02d}-{Path(archivo).stem.split('-', 1)[1]}{'-aviso' if aviso else ''}.png"
+        img.save(destino / nombre, optimize=True)
+        print(destino / nombre, img.size)
 
 
 if __name__ == "__main__":
