@@ -714,4 +714,105 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tipIconError => 'The icon couldn\'t be changed.';
+
+  @override
+  String get evFuelLabel => '⚡ Electric';
+
+  @override
+  String evCountByPrice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count charging points · by price',
+      one: '1 charging point · by price',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evCountByDistance(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count charging points · by distance',
+      one: '1 charging point · by distance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evMapTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Map · $count charging points',
+      one: 'Map · 1 charging point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evFilterFast => 'Fast charging';
+
+  @override
+  String get evFree => 'Free';
+
+  @override
+  String get evNoPrice => 'Price not published';
+
+  @override
+  String get evPriceCommunity => 'Indicative price, provided by the community.';
+
+  @override
+  String evListedPrice(String text) {
+    return 'Listed price: $text';
+  }
+
+  @override
+  String evReviewedAt(String date) {
+    return 'Checked · $date';
+  }
+
+  @override
+  String get evOutOfService => 'Out of service';
+
+  @override
+  String get evAttribution =>
+      'Charging point data: Open Charge Map and contributors (CC BY 4.0).';
+
+  @override
+  String get evNoResults => 'No charging points match these filters.';
+
+  @override
+  String get evLoadError => 'Charging points couldn\'t be loaded.';
+
+  @override
+  String get evDetailTitle => 'Charging point';
+
+  @override
+  String get evConnectors => 'Connectors';
+
+  @override
+  String get evCalcTitle => 'Work out your charge';
+
+  @override
+  String get evCalcKwh => 'kWh to charge';
+
+  @override
+  String evCalcCost(String kwh) {
+    return 'Charging $kwh kWh would cost you:';
+  }
+
+  @override
+  String get evCalcNote =>
+      'Estimated from the price per kWh. Some operators also charge per minute or per session.';
+
+  @override
+  String get evConnType2 => 'Type 2';
+
+  @override
+  String get evConnType1 => 'Type 1';
+
+  @override
+  String get evConnOther => 'Other';
 }

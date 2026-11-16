@@ -722,4 +722,106 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tipIconError => 'No se ha podido cambiar el icono.';
+
+  @override
+  String get evFuelLabel => '⚡ Eléctrico';
+
+  @override
+  String evCountByPrice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count puntos de carga · por precio',
+      one: '1 punto de carga · por precio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evCountByDistance(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count puntos de carga · por distancia',
+      one: '1 punto de carga · por distancia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evMapTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mapa · $count puntos de carga',
+      one: 'Mapa · 1 punto de carga',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evFilterFast => 'Carga rápida';
+
+  @override
+  String get evFree => 'Gratis';
+
+  @override
+  String get evNoPrice => 'Precio sin publicar';
+
+  @override
+  String get evPriceCommunity =>
+      'Precio orientativo, aportado por la comunidad.';
+
+  @override
+  String evListedPrice(String text) {
+    return 'Precio indicado: $text';
+  }
+
+  @override
+  String evReviewedAt(String date) {
+    return 'Revisado · $date';
+  }
+
+  @override
+  String get evOutOfService => 'Fuera de servicio';
+
+  @override
+  String get evAttribution =>
+      'Datos de puntos de carga: Open Charge Map y sus colaboradores (CC BY 4.0).';
+
+  @override
+  String get evNoResults => 'No hay puntos de carga con estos filtros.';
+
+  @override
+  String get evLoadError => 'No se pudieron cargar los puntos de carga.';
+
+  @override
+  String get evDetailTitle => 'Punto de carga';
+
+  @override
+  String get evConnectors => 'Conectores';
+
+  @override
+  String get evCalcTitle => 'Calcula tu carga';
+
+  @override
+  String get evCalcKwh => 'kWh a cargar';
+
+  @override
+  String evCalcCost(String kwh) {
+    return 'Cargar $kwh kWh te costaría:';
+  }
+
+  @override
+  String get evCalcNote =>
+      'Estimado con el precio por kWh. Algunos operadores cobran también por tiempo o por conexión.';
+
+  @override
+  String get evConnType2 => 'Tipo 2';
+
+  @override
+  String get evConnType1 => 'Tipo 1';
+
+  @override
+  String get evConnOther => 'Otro';
 }

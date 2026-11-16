@@ -21,6 +21,7 @@ import '../models/gas_station.dart';
 import 'details/gas_station_details.dart';
 import 'map/gas_station_map_page.dart';
 import 'station_search_field.dart';
+import '../../recarga/charging_list_view.dart';
 
 enum SortBy { precio, distancia }
 
@@ -47,6 +48,9 @@ class _GasStationListPageState extends State<GasStationListPage> {
   StreamSubscription<void>? _profileSubscription;
   SortBy _sort = SortBy.precio;
   FuelType _fuel = FuelType.g95;
+  // «⚡ Eléctrico»: la lista pasa a ser de puntos de recarga.
+  bool _electric = false;
+  final _chargingKey = GlobalKey<ChargingListViewState>();
   double _tankLiters = 50;
   Position? _position;
   String _zone = 'nearby';
@@ -118,6 +122,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
         (v) => v.name == prefs.getString('sortBy'),
         orElse: () => SortBy.precio,
       );
+      _electric = fuel == 'electric';
       _fuel =
           profile?.preferredFuel ??
           FuelType.values.firstWhere(
@@ -130,12 +135,16 @@ class _GasStationListPageState extends State<GasStationListPage> {
 
   Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('fuelType', _fuel.name);
+    await prefs.setString('fuelType', _electric ? 'electric' : _fuel.name);
     await prefs.setString('sortBy', _sort.name);
   }
 
   Future<void> _refresh() async {
     unawaited(_locate(forceRefresh: true));
+    if (_electric) {
+      await _chargingKey.currentState?.refresh();
+      return;
+    }
     // Subscribe before dispatching and keep the refresh indicator until completion.
     final done = _bloc.stream.firstWhere(
       (s) => s is GasStationLoaded || s is GasStationError,
@@ -203,11 +212,13 @@ class _GasStationListPageState extends State<GasStationListPage> {
           : <GasStation>[];
       final filtered = _visibleStations(stations);
       final municipalities =
-          stations
-              .map((s) => s.municipio)
-              .where((s) => s.isNotEmpty)
-              .toSet()
-              .toList()
+          _electric
+                ? <String>[]
+                : stations
+                      .map((s) => s.municipio)
+                      .where((s) => s.isNotEmpty)
+                      .toSet()
+                      .toList()
             ..sort(
               (a, b) =>
                   normalizeStationText(a).compareTo(normalizeStationText(b)),
@@ -294,19 +305,33 @@ class _GasStationListPageState extends State<GasStationListPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  PopupMenuButton<FuelType>(
-                    tooltip: l10n.stationFuelTooltip(_fuel.label(l10n)),
-                    initialValue: _fuel,
-                    itemBuilder: (_) => FuelType.values
-                        .map(
-                          (fuel) => PopupMenuItem(
-                            value: fuel,
-                            child: Text(fuel.label(l10n)),
-                          ),
-                        )
-                        .toList(),
-                    onSelected: (fuel) {
-                      setState(() => _fuel = fuel);
+                  PopupMenuButton<String>(
+                    tooltip: l10n.stationFuelTooltip(
+                      _electric ? l10n.evFuelLabel : _fuel.label(l10n),
+                    ),
+                    initialValue: _electric ? 'electric' : _fuel.name,
+                    itemBuilder: (_) => [
+                      ...FuelType.values.map(
+                        (fuel) => PopupMenuItem(
+                          value: fuel.name,
+                          child: Text(fuel.label(l10n)),
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'electric',
+                        child: Text(l10n.evFuelLabel),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      setState(() {
+                        _electric = value == 'electric';
+                        if (_electric) {
+                          if (_zone.startsWith('municipio:')) _zone = 'all';
+                        } else {
+                          _fuel = FuelType.values.byName(value);
+                        }
+                      });
                       _savePreferences();
                     },
                     child: Padding(
@@ -318,7 +343,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _fuel.shortLabel,
+                            _electric ? '⚡' : _fuel.shortLabel,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           const Icon(Icons.arrow_drop_down),
@@ -360,14 +385,27 @@ class _GasStationListPageState extends State<GasStationListPage> {
                   ),
                 ),
               ),
-            if (state is GasStationLoaded && state.offline)
+            if (_electric)
+              Expanded(
+                child: ChargingListView(
+                  key: _chargingKey,
+                  position: _position,
+                  query: _query,
+                  nearby:
+                      _zone == 'nearby' &&
+                      _query.trim().isEmpty &&
+                      _position != null,
+                  sortByPrice: _sort == SortBy.precio,
+                ),
+              ),
+            if (!_electric && state is GasStationLoaded && state.offline)
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
                   l10n.stationOfflineNotice(_date(l10n, state.fetchedAt)),
                 ),
               ),
-            if (state is GasStationLoaded)
+            if (!_electric && state is GasStationLoaded)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -423,58 +461,59 @@ class _GasStationListPageState extends State<GasStationListPage> {
                   ],
                 ),
               ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _refresh,
-                child: state is GasStationLoaded
-                    ? ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: filtered.isEmpty ? 1 : filtered.length,
-                        itemBuilder: (context, index) => filtered.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  children: [
-                                    const Icon(Icons.search_off, size: 40),
-                                    Text(l10n.stationNoResults),
-                                    Text(l10n.stationNoResultsHint),
-                                    TextButton(
-                                      onPressed: () => setState(() {
-                                        _zone = 'all';
-                                        _query = '';
-                                        _search.clear();
-                                      }),
-                                      child: Text(l10n.stationClearSearchAll),
-                                    ),
-                                  ],
+            if (!_electric)
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: state is GasStationLoaded
+                      ? ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: filtered.isEmpty ? 1 : filtered.length,
+                          itemBuilder: (context, index) => filtered.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    children: [
+                                      const Icon(Icons.search_off, size: 40),
+                                      Text(l10n.stationNoResults),
+                                      Text(l10n.stationNoResultsHint),
+                                      TextButton(
+                                        onPressed: () => setState(() {
+                                          _zone = 'all';
+                                          _query = '';
+                                          _search.clear();
+                                        }),
+                                        child: Text(l10n.stationClearSearchAll),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : _stationCard(filtered[index]),
+                        )
+                      : ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            const SizedBox(height: 40),
+                            if (state is GasStationError) ...[
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  state.message,
+                                  textAlign: TextAlign.center,
                                 ),
-                              )
-                            : _stationCard(filtered[index]),
-                      )
-                    : ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          const SizedBox(height: 40),
-                          if (state is GasStationError) ...[
-                            Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Text(
-                                state.message,
-                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            Center(
-                              child: FilledButton(
-                                onPressed: _refresh,
-                                child: Text(l10n.stationRetry),
+                              Center(
+                                child: FilledButton(
+                                  onPressed: _refresh,
+                                  child: Text(l10n.stationRetry),
+                                ),
                               ),
-                            ),
-                          ] else
-                            const Center(child: CircularProgressIndicator()),
-                        ],
-                      ),
+                            ] else
+                              const Center(child: CircularProgressIndicator()),
+                          ],
+                        ),
+                ),
               ),
-            ),
           ],
         ),
       );

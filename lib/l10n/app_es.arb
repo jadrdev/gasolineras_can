@@ -390,5 +390,70 @@
   "tipIconNight": "Noche",
   "tipIconOrange": "Naranja",
   "tipIconCoffee": "Café",
-  "tipIconError": "No se ha podido cambiar el icono."
+  "tipIconError": "No se ha podido cambiar el icono.",
+  "evFuelLabel": "⚡ Eléctrico",
+  "evCountByPrice": "{count, plural, =1{1 punto de carga · por precio} other{{count} puntos de carga · por precio}}",
+  "@evCountByPrice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evCountByDistance": "{count, plural, =1{1 punto de carga · por distancia} other{{count} puntos de carga · por distancia}}",
+  "@evCountByDistance": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evMapTitle": "{count, plural, =1{Mapa · 1 punto de carga} other{Mapa · {count} puntos de carga}}",
+  "@evMapTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evFilterFast": "Carga rápida",
+  "evFree": "Gratis",
+  "evNoPrice": "Precio sin publicar",
+  "evPriceCommunity": "Precio orientativo, aportado por la comunidad.",
+  "evListedPrice": "Precio indicado: {text}",
+  "@evListedPrice": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "evReviewedAt": "Revisado · {date}",
+  "@evReviewedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "evOutOfService": "Fuera de servicio",
+  "evAttribution": "Datos de puntos de carga: Open Charge Map y sus colaboradores (CC BY 4.0).",
+  "evNoResults": "No hay puntos de carga con estos filtros.",
+  "evLoadError": "No se pudieron cargar los puntos de carga.",
+  "evDetailTitle": "Punto de carga",
+  "evConnectors": "Conectores",
+  "evCalcTitle": "Calcula tu carga",
+  "evCalcKwh": "kWh a cargar",
+  "evCalcCost": "Cargar {kwh} kWh te costaría:",
+  "@evCalcCost": {
+    "placeholders": {
+      "kwh": {
+        "type": "String"
+      }
+    }
+  },
+  "evCalcNote": "Estimado con el precio por kWh. Algunos operadores cobran también por tiempo o por conexión.",
+  "evConnType2": "Tipo 2",
+  "evConnType1": "Tipo 1",
+  "evConnOther": "Otro"
 }

@@ -1305,6 +1305,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se ha podido cambiar el icono.'**
   String get tipIconError;
+
+  /// No description provided for @evFuelLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'⚡ Eléctrico'**
+  String get evFuelLabel;
+
+  /// No description provided for @evCountByPrice.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 punto de carga · por precio} other{{count} puntos de carga · por precio}}'**
+  String evCountByPrice(int count);
+
+  /// No description provided for @evCountByDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 punto de carga · por distancia} other{{count} puntos de carga · por distancia}}'**
+  String evCountByDistance(int count);
+
+  /// No description provided for @evMapTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Mapa · 1 punto de carga} other{Mapa · {count} puntos de carga}}'**
+  String evMapTitle(int count);
+
+  /// No description provided for @evFilterFast.
+  ///
+  /// In es, this message translates to:
+  /// **'Carga rápida'**
+  String get evFilterFast;
+
+  /// No description provided for @evFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Gratis'**
+  String get evFree;
+
+  /// No description provided for @evNoPrice.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio sin publicar'**
+  String get evNoPrice;
+
+  /// No description provided for @evPriceCommunity.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio orientativo, aportado por la comunidad.'**
+  String get evPriceCommunity;
+
+  /// No description provided for @evListedPrice.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio indicado: {text}'**
+  String evListedPrice(String text);
+
+  /// No description provided for @evReviewedAt.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisado · {date}'**
+  String evReviewedAt(String date);
+
+  /// No description provided for @evOutOfService.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuera de servicio'**
+  String get evOutOfService;
+
+  /// No description provided for @evAttribution.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de puntos de carga: Open Charge Map y sus colaboradores (CC BY 4.0).'**
+  String get evAttribution;
+
+  /// No description provided for @evNoResults.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay puntos de carga con estos filtros.'**
+  String get evNoResults;
+
+  /// No description provided for @evLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar los puntos de carga.'**
+  String get evLoadError;
+
+  /// No description provided for @evDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto de carga'**
+  String get evDetailTitle;
+
+  /// No description provided for @evConnectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectores'**
+  String get evConnectors;
+
+  /// No description provided for @evCalcTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Calcula tu carga'**
+  String get evCalcTitle;
+
+  /// No description provided for @evCalcKwh.
+  ///
+  /// In es, this message translates to:
+  /// **'kWh a cargar'**
+  String get evCalcKwh;
+
+  /// No description provided for @evCalcCost.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar {kwh} kWh te costaría:'**
+  String evCalcCost(String kwh);
+
+  /// No description provided for @evCalcNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Estimado con el precio por kWh. Algunos operadores cobran también por tiempo o por conexión.'**
+  String get evCalcNote;
+
+  /// No description provided for @evConnType2.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo 2'**
+  String get evConnType2;
+
+  /// No description provided for @evConnType1.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo 1'**
+  String get evConnType1;
+
+  /// No description provided for @evConnOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get evConnOther;
 }
 
 class _AppLocalizationsDelegate
