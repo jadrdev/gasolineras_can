@@ -1183,7 +1183,7 @@ abstract class AppLocalizations {
   /// No description provided for @tipSheetBody.
   ///
   /// In es, this message translates to:
-  /// **'Es un pago único y voluntario. No desbloquea nada: solo ayuda a mantener la app y los avisos de precio.'**
+  /// **'Es un pago único y voluntario. Como agradecimiento, podrás cambiar el icono de la app y tendrás la insignia de colaborador.'**
   String get tipSheetBody;
 
   /// No description provided for @tipCoffee.
@@ -1213,7 +1213,7 @@ abstract class AppLocalizations {
   /// No description provided for @tipThanksBody.
   ///
   /// In es, this message translates to:
-  /// **'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios.'**
+  /// **'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios. Ya puedes cambiar el icono de la app.'**
   String get tipThanksBody;
 
   /// No description provided for @tipClose.
@@ -1239,6 +1239,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Las propinas no están disponibles ahora mismo. Inténtalo más tarde.'**
   String get tipUnavailable;
+
+  /// No description provided for @tipCardTitleThanks.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Gracias por tu café!'**
+  String get tipCardTitleThanks;
+
+  /// No description provided for @tipCardSubtitleThanks.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambia el icono de la app o invita a otro café.'**
+  String get tipCardSubtitleThanks;
+
+  /// No description provided for @tipBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Colaborador'**
+  String get tipBadge;
+
+  /// No description provided for @tipIconsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Icono de la app'**
+  String get tipIconsTitle;
+
+  /// No description provided for @tipIconsLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Con cualquier propina podrás elegir otro icono.'**
+  String get tipIconsLocked;
+
+  /// No description provided for @tipLoginHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para conservarlo si cambias de móvil.'**
+  String get tipLoginHint;
+
+  /// No description provided for @tipIconOriginal.
+  ///
+  /// In es, this message translates to:
+  /// **'Original'**
+  String get tipIconOriginal;
+
+  /// No description provided for @tipIconNight.
+  ///
+  /// In es, this message translates to:
+  /// **'Noche'**
+  String get tipIconNight;
+
+  /// No description provided for @tipIconOrange.
+  ///
+  /// In es, this message translates to:
+  /// **'Naranja'**
+  String get tipIconOrange;
+
+  /// No description provided for @tipIconCoffee.
+  ///
+  /// In es, this message translates to:
+  /// **'Café'**
+  String get tipIconCoffee;
+
+  /// No description provided for @tipIconError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido cambiar el icono.'**
+  String get tipIconError;
 }
 
 class _AppLocalizationsDelegate

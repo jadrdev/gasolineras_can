@@ -3,13 +3,15 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import 'colaborador.dart';
+
 /// Resultado de una propina, para que la hoja muestre el agradecimiento o el
 /// aviso que toque.
 enum ResultadoPropina { gracias, pendiente, cancelada, error }
 
 /// «Invítame a un café»: propinas de pago único con el sistema de compras de
-/// Apple y Google. Son productos consumibles (se pueden repetir) y no
-/// desbloquean nada, así que no hace falta guardarlas en el servidor.
+/// Apple y Google. Son productos consumibles (se pueden repetir); como
+/// agradecimiento, quien da una pasa a ser [Colaborador] (insignia e iconos).
 ///
 /// Los productos se crean en App Store Connect y Play Console con estos
 /// identificadores (ver store/propinas.md).
@@ -64,6 +66,7 @@ class Propinas {
       switch (compra.status) {
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
+          unawaited(Colaborador.marcar());
           _resultados.add(ResultadoPropina.gracias);
         case PurchaseStatus.pending:
           _resultados.add(ResultadoPropina.pendiente);

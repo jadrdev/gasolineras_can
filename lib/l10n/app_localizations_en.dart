@@ -648,7 +648,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tipSheetBody =>
-      'It\'s a one-off, voluntary payment. It doesn\'t unlock anything: it just helps keep the app and price alerts running.';
+      'It\'s a one-off, voluntary payment. As a thank-you, you can change the app icon and get the supporter badge.';
 
   @override
   String get tipCoffee => 'A coffee';
@@ -664,7 +664,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tipThanksBody =>
-      'Your support helps keep GasoCan free and ad-free.';
+      'Your support helps keep GasoCan free and ad-free. You can now change the app icon.';
 
   @override
   String get tipClose => 'Close';
@@ -680,4 +680,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tipUnavailable =>
       'Tips aren\'t available right now. Please try again later.';
+
+  @override
+  String get tipCardTitleThanks => 'Thanks for the coffee!';
+
+  @override
+  String get tipCardSubtitleThanks =>
+      'Change the app icon or buy another coffee.';
+
+  @override
+  String get tipBadge => 'Supporter';
+
+  @override
+  String get tipIconsTitle => 'App icon';
+
+  @override
+  String get tipIconsLocked => 'Any tip lets you choose another icon.';
+
+  @override
+  String get tipLoginHint => 'Sign in to keep it if you change phones.';
+
+  @override
+  String get tipIconOriginal => 'Original';
+
+  @override
+  String get tipIconNight => 'Night';
+
+  @override
+  String get tipIconOrange => 'Orange';
+
+  @override
+  String get tipIconCoffee => 'Coffee';
+
+  @override
+  String get tipIconError => 'The icon couldn\'t be changed.';
 }

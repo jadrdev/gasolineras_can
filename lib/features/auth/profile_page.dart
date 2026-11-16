@@ -126,6 +126,7 @@ class ProfilePage extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
+                    const InsigniaColaborador(),
                   ],
                 ),
               ),

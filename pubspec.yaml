@@ -80,3 +80,4 @@ flutter:
     enable-swift-package-manager: false
   assets:
     - .env
+    - assets/icon/alternativos/

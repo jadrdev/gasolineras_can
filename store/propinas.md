@@ -1,6 +1,11 @@
 # «Invítame a un café»: propinas en la app
 
-Tarjeta en el perfil (con y sin sesión) que abre una hoja con tres propinas de pago único. Son productos **consumibles**: se pueden repetir y no desbloquean nada. Código en `lib/features/propinas/`.
+Tarjeta en el perfil (con y sin sesión) que abre una hoja con tres propinas de pago único. Son productos **consumibles**: se pueden repetir. Código en `lib/features/propinas/`.
+
+**Agradecimiento:** cualquier propina convierte al usuario en *colaborador*: insignia «☕ Colaborador» en el perfil y puede cambiar el **icono de la app** (Original, Noche, Naranja, Café). Se guarda en el móvil y, con sesión, en `users.colaborador` (`supabase/colaborador.sql`, hay que aplicarlo antes de publicar la 1.0.7).
+
+- Iconos: `assets/icon/alternativos/` (vista previa), `ios/Runner/Assets.xcassets/AppIcon-{Noche,Naranja,Cafe}` (build setting `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`) y en Android `mipmap-*/ic_launcher_{noche,naranja,cafe}` con un `activity-alias` por icono en el manifiesto (`MainActivity.cambiarIcono`).
+- En iOS el sistema avisa «Has cambiado el icono para GasoCan». En Android el lanzador puede tardar unos segundos en actualizarlo.
 
 | ID de producto | Nombre (es / en / de) | Precio |
 |---|---|---|
@@ -19,7 +24,7 @@ Los ID tienen que ser **exactamente** estos en las dos tiendas. Mientras no exis
 
 1. Apps → Gasolineras de Canarias → **Monetización → Compras dentro de la app** → «+» → **Consumible**.
 2. Para cada fila de la tabla: nombre de referencia (p. ej. «Propina café»), ID de producto, precio (España y resto en automático) y localizaciones en español, inglés (Reino Unido) y alemán con el nombre de la tabla y una descripción corta («Invita a un café al desarrollador»).
-3. **Información para la revisión:** una captura de la hoja de propinas (1206×2622 vale) y la nota «Voluntary tip. It doesn't unlock any content or feature.»
+3. **Información para la revisión:** una captura de la hoja de propinas (1206×2622 vale) y la nota «Voluntary tip. As a thank-you it unlocks alternative app icons and a supporter badge; no features are locked.»
 4. La **primera** compra dentro de la app se envía **junto con una versión** (la 1.0.7): en la página de la versión, sección «Compras dentro de la app y suscripciones», se añaden las tres.
 
 ## Google Play Console

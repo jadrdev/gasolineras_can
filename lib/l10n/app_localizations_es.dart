@@ -654,7 +654,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tipSheetBody =>
-      'Es un pago único y voluntario. No desbloquea nada: solo ayuda a mantener la app y los avisos de precio.';
+      'Es un pago único y voluntario. Como agradecimiento, podrás cambiar el icono de la app y tendrás la insignia de colaborador.';
 
   @override
   String get tipCoffee => 'Un café';
@@ -670,7 +670,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tipThanksBody =>
-      'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios.';
+      'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios. Ya puedes cambiar el icono de la app.';
 
   @override
   String get tipClose => 'Cerrar';
@@ -686,4 +686,40 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tipUnavailable =>
       'Las propinas no están disponibles ahora mismo. Inténtalo más tarde.';
+
+  @override
+  String get tipCardTitleThanks => '¡Gracias por tu café!';
+
+  @override
+  String get tipCardSubtitleThanks =>
+      'Cambia el icono de la app o invita a otro café.';
+
+  @override
+  String get tipBadge => 'Colaborador';
+
+  @override
+  String get tipIconsTitle => 'Icono de la app';
+
+  @override
+  String get tipIconsLocked =>
+      'Con cualquier propina podrás elegir otro icono.';
+
+  @override
+  String get tipLoginHint =>
+      'Inicia sesión para conservarlo si cambias de móvil.';
+
+  @override
+  String get tipIconOriginal => 'Original';
+
+  @override
+  String get tipIconNight => 'Noche';
+
+  @override
+  String get tipIconOrange => 'Naranja';
+
+  @override
+  String get tipIconCoffee => 'Café';
+
+  @override
+  String get tipIconError => 'No se ha podido cambiar el icono.';
 }

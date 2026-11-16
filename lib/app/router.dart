@@ -24,7 +24,6 @@ class GoRouterRefreshStream extends ChangeNotifier {
   }
 }
 
-
 GoRouter createRouter(AuthBloc authBloc) {
   return GoRouter(
     initialLocation: '/home',
@@ -58,15 +57,11 @@ GoRouter createRouter(AuthBloc authBloc) {
               FadeTransition(opacity: animation, child: child),
         ),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeScreen(),
-      ),
+      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
       GoRoute(
         path: '/guide',
-        builder: (context, state) => GuidePage(
-          firstLaunch: state.uri.queryParameters['first'] == '1',
-        ),
+        builder: (context, state) =>
+            GuidePage(firstLaunch: state.uri.queryParameters['first'] == '1'),
       ),
     ],
   );

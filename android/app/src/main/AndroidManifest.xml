@@ -32,11 +32,54 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+        </activity>
+        <!-- Iconos de la app: el lanzador abre MainActivity a través de uno de
+             estos alias. Solo uno está activo; la app los cambia como regalo de
+             «Invítame a un café» (MainActivity.cambiarIcono). -->
+        <activity-alias
+            android:name=".IconoOriginal"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconoNoche"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_noche"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconoNaranja"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_naranja"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconoCafe"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_cafe"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <!-- Push (FCM): icono blanco para la barra y canal de las alertas de

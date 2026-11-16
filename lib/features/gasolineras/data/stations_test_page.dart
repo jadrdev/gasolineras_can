@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gasolineras_can/features/gasolineras/data/gas_station_repository.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';
 
-
 class StationsTestPage extends StatelessWidget {
   const StationsTestPage({super.key});
 
@@ -13,7 +12,7 @@ class StationsTestPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Prueba estaciones")),
       body: FutureBuilder<List<GasStation>>(
-  future: repo.fetchStations(28.463629, -16.251846),
+        future: repo.fetchStations(28.463629, -16.251846),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -37,7 +36,7 @@ class StationsTestPage extends StatelessWidget {
             },
           );
         },
-      )
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'core/notifications/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
+import 'features/propinas/colaborador.dart';
 import 'features/propinas/propinas_service.dart';
 import 'firebase_options.dart';
 import 'core/format.dart';
@@ -36,6 +37,7 @@ Future<void> main() async {
   unawaited(PushService.init());
   // Cierra las propinas que se quedaran a medias y escucha las nuevas.
   Propinas.init();
+  unawaited(Colaborador.init());
 
   final authBloc = AuthBloc();
   final themeCubit = ThemeCubit();

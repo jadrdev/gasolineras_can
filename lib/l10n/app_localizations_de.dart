@@ -653,7 +653,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tipSheetBody =>
-      'Es ist eine einmalige, freiwillige Zahlung. Sie schaltet nichts frei, sondern hilft nur, die App und die Preisbenachrichtigungen am Laufen zu halten.';
+      'Es ist eine einmalige, freiwillige Zahlung. Als Dankeschön kannst du das App-Symbol ändern und bekommst das Unterstützer-Abzeichen.';
 
   @override
   String get tipCoffee => 'Ein Kaffee';
@@ -669,7 +669,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tipThanksBody =>
-      'Deine Unterstützung hilft, GasoCan kostenlos und werbefrei zu halten.';
+      'Deine Unterstützung hilft, GasoCan kostenlos und werbefrei zu halten. Du kannst jetzt das App-Symbol ändern.';
 
   @override
   String get tipClose => 'Schließen';
@@ -685,4 +685,40 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get tipUnavailable =>
       'Trinkgeld ist gerade nicht verfügbar. Bitte versuche es später erneut.';
+
+  @override
+  String get tipCardTitleThanks => 'Danke für den Kaffee!';
+
+  @override
+  String get tipCardSubtitleThanks =>
+      'Ändere das App-Symbol oder spendiere noch einen Kaffee.';
+
+  @override
+  String get tipBadge => 'Unterstützer';
+
+  @override
+  String get tipIconsTitle => 'App-Symbol';
+
+  @override
+  String get tipIconsLocked =>
+      'Mit jedem Trinkgeld kannst du ein anderes Symbol wählen.';
+
+  @override
+  String get tipLoginHint =>
+      'Melde dich an, um es beim Handywechsel zu behalten.';
+
+  @override
+  String get tipIconOriginal => 'Original';
+
+  @override
+  String get tipIconNight => 'Nacht';
+
+  @override
+  String get tipIconOrange => 'Orange';
+
+  @override
+  String get tipIconCoffee => 'Kaffee';
+
+  @override
+  String get tipIconError => 'Das Symbol konnte nicht geändert werden.';
 }

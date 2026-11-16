@@ -1,10 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 
-
 import 'directions_event.dart';
 import 'directions_state.dart';
-
 
 class DirectionsBloc extends Bloc<DirectionsEvent, DirectionsState> {
   final DirectionsRepository repository;
