@@ -71,3 +71,8 @@ Si caben, cambiar alguna por: `cargador`, `eléctrico`, `recarga` (es) · `ev ch
 ## Hecho en App Store Connect (16/11)
 
 Versión 1.0.7 creada con el build 22, novedades en es/en/de (sin emojis), descripción con la viñeta de eléctricos y la frase del café en los tres idiomas, texto promocional nuevo (no se copió de la 1.0.6) y notas de revisión en `store/app-store/notas-revision-1.0.7.md`. Publicación automática. **Sin enviar**: faltan las compras dentro de la app.
+
+## Enviada (16/11)
+
+- **App Store:** 1.0.7 (build 22) y las tres propinas enviadas a revisión.
+- **Google Play:** 1.0.7 (22) en Producción enviada a revisión, con las notas de arriba; propinas activas.

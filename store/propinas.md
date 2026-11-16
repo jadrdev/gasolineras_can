@@ -27,13 +27,15 @@ Los ID tienen que ser **exactamente** estos en las dos tiendas. Mientras no exis
 3. **Información para la revisión:** una captura de la hoja de propinas (1206×2622 vale) y la nota «Voluntary tip. As a thank-you it unlocks alternative app icons and a supporter badge; no features are locked.»
 4. La **primera** compra dentro de la app se envía **junto con una versión** (la 1.0.7). La página de la versión ya no tiene sección para elegirlas: se pulsa «Añadir a revisión» en cada compra (las mete en el borrador de envío, no envía nada) y luego se envía la versión, que se las lleva.
 
-**Hecho el 16/11:** las tres creadas como consumibles (`propina_cafe` 1,99 €, `propina_cafe_dulce` 3,99 €, `propina_desayuno` 6,99 €; base España, 175 países), con nombre y descripción en es-ES, en-GB y de-DE, captura `store/app-store/propinas-revision.png` y la nota de revisión. Estado «En preparación para el envío». **Sin añadir a revisión.**
+**Hecho el 16/11:** las tres creadas como consumibles (`propina_cafe` 1,99 €, `propina_cafe_dulce` 3,99 €, `propina_desayuno` 6,99 €; base España, 175 países), con nombre y descripción en es-ES, en-GB y de-DE, captura `store/app-store/propinas-revision.png` y la nota de revisión. Enviadas a revisión junto con la 1.0.7 (build 22) el 16/11.
 
 ## Google Play Console
 
 1. Primero hay que subir un AAB que lleve la librería de pagos (la 1.0.7), aunque sea a pruebas internas: si no, Play no deja crear productos.
 2. **Monetizar con Play → Productos → Productos únicos** → Crear producto, con el ID, nombre, descripción y precio de la tabla. Añadir traducciones en-GB y de-DE.
 3. Activar los tres productos.
+
+**Hecho el 16/11:** AAB 1.0.7 (22) subido a Producción y enviado a revisión; las tres propinas creadas y activas (opción de compra `compra`, es/en-GB/de-DE). Ojo: el precio en bloque suma el IVA (1,99 → 2,39 €), así que el de España se corrigió a mano a 1,99 / 3,99 / 6,99 €; la app solo se publica en España.
 
 ## Privacidad
 
