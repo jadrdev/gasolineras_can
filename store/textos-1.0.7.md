@@ -6,6 +6,8 @@ La 1.0.7 trae **puntos de recarga para eléctricos e híbridos enchufables** e *
 
 App Store («Novedades en esta versión») y Google Play (notas de la versión, con las etiquetas de idioma).
 
+> **Apple no acepta emojis** en las novedades («Este campo contiene uno o más caracteres no válidos»): en el App Store se pusieron sin ⚡ ni ☕ y con una línea en blanco entre los dos párrafos (16/11). En Google Play sí valen.
+
 **Español**
 ```
 ⚡ Nuevo: puntos de recarga para coches eléctricos e híbridos enchufables. Elige «Eléctrico» en el selector de combustible y verás los cargadores de Canarias ordenados por precio, con conectores, potencia y cómo llegar.
@@ -65,3 +67,7 @@ Si caben, cambiar alguna por: `cargador`, `eléctrico`, `recarga` (es) · `ev ch
 1. La 1.0.6 tiene que estar **publicada** en las dos tiendas (Apple no deja tener dos versiones en revisión; en Play un envío nuevo reinicia la revisión en curso).
 2. **Propinas:** acuerdo de pago de Apple activo, perfil de pagos en Google y los tres productos creados (ver `store/propinas.md`). En Apple, las tres compras se añaden a la versión 1.0.7 al enviarla.
 3. Probar en TestFlight y en el Android: ⚡ Eléctrico con ubicación, la calculadora de un punto de pago, el cambio de icono en Android y una propina en modo prueba.
+
+## Hecho en App Store Connect (16/11)
+
+Versión 1.0.7 creada con el build 22, novedades en es/en/de (sin emojis), descripción con la viñeta de eléctricos y la frase del café en los tres idiomas, texto promocional nuevo (no se copió de la 1.0.6) y notas de revisión en `store/app-store/notas-revision-1.0.7.md`. Publicación automática. **Sin enviar**: faltan las compras dentro de la app.
