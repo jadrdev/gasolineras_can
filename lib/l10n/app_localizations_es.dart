@@ -644,4 +644,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String locationError(String detalle) {
     return 'Error al obtener la ubicación: $detalle';
   }
+
+  @override
+  String get tipCardTitle => 'Invítame a un café';
+
+  @override
+  String get tipCardSubtitle =>
+      'GasoCan es gratis y sin anuncios. Si te ahorra dinero, puedes apoyarla.';
+
+  @override
+  String get tipSheetBody =>
+      'Es un pago único y voluntario. No desbloquea nada: solo ayuda a mantener la app y los avisos de precio.';
+
+  @override
+  String get tipCoffee => 'Un café';
+
+  @override
+  String get tipCoffeeCake => 'Café con dulce';
+
+  @override
+  String get tipBreakfast => 'Un desayuno';
+
+  @override
+  String get tipThanksTitle => '¡Gracias!';
+
+  @override
+  String get tipThanksBody =>
+      'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios.';
+
+  @override
+  String get tipClose => 'Cerrar';
+
+  @override
+  String get tipPending =>
+      'El pago está pendiente de confirmar. Te avisará la tienda.';
+
+  @override
+  String get tipError =>
+      'No se ha podido completar el pago. Inténtalo de nuevo.';
+
+  @override
+  String get tipUnavailable =>
+      'Las propinas no están disponibles ahora mismo. Inténtalo más tarde.';
 }

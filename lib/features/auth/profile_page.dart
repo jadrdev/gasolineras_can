@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasolineras_can/core/theme/theme_cubit.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'vehicle_profile_card.dart';
+import 'package:gasolineras_can/features/propinas/propinas_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -146,6 +147,8 @@ class ProfilePage extends StatelessWidget {
                     onTap: () => context.push('/guide'),
                   ),
                 ),
+                const SizedBox(height: 16),
+                const PropinasCard(),
                 const SizedBox(height: 16),
                 _buildThemeCard(context),
                 const SizedBox(height: 16),
@@ -352,6 +355,8 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildThemeCard(context),
+            const SizedBox(height: 16),
+            const PropinasCard(),
           ],
         ),
       ),

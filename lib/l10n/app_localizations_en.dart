@@ -638,4 +638,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String locationError(String detalle) {
     return 'Couldn\'t get your location: $detalle';
   }
+
+  @override
+  String get tipCardTitle => 'Buy me a coffee';
+
+  @override
+  String get tipCardSubtitle =>
+      'GasoCan is free and ad-free. If it saves you money, you can support it.';
+
+  @override
+  String get tipSheetBody =>
+      'It\'s a one-off, voluntary payment. It doesn\'t unlock anything: it just helps keep the app and price alerts running.';
+
+  @override
+  String get tipCoffee => 'A coffee';
+
+  @override
+  String get tipCoffeeCake => 'Coffee and cake';
+
+  @override
+  String get tipBreakfast => 'A breakfast';
+
+  @override
+  String get tipThanksTitle => 'Thank you!';
+
+  @override
+  String get tipThanksBody =>
+      'Your support helps keep GasoCan free and ad-free.';
+
+  @override
+  String get tipClose => 'Close';
+
+  @override
+  String get tipPending =>
+      'The payment is waiting to be confirmed. The store will let you know.';
+
+  @override
+  String get tipError =>
+      'The payment couldn\'t be completed. Please try again.';
+
+  @override
+  String get tipUnavailable =>
+      'Tips aren\'t available right now. Please try again later.';
 }

@@ -1167,6 +1167,78 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error al obtener la ubicación: {detalle}'**
   String locationError(String detalle);
+
+  /// No description provided for @tipCardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Invítame a un café'**
+  String get tipCardTitle;
+
+  /// No description provided for @tipCardSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'GasoCan es gratis y sin anuncios. Si te ahorra dinero, puedes apoyarla.'**
+  String get tipCardSubtitle;
+
+  /// No description provided for @tipSheetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Es un pago único y voluntario. No desbloquea nada: solo ayuda a mantener la app y los avisos de precio.'**
+  String get tipSheetBody;
+
+  /// No description provided for @tipCoffee.
+  ///
+  /// In es, this message translates to:
+  /// **'Un café'**
+  String get tipCoffee;
+
+  /// No description provided for @tipCoffeeCake.
+  ///
+  /// In es, this message translates to:
+  /// **'Café con dulce'**
+  String get tipCoffeeCake;
+
+  /// No description provided for @tipBreakfast.
+  ///
+  /// In es, this message translates to:
+  /// **'Un desayuno'**
+  String get tipBreakfast;
+
+  /// No description provided for @tipThanksTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Gracias!'**
+  String get tipThanksTitle;
+
+  /// No description provided for @tipThanksBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios.'**
+  String get tipThanksBody;
+
+  /// No description provided for @tipClose.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar'**
+  String get tipClose;
+
+  /// No description provided for @tipPending.
+  ///
+  /// In es, this message translates to:
+  /// **'El pago está pendiente de confirmar. Te avisará la tienda.'**
+  String get tipPending;
+
+  /// No description provided for @tipError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido completar el pago. Inténtalo de nuevo.'**
+  String get tipError;
+
+  /// No description provided for @tipUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Las propinas no están disponibles ahora mismo. Inténtalo más tarde.'**
+  String get tipUnavailable;
 }
 
 class _AppLocalizationsDelegate

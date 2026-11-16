@@ -1,0 +1,39 @@
+# «Invítame a un café»: propinas en la app
+
+Tarjeta en el perfil (con y sin sesión) que abre una hoja con tres propinas de pago único. Son productos **consumibles**: se pueden repetir y no desbloquean nada. Código en `lib/features/propinas/`.
+
+| ID de producto | Nombre (es / en / de) | Precio |
+|---|---|---|
+| `propina_cafe` | Un café / A coffee / Ein Kaffee | 1,99 € |
+| `propina_cafe_dulce` | Café con dulce / Coffee and cake / Kaffee und Kuchen | 3,99 € |
+| `propina_desayuno` | Un desayuno / A breakfast / Ein Frühstück | 6,99 € |
+
+Los ID tienen que ser **exactamente** estos en las dos tiendas. Mientras no existan, la hoja dice «Las propinas no están disponibles ahora mismo».
+
+## Antes de nada
+
+- **Apple:** el *Acuerdo para apps de pago* tiene que estar **Activo** (Negocio → Acuerdos). El 12/11 estaba en «Información del usuario pendiente»: faltaba un formulario fiscal y la cuenta del BBVA estaba en proceso.
+- **Google:** hace falta un **perfil de pagos** (cuenta de comerciante) vinculado a la cuenta de desarrollador: Play Console → Configuración → Perfil de pagos.
+
+## App Store Connect
+
+1. Apps → Gasolineras de Canarias → **Monetización → Compras dentro de la app** → «+» → **Consumible**.
+2. Para cada fila de la tabla: nombre de referencia (p. ej. «Propina café»), ID de producto, precio (España y resto en automático) y localizaciones en español, inglés (Reino Unido) y alemán con el nombre de la tabla y una descripción corta («Invita a un café al desarrollador»).
+3. **Información para la revisión:** una captura de la hoja de propinas (1206×2622 vale) y la nota «Voluntary tip. It doesn't unlock any content or feature.»
+4. La **primera** compra dentro de la app se envía **junto con una versión** (la 1.0.7): en la página de la versión, sección «Compras dentro de la app y suscripciones», se añaden las tres.
+
+## Google Play Console
+
+1. Primero hay que subir un AAB que lleve la librería de pagos (la 1.0.7), aunque sea a pruebas internas: si no, Play no deja crear productos.
+2. **Monetizar con Play → Productos → Productos únicos** → Crear producto, con el ID, nombre, descripción y precio de la tabla. Añadir traducciones en-GB y de-DE.
+3. Activar los tres productos.
+
+## Privacidad
+
+No guardamos nada de las compras (las gestiona la tienda), así que no cambia la declaración de privacidad de Apple ni la sección «Seguridad de los datos» de Play.
+
+## Probar
+
+- **Simulador, desde Xcode:** `ios/Runner/Propinas.storekit` tiene los tres productos y está enlazado al esquema Runner. Abrir `ios/Runner.xcworkspace`, ▶︎ Run, Perfil → «Invítame a un café». El pago es simulado. (Con `flutter run` no se carga este archivo y la hoja sale vacía.)
+- **iPhone de verdad:** con un usuario de pruebas *sandbox* (App Store Connect → Usuarios y acceso → Sandbox) cuando los productos estén creados.
+- **Android:** con una cuenta de *tester de licencias* (Play Console → Configuración → Pruebas de licencias) y la app instalada desde pruebas internas.

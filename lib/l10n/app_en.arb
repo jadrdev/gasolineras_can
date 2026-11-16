@@ -177,5 +177,17 @@
   "locationServicesOff": "Location services are turned off. Please turn on GPS on your device.",
   "locationDenied": "Location permission denied. Please allow location access to continue.",
   "locationDeniedForever": "Location permission permanently denied. Go to Settings and allow location access for this app.",
-  "locationError": "Couldn't get your location: {detalle}"
+  "locationError": "Couldn't get your location: {detalle}",
+  "tipCardTitle": "Buy me a coffee",
+  "tipCardSubtitle": "GasoCan is free and ad-free. If it saves you money, you can support it.",
+  "tipSheetBody": "It's a one-off, voluntary payment. It doesn't unlock anything: it just helps keep the app and price alerts running.",
+  "tipCoffee": "A coffee",
+  "tipCoffeeCake": "Coffee and cake",
+  "tipBreakfast": "A breakfast",
+  "tipThanksTitle": "Thank you!",
+  "tipThanksBody": "Your support helps keep GasoCan free and ad-free.",
+  "tipClose": "Close",
+  "tipPending": "The payment is waiting to be confirmed. The store will let you know.",
+  "tipError": "The payment couldn't be completed. Please try again.",
+  "tipUnavailable": "Tips aren't available right now. Please try again later."
 }

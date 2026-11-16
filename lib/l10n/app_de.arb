@@ -177,5 +177,17 @@
   "locationServicesOff": "Die Ortungsdienste sind deaktiviert. Bitte aktiviere GPS auf deinem Gerät.",
   "locationDenied": "Standortberechtigung verweigert. Bitte erlaube den Standortzugriff, um fortzufahren.",
   "locationDeniedForever": "Standortberechtigung dauerhaft verweigert. Öffne die Einstellungen und erlaube dieser App den Standortzugriff.",
-  "locationError": "Standort konnte nicht ermittelt werden: {detalle}"
+  "locationError": "Standort konnte nicht ermittelt werden: {detalle}",
+  "tipCardTitle": "Spendier mir einen Kaffee",
+  "tipCardSubtitle": "GasoCan ist kostenlos und werbefrei. Wenn sie dir Geld spart, kannst du sie unterstützen.",
+  "tipSheetBody": "Es ist eine einmalige, freiwillige Zahlung. Sie schaltet nichts frei, sondern hilft nur, die App und die Preisbenachrichtigungen am Laufen zu halten.",
+  "tipCoffee": "Ein Kaffee",
+  "tipCoffeeCake": "Kaffee und Kuchen",
+  "tipBreakfast": "Ein Frühstück",
+  "tipThanksTitle": "Danke!",
+  "tipThanksBody": "Deine Unterstützung hilft, GasoCan kostenlos und werbefrei zu halten.",
+  "tipClose": "Schließen",
+  "tipPending": "Die Zahlung wartet auf Bestätigung. Der Store benachrichtigt dich.",
+  "tipError": "Die Zahlung konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+  "tipUnavailable": "Trinkgeld ist gerade nicht verfügbar. Bitte versuche es später erneut."
 }

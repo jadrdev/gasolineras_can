@@ -367,5 +367,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tipCardTitle": "Invítame a un café",
+  "tipCardSubtitle": "GasoCan es gratis y sin anuncios. Si te ahorra dinero, puedes apoyarla.",
+  "tipSheetBody": "Es un pago único y voluntario. No desbloquea nada: solo ayuda a mantener la app y los avisos de precio.",
+  "tipCoffee": "Un café",
+  "tipCoffeeCake": "Café con dulce",
+  "tipBreakfast": "Un desayuno",
+  "tipThanksTitle": "¡Gracias!",
+  "tipThanksBody": "Tu apoyo ayuda a que GasoCan siga siendo gratis y sin anuncios.",
+  "tipClose": "Cerrar",
+  "tipPending": "El pago está pendiente de confirmar. Te avisará la tienda.",
+  "tipError": "No se ha podido completar el pago. Inténtalo de nuevo.",
+  "tipUnavailable": "Las propinas no están disponibles ahora mismo. Inténtalo más tarde."
 }

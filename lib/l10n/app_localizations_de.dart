@@ -643,4 +643,46 @@ class AppLocalizationsDe extends AppLocalizations {
   String locationError(String detalle) {
     return 'Standort konnte nicht ermittelt werden: $detalle';
   }
+
+  @override
+  String get tipCardTitle => 'Spendier mir einen Kaffee';
+
+  @override
+  String get tipCardSubtitle =>
+      'GasoCan ist kostenlos und werbefrei. Wenn sie dir Geld spart, kannst du sie unterstützen.';
+
+  @override
+  String get tipSheetBody =>
+      'Es ist eine einmalige, freiwillige Zahlung. Sie schaltet nichts frei, sondern hilft nur, die App und die Preisbenachrichtigungen am Laufen zu halten.';
+
+  @override
+  String get tipCoffee => 'Ein Kaffee';
+
+  @override
+  String get tipCoffeeCake => 'Kaffee und Kuchen';
+
+  @override
+  String get tipBreakfast => 'Ein Frühstück';
+
+  @override
+  String get tipThanksTitle => 'Danke!';
+
+  @override
+  String get tipThanksBody =>
+      'Deine Unterstützung hilft, GasoCan kostenlos und werbefrei zu halten.';
+
+  @override
+  String get tipClose => 'Schließen';
+
+  @override
+  String get tipPending =>
+      'Die Zahlung wartet auf Bestätigung. Der Store benachrichtigt dich.';
+
+  @override
+  String get tipError =>
+      'Die Zahlung konnte nicht abgeschlossen werden. Bitte versuche es erneut.';
+
+  @override
+  String get tipUnavailable =>
+      'Trinkgeld ist gerade nicht verfügbar. Bitte versuche es später erneut.';
 }

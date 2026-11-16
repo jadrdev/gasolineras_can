@@ -1,0 +1,63 @@
+{
+  "identifier": "2E1A05F8",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "2482015149",
+      "localizations": [
+        {
+          "description": "Invita a un café al desarrollador",
+          "displayName": "Un café",
+          "locale": "es_ES"
+        }
+      ],
+      "productID": "propina_cafe",
+      "referenceName": "Propina café",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "3.99",
+      "familyShareable": false,
+      "internalID": "2772660441",
+      "localizations": [
+        {
+          "description": "Invita a un café con dulce",
+          "displayName": "Café con dulce",
+          "locale": "es_ES"
+        }
+      ],
+      "productID": "propina_cafe_dulce",
+      "referenceName": "Propina café con dulce",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "6.99",
+      "familyShareable": false,
+      "internalID": "1159677481",
+      "localizations": [
+        {
+          "description": "Invita a un desayuno",
+          "displayName": "Un desayuno",
+          "locale": "es_ES"
+        }
+      ],
+      "productID": "propina_desayuno",
+      "referenceName": "Propina desayuno",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "6832509598",
+    "_developerTeamID": "26W4G92PSS",
+    "_locale": "es_ES",
+    "_storefront": "ESP",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

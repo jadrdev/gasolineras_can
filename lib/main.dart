@@ -12,6 +12,7 @@ import 'core/notifications/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/auth_bloc.dart';
+import 'features/propinas/propinas_service.dart';
 import 'firebase_options.dart';
 import 'core/format.dart';
 import 'l10n/l10n.dart';
@@ -33,6 +34,8 @@ Future<void> main() async {
   // Push de bajada de precio: las decide el servidor (price-alerts) cada hora.
   // No bloquea el arranque: en iOS el token de APNs puede tardar un poco.
   unawaited(PushService.init());
+  // Cierra las propinas que se quedaran a medias y escucha las nuevas.
+  Propinas.init();
 
   final authBloc = AuthBloc();
   final themeCubit = ThemeCubit();
