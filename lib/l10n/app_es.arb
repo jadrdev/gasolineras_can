@@ -408,7 +408,7 @@
       }
     }
   },
-  "evMapTitle": "{count, plural, =1{Mapa · 1 punto de carga} other{Mapa · {count} puntos de carga}}",
+  "evMapTitle": "{count, plural, =1{1 punto de carga} other{{count} puntos de carga}}",
   "@evMapTitle": {
     "placeholders": {
       "count": {
@@ -455,5 +455,6 @@
   "evCalcNote": "Estimado con el precio por kWh. Algunos operadores cobran también por tiempo o por conexión.",
   "evConnType2": "Tipo 2",
   "evConnType1": "Tipo 1",
-  "evConnOther": "Otro"
+  "evConnOther": "Otro",
+  "evListTitle": "Puntos de carga"
 }

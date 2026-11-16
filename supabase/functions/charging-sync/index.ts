@@ -31,7 +31,9 @@ Deno.serve(async (req) => {
     return json(await run(dry));
   } catch (e) {
     console.error(e);
-    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+    // Los errores de Supabase no son Error: se devuelven enteros.
+    const message = e instanceof Error ? e.message : JSON.stringify(e);
+    return json({ error: message }, 500);
   }
 });
 

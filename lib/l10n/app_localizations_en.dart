@@ -745,8 +745,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Map · $count charging points',
-      one: 'Map · 1 charging point',
+      other: '$count charging points',
+      one: '1 charging point',
     );
     return '$_temp0';
   }
@@ -815,4 +815,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get evConnOther => 'Other';
+
+  @override
+  String get evListTitle => 'Charging points';
 }

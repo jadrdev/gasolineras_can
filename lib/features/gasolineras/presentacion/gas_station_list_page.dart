@@ -226,7 +226,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
       final l10n = context.l10n;
       return Scaffold(
         appBar: AppBar(
-          title: Text(l10n.stationListTitle),
+          title: Text(_electric ? l10n.evListTitle : l10n.stationListTitle),
           actions: [
             if (_position == null)
               IconButton(

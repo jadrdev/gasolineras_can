@@ -204,7 +204,7 @@
   "evFuelLabel": "⚡ Electric",
   "evCountByPrice": "{count, plural, =1{1 charging point · by price} other{{count} charging points · by price}}",
   "evCountByDistance": "{count, plural, =1{1 charging point · by distance} other{{count} charging points · by distance}}",
-  "evMapTitle": "{count, plural, =1{Map · 1 charging point} other{Map · {count} charging points}}",
+  "evMapTitle": "{count, plural, =1{1 charging point} other{{count} charging points}}",
   "evFilterFast": "Fast charging",
   "evFree": "Free",
   "evNoPrice": "Price not published",
@@ -223,5 +223,6 @@
   "evCalcNote": "Estimated from the price per kWh. Some operators also charge per minute or per session.",
   "evConnType2": "Type 2",
   "evConnType1": "Type 1",
-  "evConnOther": "Other"
+  "evConnOther": "Other",
+  "evListTitle": "Charging points"
 }

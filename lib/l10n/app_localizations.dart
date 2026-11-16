@@ -1327,7 +1327,7 @@ abstract class AppLocalizations {
   /// No description provided for @evMapTitle.
   ///
   /// In es, this message translates to:
-  /// **'{count, plural, =1{Mapa · 1 punto de carga} other{Mapa · {count} puntos de carga}}'**
+  /// **'{count, plural, =1{1 punto de carga} other{{count} puntos de carga}}'**
   String evMapTitle(int count);
 
   /// No description provided for @evFilterFast.
@@ -1443,6 +1443,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Otro'**
   String get evConnOther;
+
+  /// No description provided for @evListTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos de carga'**
+  String get evListTitle;
 }
 
 class _AppLocalizationsDelegate

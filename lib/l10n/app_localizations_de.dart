@@ -752,8 +752,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Karte · $count Ladestationen',
-      one: 'Karte · 1 Ladestation',
+      other: '$count Ladestationen',
+      one: '1 Ladestation',
     );
     return '$_temp0';
   }
@@ -822,4 +822,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get evConnOther => 'Andere';
+
+  @override
+  String get evListTitle => 'Ladestationen';
 }

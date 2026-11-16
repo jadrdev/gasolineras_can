@@ -204,7 +204,7 @@
   "evFuelLabel": "⚡ Elektro",
   "evCountByPrice": "{count, plural, =1{1 Ladestation · nach Preis} other{{count} Ladestationen · nach Preis}}",
   "evCountByDistance": "{count, plural, =1{1 Ladestation · nach Entfernung} other{{count} Ladestationen · nach Entfernung}}",
-  "evMapTitle": "{count, plural, =1{Karte · 1 Ladestation} other{Karte · {count} Ladestationen}}",
+  "evMapTitle": "{count, plural, =1{1 Ladestation} other{{count} Ladestationen}}",
   "evFilterFast": "Schnellladen",
   "evFree": "Kostenlos",
   "evNoPrice": "Preis nicht angegeben",
@@ -223,5 +223,6 @@
   "evCalcNote": "Geschätzt nach dem kWh-Preis. Manche Betreiber berechnen zusätzlich Zeit oder Sitzung.",
   "evConnType2": "Typ 2",
   "evConnType1": "Typ 1",
-  "evConnOther": "Andere"
+  "evConnOther": "Andere",
+  "evListTitle": "Ladestationen"
 }
