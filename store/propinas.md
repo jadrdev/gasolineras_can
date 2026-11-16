@@ -25,7 +25,9 @@ Los ID tienen que ser **exactamente** estos en las dos tiendas. Mientras no exis
 1. Apps → Gasolineras de Canarias → **Monetización → Compras dentro de la app** → «+» → **Consumible**.
 2. Para cada fila de la tabla: nombre de referencia (p. ej. «Propina café»), ID de producto, precio (España y resto en automático) y localizaciones en español, inglés (Reino Unido) y alemán con el nombre de la tabla y una descripción corta («Invita a un café al desarrollador»).
 3. **Información para la revisión:** una captura de la hoja de propinas (1206×2622 vale) y la nota «Voluntary tip. As a thank-you it unlocks alternative app icons and a supporter badge; no features are locked.»
-4. La **primera** compra dentro de la app se envía **junto con una versión** (la 1.0.7): en la página de la versión, sección «Compras dentro de la app y suscripciones», se añaden las tres.
+4. La **primera** compra dentro de la app se envía **junto con una versión** (la 1.0.7). La página de la versión ya no tiene sección para elegirlas: se pulsa «Añadir a revisión» en cada compra (las mete en el borrador de envío, no envía nada) y luego se envía la versión, que se las lleva.
+
+**Hecho el 16/11:** las tres creadas como consumibles (`propina_cafe` 1,99 €, `propina_cafe_dulce` 3,99 €, `propina_desayuno` 6,99 €; base España, 175 países), con nombre y descripción en es-ES, en-GB y de-DE, captura `store/app-store/propinas-revision.png` y la nota de revisión. Estado «En preparación para el envío». **Sin añadir a revisión.**
 
 ## Google Play Console
 
@@ -39,6 +41,6 @@ No guardamos nada de las compras (las gestiona la tienda), así que no cambia la
 
 ## Probar
 
-- **Simulador, desde Xcode:** `ios/Runner/Propinas.storekit` tiene los tres productos y está enlazado al esquema Runner. Abrir `ios/Runner.xcworkspace`, ▶︎ Run, Perfil → «Invítame a un café». El pago es simulado. (Con `flutter run` no se carga este archivo y la hoja sale vacía.)
+- **Simulador, desde Xcode:** `ios/Runner/Propinas.storekit` tiene los tres productos y está enlazado al esquema Runner. Abrir `ios/Runner.xcworkspace`, ▶︎ Run, Perfil → «Invítame a un café». El pago es simulado. (Con `flutter run` no se carga este archivo y la hoja dice «no disponibles».) La ruta del esquema es `../Runner/Propinas.storekit`; con `../../` Xcode no lo encontraba y tiraba del sandbox real.
 - **iPhone de verdad:** con un usuario de pruebas *sandbox* (App Store Connect → Usuarios y acceso → Sandbox) cuando los productos estén creados.
 - **Android:** con una cuenta de *tester de licencias* (Play Console → Configuración → Pruebas de licencias) y la app instalada desde pruebas internas.
