@@ -1,0 +1,16 @@
+{
+  "texts": {
+    "es": {
+      "title": "⚡ Nuevo: coches eléctricos",
+      "body": "Ya puedes ver los puntos de recarga de Canarias ordenados por precio. Elige «Eléctrico» en el selector de combustible."
+    },
+    "en": {
+      "title": "⚡ New: electric cars",
+      "body": "See charging points across the Canary Islands sorted by price. Choose \"Electric\" in the fuel selector."
+    },
+    "de": {
+      "title": "⚡ Neu: Elektroautos",
+      "body": "Sieh dir die Ladestationen der Kanaren nach Preis sortiert an. Wähle „Elektro“ in der Kraftstoffauswahl."
+    }
+  }
+}
