@@ -41,6 +41,8 @@ En Play cuentan el título, la descripción breve y la descripción completa, y 
 
 - **Título (30):** `GasoCan: Gasolineras Canarias`
 - **Descripción breve (80):** `Gasolina y gasoil más baratos de Canarias, puntos de recarga y avisos de precio` (79)
+**Hecho el 17/11 (es-ES):** título y descripción breve cambiados y enviados a revisión. Antes eran «Gasolineras de Canarias» y «La gasolina más barata de Canarias: precios, mapa y avisos de bajada». Las fichas en en-GB y de-DE siguen con su título de siempre.
+
 - **Descripción completa:** que salgan de forma natural «gasolina barata», «gasoil», el nombre de cada isla y «puntos de recarga». No repetir palabras en lista: Google lo penaliza.
 
 ## Novedades de la versión
