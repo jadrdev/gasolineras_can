@@ -61,3 +61,8 @@ Apple no acepta emojis en las novedades.
 - **Eventos dentro de la app** (App Store Connect → Eventos dentro de la app): son tarjetas gratis que salen en la tienda y en la búsqueda. Por ejemplo, «Puntos de recarga en Canarias».
 - **Responder a las reseñas** que lleguen, en las dos tiendas.
 - Mirar en un mes en Análisis → Adquisición si suben las impresiones (82 en iOS hasta el 15/11).
+
+## Estado (17/11)
+
+- **App Store:** versión 1.0.8 creada con la compilación 23, nombre y subtítulo nuevos (Información de la app) y novedades y palabras clave en es, en-GB y de. Guardada **sin enviar a revisión**.
+- **Google Play:** AAB 1.0.8 (23) compilado (`build/app/outputs/bundle/release/app-release.aab`, 60 MB). Pesa demasiado para subirlo desde el navegador automático: se arrastra a mano en Producción → Crear nueva versión.
