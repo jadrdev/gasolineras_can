@@ -69,3 +69,17 @@ Apple no acepta emojis en las novedades.
 
 - **App Store:** versión 1.0.8 creada con la compilación 23, nombre y subtítulo nuevos (Información de la app) y novedades y palabras clave en es, en-GB y de. Guardada **sin enviar a revisión**.
 - **Google Play:** AAB 1.0.8 (23) subido a Producción (arrastrado a mano: 60 MB) con notas en es-ES, en-GB y de-DE. Guardada **sin enviar a revisión** (Resumen de publicación → Enviar cambios a revisión).
+
+## Evento dentro de la app (App Store)
+
+«Puntos de recarga (nov 2026)», creado el 17/11 y guardado **sin enviar a revisión**.
+
+- Distintivo: Actualización importante. Finalidad: atraer a nuevos usuarios. Sin compra. Todos los países.
+- Del 20/11/2026 al 20/12/2026 (hora de Canarias), publicado desde el 20/11. Apple deja como mucho 31 días.
+- Imágenes sin texto (Apple pinta encima el nombre): `store/redes/evento/tarjeta.png` (1920×1080) y `ficha.png` (1080×1920), con `python3 store/redes/generar_evento.py`.
+
+| | Nombre (30) | Descripción breve (50) | Descripción larga (120) |
+|---|---|---|---|
+| es | Puntos de recarga en Canarias | Cargadores de todas las islas, por precio | Elige «Eléctrico» y verás los cargadores de Canarias ordenados por precio, con conector, potencia y cómo llegar. |
+| en-GB | EV charging in the Canaries | Chargers on every island, sorted by price | Choose "Electric" to see chargers across the Canary Islands sorted by price, with connector, power and directions. |
+| de | Ladestationen auf den Kanaren | Ladesäulen auf allen Inseln, nach Preis | Wähle „Elektro“ und sieh die Ladestationen der Kanaren nach Preis sortiert, mit Anschluss, Leistung und Route. |
