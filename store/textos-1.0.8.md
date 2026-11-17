@@ -64,7 +64,7 @@ Apple no acepta emojis en las novedades.
 
 ## Estado (17/11)
 
-**Enviada a revisión en las dos tiendas el 17/11** (Apple: «Pendiente de revisión»; Play: lanzamiento completo en producción). La ficha de Play con el título nuevo ya estaba publicada ese mismo día.
+**Enviada a revisión en las dos tiendas el 17/11 con la build 24.** La primera vez fue con la 23; se retiró en las dos para añadir el enlace `gasocan://app/electricos`, que Apple exige al evento (es obligatorio el enlace profundo). Apple: versión 1.0.8 (24) y evento en el mismo envío. Play: lanzamiento completo de la 24 (la 23 quedó sustituida). La ficha de Play con el título nuevo ya estaba publicada ese mismo día.
 
 
 - **App Store:** versión 1.0.8 creada con la compilación 23, nombre y subtítulo nuevos (Información de la app) y novedades y palabras clave en es, en-GB y de. Guardada **sin enviar a revisión**.
@@ -72,7 +72,7 @@ Apple no acepta emojis en las novedades.
 
 ## Evento dentro de la app (App Store)
 
-«Puntos de recarga (nov 2026)», creado el 17/11 y guardado **sin enviar a revisión**.
+«Puntos de recarga (nov 2026)», creado y **enviado a revisión el 17/11 junto con la 1.0.8 (24)**. Enlace profundo: `gasocan://app/electricos` (abre la lista con «Eléctrico»; `lib/core/enlaces.dart`).
 
 - Distintivo: Actualización importante. Finalidad: atraer a nuevos usuarios. Sin compra. Todos los países.
 - Del 20/11/2026 al 20/12/2026 (hora de Canarias), publicado desde el 20/11. Apple deja como mucho 31 días.
