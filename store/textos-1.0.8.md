@@ -64,5 +64,8 @@ Apple no acepta emojis en las novedades.
 
 ## Estado (17/11)
 
+**Enviada a revisión en las dos tiendas el 17/11** (Apple: «Pendiente de revisión»; Play: lanzamiento completo en producción). La ficha de Play con el título nuevo ya estaba publicada ese mismo día.
+
+
 - **App Store:** versión 1.0.8 creada con la compilación 23, nombre y subtítulo nuevos (Información de la app) y novedades y palabras clave en es, en-GB y de. Guardada **sin enviar a revisión**.
 - **Google Play:** AAB 1.0.8 (23) subido a Producción (arrastrado a mano: 60 MB) con notas en es-ES, en-GB y de-DE. Guardada **sin enviar a revisión** (Resumen de publicación → Enviar cambios a revisión).
