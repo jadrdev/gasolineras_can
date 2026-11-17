@@ -7,6 +7,7 @@ import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gasolineras_can/core/location.dart';
+import 'package:gasolineras_can/core/valoracion.dart';
 
 import 'package:gasolineras_can/features/favoritos/presentacion.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
@@ -196,6 +197,7 @@ class _GasStationDetailPageState extends State<GasStationDetailPage> {
         );
         return;
       }
+      Valoracion.rutaAbierta();
 
       if (availableMaps.length == 1) {
         await availableMaps.first.showDirections(

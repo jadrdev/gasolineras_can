@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../l10n/l10n.dart';
+import 'valoracion.dart';
 
 /// Ancho del marcador en puntos de pantalla. El dibujo se hace a 3x para que
 /// se vea nítido; a 90 puntos se tapaban unos a otros.
@@ -86,6 +88,7 @@ Future<void> launchDirections(
       return;
     }
     final destination = Coords(latitude, longitude);
+    unawaited(Valoracion.rutaAbierta());
     if (maps.length == 1) {
       await maps.first.showDirections(
         destination: destination,

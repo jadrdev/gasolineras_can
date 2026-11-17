@@ -11,6 +11,7 @@ import 'core/notifications/notification_service.dart';
 import 'core/notifications/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
+import 'core/valoracion.dart';
 import 'features/auth/auth_bloc.dart';
 import 'features/propinas/colaborador.dart';
 import 'features/propinas/propinas_service.dart';
@@ -38,6 +39,8 @@ Future<void> main() async {
   // Cierra las propinas que se quedaran a medias y escucha las nuevas.
   Propinas.init();
   unawaited(Colaborador.init());
+  // Pide la valoración de la tienda cuando la app ya ha sido útil.
+  unawaited(Valoracion.init());
 
   final authBloc = AuthBloc();
   final themeCubit = ThemeCubit();
