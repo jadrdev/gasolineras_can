@@ -8,6 +8,7 @@ import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gasolineras_can/core/enlaces.dart';
 import 'package:gasolineras_can/features/guide/guide_page.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';
 import 'dart:async';
@@ -24,11 +25,16 @@ class _HomeScreenState extends State<HomeScreen> {
   FavoriteRepository _favorites = FavoriteRepository();
   String? _userId = Supabase.instance.client.auth.currentUser?.id;
   StreamSubscription<AuthState>? _authSubscription;
+  StreamSubscription<void>? _enlaceSubscription;
   bool _guideCheckStarted = false;
 
   @override
   void initState() {
     super.initState();
+    // gasocan://app/electricos: vuelve a la pestaña de gasolineras.
+    _enlaceSubscription = Enlaces.electricos.listen((_) {
+      if (mounted) setState(() => _currentIndex = 0);
+    });
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _showGuideOnFirstLaunch(),
     );
@@ -60,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _enlaceSubscription?.cancel();
     super.dispose();
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gasolineras_can/core/enlaces.dart';
 import 'package:gasolineras_can/core/splash_screen.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/auth/presentacion.dart';
@@ -58,6 +59,14 @@ GoRouter createRouter(AuthBloc authBloc) {
         ),
       ),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      // Enlace gasocan://app/electricos (evento del App Store).
+      GoRoute(
+        path: '/electricos',
+        redirect: (context, state) {
+          Enlaces.pedirElectricos();
+          return '/home';
+        },
+      ),
       GoRoute(
         path: '/guide',
         builder: (context, state) =>

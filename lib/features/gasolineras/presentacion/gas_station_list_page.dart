@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config.dart';
 import '../../../core/directions_service.dart';
+import '../../../core/enlaces.dart';
 import '../../../core/location.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/user_profile_repository.dart';
@@ -46,6 +47,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
   late final _favorites = widget.favoriteRepository ?? FavoriteRepository();
   final _search = TextEditingController();
   StreamSubscription<void>? _profileSubscription;
+  StreamSubscription<void>? _enlaceSubscription;
   SortBy _sort = SortBy.precio;
   FuelType _fuel = FuelType.g95;
   // «⚡ Eléctrico»: la lista pasa a ser de puntos de recarga.
@@ -64,6 +66,10 @@ class _GasStationListPageState extends State<GasStationListPage> {
     _profileSubscription = UserProfileRepository.changes.listen(
       (_) => _loadPreferences(),
     );
+    _enlaceSubscription = Enlaces.electricos.listen((_) {
+      Enlaces.consumirElectricos();
+      _abrirElectricos();
+    });
     _loadPreferences();
     // Browsing/search does not wait for GPS permission or a location fix.
     _bloc.add(LoadStations());
@@ -131,6 +137,17 @@ class _GasStationListPageState extends State<GasStationListPage> {
           );
       _tankLiters = profile?.tankLiters ?? prefs.getDouble('tankLiters') ?? 50;
     });
+    // Arranque en frío desde gasocan://app/electricos.
+    if (Enlaces.consumirElectricos()) _abrirElectricos();
+  }
+
+  void _abrirElectricos() {
+    if (!mounted || _electric) return;
+    setState(() {
+      _electric = true;
+      if (_zone.startsWith('municipio:')) _zone = 'all';
+    });
+    _savePreferences();
   }
 
   Future<void> _savePreferences() async {
@@ -196,6 +213,7 @@ class _GasStationListPageState extends State<GasStationListPage> {
   @override
   void dispose() {
     _profileSubscription?.cancel();
+    _enlaceSubscription?.cancel();
     _search.dispose();
     _bloc.close();
     super.dispose();

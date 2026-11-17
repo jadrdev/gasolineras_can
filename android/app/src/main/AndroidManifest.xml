@@ -32,6 +32,15 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Enlace gasocan://app/electricos (evento del App Store y
+                 anuncios): abre la lista con «Eléctrico». Ver lib/core/enlaces.dart. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="gasocan" android:host="app" />
+            </intent-filter>
         </activity>
         <!-- Iconos de la app: el lanzador abre MainActivity a través de uno de
              estos alias. Solo uno está activo; la app los cambia como regalo de
