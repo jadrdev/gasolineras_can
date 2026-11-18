@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';
 
 enum FuelType { g95, g98, diesel, dieselPremium }

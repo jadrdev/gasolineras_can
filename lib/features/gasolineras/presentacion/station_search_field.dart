@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';
 
 /// Kept outside the result list so zero matches never removes the input/focus.

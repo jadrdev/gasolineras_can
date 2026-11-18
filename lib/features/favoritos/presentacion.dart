@@ -1,5 +1,5 @@
 import '../../core/notifications/push_service.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';

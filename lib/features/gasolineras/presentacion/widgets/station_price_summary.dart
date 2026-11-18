@@ -1,5 +1,5 @@
 import 'package:gasolineras_can/core/format.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';
 

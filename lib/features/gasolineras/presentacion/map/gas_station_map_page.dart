@@ -1,7 +1,7 @@
 import 'package:gasolineras_can/core/format.dart';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/core/config.dart';
 import 'package:gasolineras_can/core/directions_service.dart';
 import 'package:gasolineras_can/core/valoracion.dart';

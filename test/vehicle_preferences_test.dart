@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gasolineras_can/l10n/l10n.dart';
 import 'package:gasolineras_can/features/auth/vehicle_profile_card.dart';
@@ -13,7 +13,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('es'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: delegadosIdioma,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: VehiclePreferencesForm(
@@ -50,7 +50,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: delegadosIdioma,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: VehiclePreferencesForm(
@@ -80,7 +80,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: delegadosIdioma,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: VehiclePreferencesForm(

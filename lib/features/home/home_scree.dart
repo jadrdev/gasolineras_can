@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../core/widgets/ios_glass_navigation_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/features/auth/profile_page.dart';
 import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
 import 'package:gasolineras_can/features/gasolineras/presentacion/gas_station_list_page.dart';

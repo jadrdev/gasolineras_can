@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/core/enlaces.dart';
 import 'package:gasolineras_can/core/splash_screen.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';

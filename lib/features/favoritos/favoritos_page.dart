@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import '../auth/user_profile_repository.dart';
 import 'presentacion.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/features/favoritos/data.dart';
 import 'package:gasolineras_can/features/gasolineras/fuel_colors.dart';
 import 'package:gasolineras_can/features/gasolineras/models/gas_station.dart';

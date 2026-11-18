@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// Native UIKit material on iOS (Liquid Glass on iOS 26+, blur on older iOS).

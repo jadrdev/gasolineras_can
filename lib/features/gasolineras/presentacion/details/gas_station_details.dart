@@ -1,7 +1,7 @@
 import 'package:gasolineras_can/core/format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/station_price_summary.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:gasolineras_can/features/auth/user_profile_repository.dart';
 import 'package:gasolineras_can/features/directions/domain/directions_repository.dart';
