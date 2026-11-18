@@ -34,4 +34,4 @@ Nombre, subtítulo, palabras clave y capturas: los mismos de la 1.0.8 (`store/te
 ## Estado
 
 - **App Store:** build 25, versión 1.0.9 con novedades en es/en-GB/de, **enviada a revisión el 18/11**. (Al rellenarla se añadió sin querer el idioma «Canarés»; se quitó antes de enviar.)
-- **Google Play:** AAB 1.0.9 (25) en `build/app/outputs/bundle/release/app-release.aab`.
+- **Google Play:** AAB 1.0.9 (25) subido a Producción con notas en es-ES/en-GB/de-DE, **enviado a revisión el 18/11** (lanzamiento completo).
