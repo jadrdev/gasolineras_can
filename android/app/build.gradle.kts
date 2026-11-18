@@ -22,6 +22,14 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    // AGP 9 deja fuera de los APK/AAB los assets que empiezan por punto
+    // (patrón «.*»), y la app lee .env al arrancar: sin él se queda en negro.
+    // Es la lista por defecto de aapt sin «.*».
+    androidResources {
+        ignoreAssetsPattern =
+            "!.svn:!.git:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
     packaging {
         // Keep native libraries uncompressed so they can be mmapped with
         // 16 kB page size alignment on Android 15+ devices.
