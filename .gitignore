@@ -60,3 +60,6 @@ keystore_credentials.txt
 
 # Supabase CLI
 supabase/.temp/
+
+# Posts diarios generados (store/redes/generar_diario.py)
+/store/redes/diario/
