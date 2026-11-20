@@ -224,5 +224,12 @@
   "evConnType2": "Typ 2",
   "evConnType1": "Typ 1",
   "evConnOther": "Andere",
-  "evListTitle": "Ladestationen"
+  "evListTitle": "Ladestationen",
+  "evSourceReve": "Quelle: Red Eléctrica de España (mapaREVE), Daten vom {date}.",
+  "evPriceReve": "Vom Betreiber veröffentlichter Preis inkl. Steuern für diese Uhrzeit. Er kann sich je nach Zeitfenster ändern.",
+  "evExtraFees": "Dieser Betreiber berechnet auch Zeit, Ladevorgang oder Parken.",
+  "evUpdatedAt": "Aktualisiert · {date}",
+  "evFreeCount": "{count, plural, =1{1 frei} other{{count} frei}}",
+  "evBusyCount": "{count, plural, =1{1 belegt} other{{count} belegt}}",
+  "evBrokenCount": "{count, plural, =1{1 defekt} other{{count} defekt}}"
 }

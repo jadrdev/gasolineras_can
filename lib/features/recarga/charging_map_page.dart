@@ -203,7 +203,7 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
                   _fit();
                 },
               ),
-              // Atribución de Open Charge Map, siempre visible.
+              // Fuentes (Red Eléctrica y Open Charge Map), siempre visibles.
               Positioned(
                 left: 8,
                 right: 72,
@@ -217,7 +217,7 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const OcmAttribution(),
+                  child: const ChargingAttribution(),
                 ),
               ),
             ],

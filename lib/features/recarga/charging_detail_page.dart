@@ -67,7 +67,14 @@ class _ChargingDetailPageState extends State<ChargingDetailPage> {
               const SizedBox(height: 4),
               Text(point.operator!, style: theme.textTheme.titleSmall),
             ],
-            if (point.status == ChargingStatus.notOperational) ...[
+            if (point.available != null &&
+                point.status != ChargingStatus.notOperational) ...[
+              const SizedBox(height: 8),
+              ChargingOccupancy(
+                point: point,
+                style: theme.textTheme.titleSmall,
+              ),
+            ] else if (point.status == ChargingStatus.notOperational) ...[
               const SizedBox(height: 8),
               Text(
                 l10n.evOutOfService,
@@ -85,7 +92,9 @@ class _ChargingDetailPageState extends State<ChargingDetailPage> {
                   children: [
                     ChargingPriceSummary(point: point),
                     const SizedBox(height: 4),
-                    if (point.priceKwh != null || point.free)
+                    if (point.priceSource == ChargingSource.reve)
+                      Text(l10n.evPriceReve, style: theme.textTheme.bodySmall)
+                    else if (point.priceKwh != null || point.free)
                       Text(
                         l10n.evPriceCommunity,
                         style: theme.textTheme.bodySmall,
@@ -95,9 +104,13 @@ class _ChargingDetailPageState extends State<ChargingDetailPage> {
                         l10n.evListedPrice(point.usageCost!),
                         style: theme.textTheme.bodySmall,
                       ),
+                    if (point.extraFees)
+                      Text(l10n.evExtraFees, style: theme.textTheme.bodySmall),
                     if (point.updated != null)
                       Text(
-                        l10n.evReviewedAt(evDate(l10n, point.updated!)),
+                        point.source == ChargingSource.reve
+                            ? l10n.evUpdatedAt(evDateTime(l10n, point.updated!))
+                            : l10n.evReviewedAt(evDate(l10n, point.updated!)),
                         style: theme.textTheme.bodySmall,
                       ),
                   ],
@@ -133,10 +146,15 @@ class _ChargingDetailPageState extends State<ChargingDetailPage> {
                       title: Text(
                         c.label.isEmpty ? connectorName(l10n, c.kind) : c.label,
                       ),
-                      subtitle: c.kw == null
+                      subtitle: c.kw == null && c.priceKwh == null
                           ? null
                           : Text(
-                              '${decimal(c.kw!, c.kw! % 1 == 0 ? 0 : 1)} kW',
+                              [
+                                if (c.kw != null)
+                                  '${decimal(c.kw!, c.kw! % 1 == 0 ? 0 : 1)} kW',
+                                if (c.priceKwh != null)
+                                  '${decimal(c.priceKwh!, 2)} €/kWh',
+                              ].join(' · '),
                             ),
                       trailing: Text('×${c.quantity}'),
                     ),
@@ -150,7 +168,7 @@ class _ChargingDetailPageState extends State<ChargingDetailPage> {
               _calculator(l10n, theme, point.priceKwh!),
             ],
             const SizedBox(height: 24),
-            const OcmAttribution(),
+            ChargingAttribution(point: point),
           ],
         ),
       ),

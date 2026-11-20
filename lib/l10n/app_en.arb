@@ -224,5 +224,12 @@
   "evConnType2": "Type 2",
   "evConnType1": "Type 1",
   "evConnOther": "Other",
-  "evListTitle": "Charging points"
+  "evListTitle": "Charging points",
+  "evSourceReve": "Source: Red Eléctrica de España (mapaREVE), data from {date}.",
+  "evPriceReve": "Price published by the operator, taxes included, for this time of day. It may change with the time slot.",
+  "evExtraFees": "This operator also charges by time, per session or for parking.",
+  "evUpdatedAt": "Updated · {date}",
+  "evFreeCount": "{count, plural, =1{1 free} other{{count} free}}",
+  "evBusyCount": "{count, plural, =1{1 in use} other{{count} in use}}",
+  "evBrokenCount": "{count, plural, =1{1 out of order} other{{count} out of order}}"
 }

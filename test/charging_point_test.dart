@@ -51,12 +51,52 @@ void main() {
     final sinPrecio = ChargingPoint.fromJson(fila(id: 3));
     final lista = [sinPrecio, caro, gratis]
       ..sort((a, b) => a.sortPrice.compareTo(b.sortPrice));
-    expect(lista.map((p) => p.id), [2, 1, 3]);
+    expect(lista.map((p) => p.id), ['2', '1', '3']);
   });
 
   test('distancia en línea recta', () {
     final p = ChargingPoint.fromJson(fila());
     p.calcDistance(28.4636, -16.2518); // Santa Cruz
     expect(p.distance, closeTo(6.1, 0.5));
+  });
+
+  test('lee una fila de Red Eléctrica con ocupación y precio por conector', () {
+    final p = ChargingPoint.fromJson({
+      ...fila(price: 0.46, maxKw: 50),
+      'id': 'reve:abc',
+      'source': 'reve',
+      'price_source': 'reve',
+      'available': 2,
+      'occupied': 1,
+      'out_of_order': 1,
+      'extra_fees': true,
+      'connectors': [
+        {
+          'type': 'ccs',
+          'label': 'CCS (Type 2)',
+          'kw': 50,
+          'quantity': 2,
+          'price_kwh': 0.46,
+        },
+      ],
+      'ocm_updated': null,
+      'source_updated': '2026-11-20T08:00:00Z',
+      'synced_at': '2026-11-20T08:05:00Z',
+    });
+    expect(p.id, 'reve:abc');
+    expect(p.source, ChargingSource.reve);
+    expect(p.priceSource, ChargingSource.reve);
+    expect([p.available, p.occupied, p.outOfOrder], [2, 1, 1]);
+    expect(p.extraFees, isTrue);
+    expect(p.connectors.single.priceKwh, 0.46);
+    expect(p.updated, DateTime.utc(2026, 11, 20, 8));
+    expect(p.syncedAt, DateTime.utc(2026, 11, 20, 8, 5));
+  });
+
+  test('las filas antiguas de Open Charge Map siguen leyéndose', () {
+    final p = ChargingPoint.fromJson(fila(price: 0.39));
+    expect(p.source, ChargingSource.ocm);
+    expect(p.available, isNull);
+    expect(p.updated, DateTime.utc(2025, 10, 1, 10));
   });
 }

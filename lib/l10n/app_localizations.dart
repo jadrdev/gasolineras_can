@@ -1449,6 +1449,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Puntos de carga'**
   String get evListTitle;
+
+  /// No description provided for @evSourceReve.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuente: Red Eléctrica de España (mapaREVE), datos del {date}.'**
+  String evSourceReve(String date);
+
+  /// No description provided for @evPriceReve.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio publicado por el operador, impuestos incluidos, para esta hora. Puede cambiar según la franja horaria.'**
+  String get evPriceReve;
+
+  /// No description provided for @evExtraFees.
+  ///
+  /// In es, this message translates to:
+  /// **'Este operador cobra también por tiempo, por conexión o por dejar el coche aparcado.'**
+  String get evExtraFees;
+
+  /// No description provided for @evUpdatedAt.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizado · {date}'**
+  String evUpdatedAt(String date);
+
+  /// No description provided for @evFreeCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 libre} other{{count} libres}}'**
+  String evFreeCount(int count);
+
+  /// No description provided for @evBusyCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 ocupado} other{{count} ocupados}}'**
+  String evBusyCount(int count);
+
+  /// No description provided for @evBrokenCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 averiado} other{{count} averiados}}'**
+  String evBrokenCount(int count);
 }
 
 class _AppLocalizationsDelegate

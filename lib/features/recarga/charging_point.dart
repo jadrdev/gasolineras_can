@@ -13,12 +13,16 @@ class ChargingConnector {
     required this.label,
     this.kw,
     this.quantity = 1,
+    this.priceKwh,
   });
 
   final ConnectorKind kind;
   final String label;
   final double? kw;
   final int quantity;
+
+  /// €/kWh con IVA de este conector ahora (solo en los de Red Eléctrica).
+  final double? priceKwh;
 
   factory ChargingConnector.fromJson(Map<String, dynamic> json) =>
       ChargingConnector(
@@ -29,13 +33,26 @@ class ChargingConnector {
         label: (json['label'] as String?)?.trim() ?? '',
         kw: (json['kw'] as num?)?.toDouble(),
         quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+        priceKwh: (json['price_kwh'] as num?)?.toDouble(),
       );
 }
 
 enum ChargingStatus { operational, notOperational, unknown }
 
-/// Punto de recarga de coches eléctricos e híbridos enchufables, de Open
-/// Charge Map (CC BY 4.0) a través de la tabla charging_points.
+/// De dónde salen los datos de un punto (y de su precio).
+/// reve: mapaREVE de Red Eléctrica, precio publicado por el operador.
+/// ocm: Open Charge Map (CC BY 4.0), precio aportado por la comunidad.
+enum ChargingSource { reve, ocm }
+
+ChargingSource? _source(Object? value) => switch (value) {
+  'reve' => ChargingSource.reve,
+  'ocm' => ChargingSource.ocm,
+  _ => null,
+};
+
+/// Punto de recarga de coches eléctricos e híbridos enchufables, de la tabla
+/// charging_stations: Red Eléctrica (mapaREVE) y, donde no llega, Open
+/// Charge Map. La junta cada hora la función charging-stations.
 class ChargingPoint {
   ChargingPoint({
     required this.id,
@@ -53,9 +70,16 @@ class ChargingPoint {
     this.free = false,
     this.usageCost,
     this.updated,
+    this.source = ChargingSource.ocm,
+    this.priceSource,
+    this.available,
+    this.occupied,
+    this.outOfOrder,
+    this.extraFees = false,
+    this.syncedAt,
   });
 
-  final int id;
+  final String id;
   final String name;
   final String? operator;
   final String? address;
@@ -67,13 +91,33 @@ class ChargingPoint {
   final int? points;
   final ChargingStatus status;
 
-  /// Precio orientativo en €/kWh, aportado por la comunidad.
+  /// €/kWh con IVA (el conector más barato). De quién es: [priceSource].
   final double? priceKwh;
   final bool free;
 
   /// Texto original del precio, por si no se pudo leer como €/kWh.
   final String? usageCost;
+
+  /// Última actualización en la fuente (REVE u Open Charge Map).
   final DateTime? updated;
+
+  final ChargingSource source;
+  final ChargingSource? priceSource;
+
+  /// Cargadores libres ahora mismo (solo Red Eléctrica).
+  final int? available;
+
+  /// Cargadores cargando, bloqueados o reservados ahora (solo Red Eléctrica).
+  final int? occupied;
+
+  /// Cargadores averiados ahora (solo Red Eléctrica).
+  final int? outOfOrder;
+
+  /// El operador cobra también por tiempo, por conexión o por aparcar.
+  final bool extraFees;
+
+  /// Cuándo los bajó GasoCan de la fuente.
+  final DateTime? syncedAt;
 
   /// Distancia en km desde la posición del usuario (en línea recta).
   double? distance;
@@ -87,7 +131,7 @@ class ChargingPoint {
   bool has(ConnectorKind kind) => connectors.any((c) => c.kind == kind);
 
   factory ChargingPoint.fromJson(Map<String, dynamic> json) => ChargingPoint(
-    id: (json['id'] as num).toInt(),
+    id: json['id'].toString(),
     name: nombrePropio((json['name'] as String?)?.trim() ?? ''),
     operator: json['operator'] as String?,
     address: (json['address'] as String?)?.trim(),
@@ -108,7 +152,16 @@ class ChargingPoint {
     priceKwh: (json['price_kwh'] as num?)?.toDouble(),
     free: json['free'] == true,
     usageCost: (json['usage_cost'] as String?)?.trim(),
-    updated: DateTime.tryParse(json['ocm_updated'] as String? ?? ''),
+    updated: DateTime.tryParse(
+      (json['source_updated'] ?? json['ocm_updated']) as String? ?? '',
+    ),
+    source: _source(json['source']) ?? ChargingSource.ocm,
+    priceSource: _source(json['price_source']),
+    available: (json['available'] as num?)?.toInt(),
+    occupied: (json['occupied'] as num?)?.toInt(),
+    outOfOrder: (json['out_of_order'] as num?)?.toInt(),
+    extraFees: json['extra_fees'] == true,
+    syncedAt: DateTime.tryParse(json['synced_at'] as String? ?? ''),
   );
 
   void calcDistance(double lat, double lon) {
@@ -123,8 +176,8 @@ class ChargingPoint {
   }
 }
 
-/// Lee los puntos de recarga de Supabase. Son ~900 en Canarias y cambian una
-/// vez al día, así que se guardan en memoria una hora.
+/// Lee los puntos de recarga de Supabase. Son ~1.000 en Canarias y se
+/// actualizan cada 15 minutos, así que se guardan en memoria 5 minutos.
 class ChargingRepository {
   ChargingRepository({SupabaseClient? client}) : _client = client;
 
@@ -135,18 +188,36 @@ class ChargingRepository {
   Future<List<ChargingPoint>> all({bool forceRefresh = false}) async {
     final fresh =
         _cachedAt != null &&
-        DateTime.now().difference(_cachedAt!) < const Duration(hours: 1);
+        DateTime.now().difference(_cachedAt!) < const Duration(minutes: 5);
     if (!forceRefresh && fresh && _cache != null) return _cache!;
     final client = _client ?? Supabase.instance.client;
-    final rows = await client
-        .from('charging_points')
-        .select(
-          'id, name, operator, address, town, latitude, longitude, connectors, '
-          'max_kw, points, status, price_kwh, free, usage_cost, ocm_updated',
-        )
-        .limit(5000);
+    // Supabase da como mucho 1.000 filas por petición: se piden por páginas.
+    const page = 1000;
+    final rows = <Map<String, dynamic>>[];
+    while (true) {
+      final batch = await client
+          .from('charging_stations')
+          .select(
+            'id, source, name, operator, address, town, latitude, longitude, '
+            'connectors, max_kw, points, available, occupied, out_of_order, '
+            'status, price_kwh, free, price_source, extra_fees, usage_cost, '
+            'source_updated, synced_at',
+          )
+          .order('id')
+          .range(rows.length, rows.length + page - 1);
+      rows.addAll(batch);
+      if (batch.length < page || rows.length >= 10000) break;
+    }
     _cache = rows.map(ChargingPoint.fromJson).toList();
     _cachedAt = DateTime.now();
+    lastReveSync = _cache!
+        .where((p) => p.source == ChargingSource.reve)
+        .map((p) => p.syncedAt)
+        .whereType<DateTime>()
+        .fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
     return _cache!;
   }
+
+  /// Última vez que se bajaron los datos de Red Eléctrica (para citarla).
+  static DateTime? lastReveSync;
 }

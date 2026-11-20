@@ -32,6 +32,61 @@ String evDate(AppLocalizations l10n, DateTime date) {
   return DateFormat.yMd(locale).format(date.toLocal());
 }
 
+/// Fecha y hora cortas: «20/11/2026 13:05».
+String evDateTime(AppLocalizations l10n, DateTime date) {
+  final locale = l10n.localeName == 'en' ? 'en_GB' : l10n.localeName;
+  return DateFormat.yMd(locale).add_Hm().format(date.toLocal());
+}
+
+/// Ocupación ahora (solo Red Eléctrica): «2 libres · 1 ocupado · 1 averiado».
+class ChargingOccupancy extends StatelessWidget {
+  const ChargingOccupancy({super.key, required this.point, this.style});
+
+  final ChargingPoint point;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final base = style ?? theme.textTheme.bodyMedium;
+    final free = point.available ?? 0;
+    final busy = point.occupied ?? 0;
+    final broken = point.outOfOrder ?? 0;
+    if (point.available == null || free + busy + broken == 0) {
+      return const SizedBox.shrink();
+    }
+    final parts = <TextSpan>[
+      if (free > 0)
+        TextSpan(
+          text: l10n.evFreeCount(free),
+          style: const TextStyle(color: evColor, fontWeight: FontWeight.w600),
+        ),
+      if (busy > 0)
+        TextSpan(
+          text: l10n.evBusyCount(busy),
+          style: TextStyle(color: Colors.orange.shade800),
+        ),
+      if (broken > 0)
+        TextSpan(
+          text: l10n.evBrokenCount(broken),
+          style: TextStyle(color: theme.colorScheme.error),
+        ),
+    ];
+    return Text.rich(
+      TextSpan(
+        style: base,
+        children: [
+          for (var i = 0; i < parts.length; i++) ...[
+            if (i > 0) const TextSpan(text: ' · '),
+            parts[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 /// Precio grande de un punto de recarga, como el de las gasolineras.
 class ChargingPriceSummary extends StatelessWidget {
   const ChargingPriceSummary({super.key, required this.point});
@@ -116,15 +171,33 @@ class ConnectorChips extends StatelessWidget {
   }
 }
 
-/// Atribución obligatoria de Open Charge Map (CC BY 4.0).
-class OcmAttribution extends StatelessWidget {
-  const OcmAttribution({super.key});
+/// Fuentes obligatorias: Red Eléctrica (con la fecha de los datos, lo piden
+/// sus condiciones) y Open Charge Map (CC BY 4.0). Con [point], solo las de
+/// ese punto.
+class ChargingAttribution extends StatelessWidget {
+  const ChargingAttribution({super.key, this.point});
+
+  final ChargingPoint? point;
 
   @override
-  Widget build(BuildContext context) => Text(
-    context.l10n.evAttribution,
-    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final p = point;
+    final reveDate = p == null
+        ? ChargingRepository.lastReveSync
+        : (p.source == ChargingSource.reve ? p.syncedAt : null);
+    final ocm =
+        p == null ||
+        p.source == ChargingSource.ocm ||
+        p.priceSource == ChargingSource.ocm;
+    return Text(
+      [
+        if (reveDate != null) l10n.evSourceReve(evDateTime(l10n, reveDate)),
+        if (ocm) l10n.evAttribution,
+      ].join('\n'),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
 }

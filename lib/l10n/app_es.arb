@@ -456,5 +456,47 @@
   "evConnType2": "Tipo 2",
   "evConnType1": "Tipo 1",
   "evConnOther": "Otro",
-  "evListTitle": "Puntos de carga"
+  "evListTitle": "Puntos de carga",
+  "evSourceReve": "Fuente: Red Eléctrica de España (mapaREVE), datos del {date}.",
+  "@evSourceReve": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "evPriceReve": "Precio publicado por el operador, impuestos incluidos, para esta hora. Puede cambiar según la franja horaria.",
+  "evExtraFees": "Este operador cobra también por tiempo, por conexión o por dejar el coche aparcado.",
+  "evUpdatedAt": "Actualizado · {date}",
+  "@evUpdatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "evFreeCount": "{count, plural, =1{1 libre} other{{count} libres}}",
+  "@evFreeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evBusyCount": "{count, plural, =1{1 ocupado} other{{count} ocupados}}",
+  "@evBusyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evBrokenCount": "{count, plural, =1{1 averiado} other{{count} averiados}}",
+  "@evBrokenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

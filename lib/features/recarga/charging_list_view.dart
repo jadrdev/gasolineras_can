@@ -184,7 +184,7 @@ class ChargingListViewState extends State<ChargingListView> {
                               ),
                               const SizedBox(height: 16),
                             ],
-                            const OcmAttribution(),
+                            const ChargingAttribution(),
                           ],
                         ),
                       );
@@ -266,7 +266,13 @@ class ChargingListViewState extends State<ChargingListView> {
               const SizedBox(height: 8),
               if (point.distance != null)
                 Text(l10n.stationStraightLineKm(decimal(point.distance!, 1))),
-              if (point.status == ChargingStatus.notOperational)
+              if (point.available != null &&
+                  point.status != ChargingStatus.notOperational)
+                ChargingOccupancy(
+                  point: point,
+                  style: theme.textTheme.bodySmall,
+                )
+              else if (point.status == ChargingStatus.notOperational)
                 Text(
                   l10n.evOutOfService,
                   style: theme.textTheme.bodySmall?.copyWith(

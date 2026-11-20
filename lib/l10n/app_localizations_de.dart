@@ -825,4 +825,55 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get evListTitle => 'Ladestationen';
+
+  @override
+  String evSourceReve(String date) {
+    return 'Quelle: Red Eléctrica de España (mapaREVE), Daten vom $date.';
+  }
+
+  @override
+  String get evPriceReve =>
+      'Vom Betreiber veröffentlichter Preis inkl. Steuern für diese Uhrzeit. Er kann sich je nach Zeitfenster ändern.';
+
+  @override
+  String get evExtraFees =>
+      'Dieser Betreiber berechnet auch Zeit, Ladevorgang oder Parken.';
+
+  @override
+  String evUpdatedAt(String date) {
+    return 'Aktualisiert · $date';
+  }
+
+  @override
+  String evFreeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frei',
+      one: '1 frei',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evBusyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belegt',
+      one: '1 belegt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String evBrokenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count defekt',
+      one: '1 defekt',
+    );
+    return '$_temp0';
+  }
 }
