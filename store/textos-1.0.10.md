@@ -1,10 +1,11 @@
 # Textos de la 1.0.10
 
-La 1.0.10 (build 26) trae los puntos de carga de Red Eléctrica:
+La 1.0.10 (build 27) trae los puntos de carga de Red Eléctrica:
 
 - Datos oficiales de mapaREVE (Red Eléctrica de España), actualizados cada 15 minutos: precio publicado por cada operador para la franja horaria y la potencia de cada conector, y cargadores libres, ocupados o averiados. Open Charge Map completa los puntos que no están en REVE.
 - Botón ⚡/⛽ arriba, junto a la ubicación, para pasar de gasolineras a puntos de carga y volver.
 - En iPhone, la barra de abajo con las medidas de las apps de Apple (cápsula de iOS 26; barra clásica en iOS anteriores).
+- iPhone Duo: cerrado, la barra va en la franja de la cámara como el dock; abierto, la app llena la pantalla (sin `UIRequiresFullScreen`, con horizontal) y muestra lista y ficha a la vez. Capturas en `store/app-store/iphone-duo/`.
 
 Servidor: función `charging-stations` y tabla `charging_stations` en producción desde el 20/11 (ver `supabase/puntos_recarga_reve.sql`). Las versiones anteriores siguen con `charging_points`.
 
@@ -12,20 +13,20 @@ Servidor: función `charging-stations` y tabla `charging_stations` en producció
 
 Apple no acepta emojis en las novedades.
 
-- **es:** `Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En iPhone, barra de abajo renovada.`
-- **en:** `Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On iPhone, a refreshed bottom bar.`
-- **de:** `Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf dem iPhone eine überarbeitete untere Leiste.`
+- **es:** `Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En iPhone, barra de abajo renovada. Adaptada al iPhone Duo: abierto, ves la lista y la ficha a la vez.`
+- **en:** `Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On iPhone, a refreshed bottom bar. Ready for iPhone Duo: unfolded, you see the list and the details side by side.`
+- **de:** `Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf dem iPhone eine überarbeitete untere Leiste. Angepasst an das iPhone Duo: aufgeklappt siehst du Liste und Details nebeneinander.`
 
 **Google Play**
 ```
 <es-ES>
-Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En iPhone, barra de abajo renovada.
+Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En iPhone, barra de abajo renovada. En pantallas grandes y plegables, la lista y la ficha a la vez.
 </es-ES>
 <en-GB>
-Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On iPhone, a refreshed bottom bar.
+Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On iPhone, a refreshed bottom bar. On large and foldable screens, the list and the details side by side.
 </en-GB>
 <de-DE>
-Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf dem iPhone eine überarbeitete untere Leiste.
+Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf dem iPhone eine überarbeitete untere Leiste. Auf großen und faltbaren Bildschirmen Liste und Details nebeneinander.
 </de-DE>
 ```
 
