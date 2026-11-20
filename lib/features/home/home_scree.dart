@@ -119,7 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // de 62 pt a 21 pt de los lados y del borde de abajo; antes, la clásica
     // de 49 pt de lado a lado más el hueco del indicador de inicio.
     final floating = ios && _iosMajor() >= 26;
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final safe = MediaQuery.paddingOf(context);
+    final safeBottom = safe.bottom;
     final textExtra = (MediaQuery.textScalerOf(context).scale(10) - 10).clamp(
       0.0,
       24.0,
@@ -135,9 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Padding(
               padding: floating
                   ? EdgeInsets.fromLTRB(
-                      21,
+                      21 + safe.left,
                       0,
-                      21,
+                      21 + safe.right,
                       safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 8,
                     )
                   : EdgeInsets.zero,

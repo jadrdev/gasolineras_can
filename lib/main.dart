@@ -87,7 +87,16 @@ class _MyAppState extends State<MyApp> {
           routerConfig: _router,
           builder: (context, child) {
             usarIdiomaParaNumeros(Localizations.localeOf(context).languageCode);
-            return child!;
+            // Zona segura a los lados: con el iPhone Duo cerrado la cámara y
+            // la barra de estado van en una franja a la derecha, y en
+            // horizontal la isla queda a un lado. Arriba y abajo lo resuelve
+            // cada pantalla (AppBar y barra de pestañas).
+            final safe = MediaQuery.paddingOf(context);
+            if (safe.left == 0 && safe.right == 0) return child!;
+            return ColoredBox(
+              color: Theme.of(context).colorScheme.surface,
+              child: SafeArea(top: false, bottom: false, child: child!),
+            );
           },
         );
       },

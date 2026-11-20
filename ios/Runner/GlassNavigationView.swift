@@ -23,6 +23,7 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
   private var accessibilityObserver: NSObjectProtocol?
   private let separator = UIView()
   private var stackBottom: NSLayoutConstraint!
+  private var separatorHeight: NSLayoutConstraint!
 
   init(frame: CGRect, id: Int64, messenger: FlutterBinaryMessenger, configuration: [String: Any]) {
     let rootView = RootView(frame: frame)
@@ -34,6 +35,8 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       guard let self else { return }
       let floating = self.configuration["floating"] as? Bool ?? true
       self.surface.layer.cornerRadius = floating ? self.root.bounds.height / 2 : 0
+      // Un píxel de la pantalla en la que está ahora (cambia al plegar el iPhone Duo).
+      self.separatorHeight.constant = 1 / max(self.root.traitCollection.displayScale, 1)
     }
     root.backgroundColor = .clear
     surface.translatesAutoresizingMaskIntoConstraints = false
@@ -48,12 +51,13 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
     stack.spacing = 0
     stack.translatesAutoresizingMaskIntoConstraints = false
     surface.contentView.addSubview(stack)
+    separatorHeight = separator.heightAnchor.constraint(equalToConstant: 1 / max(root.traitCollection.displayScale, 1))
     stackBottom = stack.bottomAnchor.constraint(equalTo: surface.contentView.bottomAnchor, constant: -4)
     NSLayoutConstraint.activate([
       separator.leadingAnchor.constraint(equalTo: root.leadingAnchor),
       separator.trailingAnchor.constraint(equalTo: root.trailingAnchor),
       separator.topAnchor.constraint(equalTo: root.topAnchor),
-      separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
+      separatorHeight,
       surface.leadingAnchor.constraint(equalTo: root.leadingAnchor),
       surface.trailingAnchor.constraint(equalTo: root.trailingAnchor),
       surface.topAnchor.constraint(equalTo: root.topAnchor),
@@ -85,6 +89,19 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
   private final class RootView: UIView {
     var onLayout: (() -> Void)?
     override func layoutSubviews() { super.layoutSubviews(); onLayout?() }
+
+    override init(frame: CGRect) {
+      super.init(frame: frame)
+      // Al pasar de una pantalla a otra del iPhone Duo puede cambiar la escala:
+      // vuelve a medir la línea fina. En iOS 15 y 16 se lee en el siguiente layout.
+      if #available(iOS 17.0, *) {
+        registerForTraitChanges([UITraitDisplayScale.self]) { (view: UIView, _: UITraitCollection) in
+          view.setNeedsLayout()
+        }
+      }
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
   }
 
   private func update() {
