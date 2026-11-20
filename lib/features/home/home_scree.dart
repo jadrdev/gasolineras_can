@@ -123,6 +123,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final safe = MediaQuery.paddingOf(context);
     final safeBottom = safe.bottom;
     final lateral = safe.left < safe.right ? safe.left : safe.right;
+    // iPhone Duo cerrado: la cámara y la barra de estado van en una franja
+    // vertical a un lado y el dock del sistema va en esa franja, abajo. La
+    // barra de pestañas hace lo mismo: cápsula vertical solo con iconos.
+    final size = MediaQuery.sizeOf(context);
+    final franjaDerecha = safe.right >= 60;
+    final franja = franjaDerecha ? safe.right : safe.left;
+    final enFranja = floating && franja >= 60 && size.height > size.width;
+    final abajo = safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 21.0;
     final textExtra = (MediaQuery.textScalerOf(context).scale(10) - 10).clamp(
       0.0,
       24.0,
@@ -135,10 +143,35 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: ios,
       // La lista se aparta de la cámara (iPhone Duo cerrado); la barra de
       // abajo no, para quedar centrada en la pantalla entera.
-      body: MargenLateral(
-        child: IndexedStack(index: pageIndex, children: pages),
+      body: Stack(
+        children: [
+          MargenLateral(
+            child: IndexedStack(index: pageIndex, children: pages),
+          ),
+          if (enFranja)
+            Positioned(
+              bottom: abajo,
+              right: franjaDerecha ? (franja - 62) / 2 : null,
+              left: franjaDerecha ? null : (franja - 62) / 2,
+              width: 62,
+              height: items.length * 58.0 + 8,
+              child: IosGlassNavigationBar(
+                labels: items.map((item) => item.label!).toList(),
+                symbols: [
+                  'fuelpump',
+                  if (isLoggedIn) 'star',
+                  'person.crop.circle',
+                ],
+                selectedIndex: bottomNavIndex,
+                vertical: true,
+                onSelected: select,
+              ),
+            ),
+        ],
       ),
-      bottomNavigationBar: ios
+      bottomNavigationBar: enFranja
+          ? null
+          : ios
           ? Padding(
               padding: floating
                   ? EdgeInsets.fromLTRB(

@@ -24,6 +24,10 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
   private let separator = UIView()
   private var stackBottom: NSLayoutConstraint!
   private var separatorHeight: NSLayoutConstraint!
+  /// Pestañas con las que se crearon los botones. Solo se rehacen si cambian:
+  /// sustituir un botón entre que el dedo baja y sube pierde el toque, y
+  /// Flutter pide actualizar muchas veces seguidas al arrancar.
+  private var builtFor: [String] = []
 
   init(frame: CGRect, id: Int64, messenger: FlutterBinaryMessenger, configuration: [String: Any]) {
     let rootView = RootView(frame: frame)
@@ -34,7 +38,7 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
     rootView.onLayout = { [weak self] in
       guard let self else { return }
       let floating = self.configuration["floating"] as? Bool ?? true
-      self.surface.layer.cornerRadius = floating ? self.root.bounds.height / 2 : 0
+      self.surface.layer.cornerRadius = floating ? min(self.root.bounds.width, self.root.bounds.height) / 2 : 0
       // Un píxel de la pantalla en la que está ahora (cambia al plegar el iPhone Duo).
       self.separatorHeight.constant = 1 / max(self.root.traitCollection.displayScale, 1)
     }
@@ -110,7 +114,10 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
     // con línea fina arriba y el hueco del indicador de inicio debajo.
     let floating = configuration["floating"] as? Bool ?? true
     let bottomInset = CGFloat((configuration["bottomInset"] as? NSNumber)?.doubleValue ?? 0)
-    surface.layer.cornerRadius = floating ? root.bounds.height / 2 : 0
+    // En columna (iPhone Duo cerrado) va como el dock: solo iconos.
+    let vertical = configuration["vertical"] as? Bool ?? false
+    stack.axis = vertical ? .vertical : .horizontal
+    surface.layer.cornerRadius = floating ? min(root.bounds.width, root.bounds.height) / 2 : 0
     separator.isHidden = floating
     stackBottom.constant = floating ? -4 : -(bottomInset + 1)
     root.overrideUserInterfaceStyle = configuration["dark"] as? Bool == true ? .dark : .light
@@ -134,11 +141,25 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
     let labels = configuration["labels"] as? [String] ?? []
     let symbols = configuration["symbols"] as? [String] ?? []
     let selected = configuration["selectedIndex"] as? Int ?? 0
-    for view in stack.arrangedSubviews { stack.removeArrangedSubview(view); view.removeFromSuperview() }
+    let key = labels + symbols + [vertical ? "v" : "h"]
+    if key != builtFor {
+      builtFor = key
+      for view in stack.arrangedSubviews { stack.removeArrangedSubview(view); view.removeFromSuperview() }
+      for index in labels.indices {
+        let button = UIButton(type: .system)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
+        button.accessibilityIdentifier = "navigation-\(index)"
+        button.addAction(UIAction { [weak self] _ in
+          self?.channel.invokeMethod("select", arguments: index)
+        }, for: .touchUpInside)
+        stack.addArrangedSubview(button)
+      }
+    }
     for (index, label) in labels.enumerated() {
-      let button = UIButton(type: .system)
+      guard index < stack.arrangedSubviews.count,
+            let button = stack.arrangedSubviews[index] as? UIButton else { continue }
       var style = UIButton.Configuration.plain()
-      style.title = label
+      style.title = vertical ? nil : label
       style.image = UIImage(systemName: index < symbols.count ? symbols[index] : "circle")
       style.imagePlacement = .top
       style.imagePadding = floating ? 3 : 2
@@ -156,14 +177,8 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       style.background.backgroundColor = floating && index == selected ? tint.withAlphaComponent(0.12) : .clear
       style.background.cornerRadius = 27
       button.configuration = style
-      button.titleLabel?.adjustsFontForContentSizeCategory = true
       button.accessibilityLabel = label
       button.accessibilityTraits = index == selected ? [.button, .selected] : [.button]
-      button.accessibilityIdentifier = "navigation-\(index)"
-      button.addAction(UIAction { [weak self] _ in
-        self?.channel.invokeMethod("select", arguments: index)
-      }, for: .touchUpInside)
-      stack.addArrangedSubview(button)
     }
   }
 

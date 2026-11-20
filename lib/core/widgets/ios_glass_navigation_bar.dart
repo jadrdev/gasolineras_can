@@ -14,6 +14,9 @@ class IosGlassNavigationBar extends StatefulWidget {
 
   /// Hueco del indicador de inicio dentro de la barra clásica.
   final double bottomInset;
+
+  /// En columna y solo con iconos, como el dock del iPhone Duo cerrado.
+  final bool vertical;
   const IosGlassNavigationBar({
     super.key,
     required this.labels,
@@ -22,6 +25,7 @@ class IosGlassNavigationBar extends StatefulWidget {
     required this.onSelected,
     this.floating = true,
     this.bottomInset = 0,
+    this.vertical = false,
   });
   @override
   State<IosGlassNavigationBar> createState() => _IosGlassNavigationBarState();
@@ -39,6 +43,7 @@ class _IosGlassNavigationBarState extends State<IosGlassNavigationBar> {
     'tint': Theme.of(context).colorScheme.primary.toARGB32(),
     'floating': widget.floating,
     'bottomInset': widget.bottomInset,
+    'vertical': widget.vertical,
   };
 
   @override
