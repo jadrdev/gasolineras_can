@@ -1503,6 +1503,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver gasolineras'**
   String get evSwitchToFuel;
+
+  /// No description provided for @stationPickOne.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una gasolinera para ver su ficha.'**
+  String get stationPickOne;
+
+  /// No description provided for @evPickOne.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un punto de carga para ver su ficha.'**
+  String get evPickOne;
 }
 
 class _AppLocalizationsDelegate

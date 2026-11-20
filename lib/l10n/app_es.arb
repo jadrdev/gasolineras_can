@@ -500,5 +500,7 @@
     }
   },
   "evSwitchToElectric": "Ver puntos de carga",
-  "evSwitchToFuel": "Ver gasolineras"
+  "evSwitchToFuel": "Ver gasolineras",
+  "stationPickOne": "Elige una gasolinera para ver su ficha.",
+  "evPickOne": "Elige un punto de carga para ver su ficha."
 }

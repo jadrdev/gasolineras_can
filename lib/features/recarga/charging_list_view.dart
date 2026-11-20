@@ -8,6 +8,7 @@ import 'charging_detail_page.dart';
 import 'charging_map_page.dart';
 import 'charging_point.dart';
 import 'charging_widgets.dart';
+import '../../core/widgets/margen_lateral.dart';
 
 /// Lista de puntos de recarga. Ocupa el sitio de la lista de gasolineras
 /// cuando se elige «⚡ Eléctrico» en el selector de combustible.
@@ -19,6 +20,8 @@ class ChargingListView extends StatefulWidget {
     required this.nearby,
     required this.sortByPrice,
     this.repository,
+    this.onSelect,
+    this.selected,
   });
 
   final Position? position;
@@ -28,6 +31,12 @@ class ChargingListView extends StatefulWidget {
   final bool nearby;
   final bool sortByPrice;
   final ChargingRepository? repository;
+
+  /// Pantalla ancha: la ficha sale al lado en vez de abrirse encima.
+  final ValueChanged<ChargingPoint>? onSelect;
+
+  /// El que se ve al lado ahora (se resalta en la lista).
+  final ChargingPoint? selected;
 
   @override
   State<ChargingListView> createState() => ChargingListViewState();
@@ -155,6 +164,9 @@ class ChargingListViewState extends State<ChargingListView> {
                             FocusScope.of(context).unfocus();
                             Navigator.of(context).push(
                               MaterialPageRoute(
+                                settings: const RouteSettings(
+                                  name: rutaATodoElAncho,
+                                ),
                                 builder: (_) => ChargingMapPage(points: points),
                               ),
                             );
@@ -237,11 +249,18 @@ class ChargingListViewState extends State<ChargingListView> {
     ].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      color: widget.selected?.id == point.id
+          ? theme.colorScheme.secondaryContainer
+          : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ChargingDetailPage(point: point)),
-        ),
+        onTap: () => widget.onSelect != null
+            ? widget.onSelect!(point)
+            : Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ChargingDetailPage(point: point),
+                ),
+              ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(

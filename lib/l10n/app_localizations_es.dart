@@ -884,4 +884,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get evSwitchToFuel => 'Ver gasolineras';
+
+  @override
+  String get stationPickOne => 'Elige una gasolinera para ver su ficha.';
+
+  @override
+  String get evPickOne => 'Elige un punto de carga para ver su ficha.';
 }

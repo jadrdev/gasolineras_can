@@ -1,3 +1,6 @@
+import '../../recarga/charging_point.dart';
+import '../../recarga/charging_detail_page.dart';
+import 'dart:math' show min;
 import 'package:gasolineras_can/core/format.dart';
 import 'dart:async';
 import 'package:material_ui/material_ui.dart';
@@ -23,6 +26,7 @@ import 'details/gas_station_details.dart';
 import 'map/gas_station_map_page.dart';
 import 'station_search_field.dart';
 import '../../recarga/charging_list_view.dart';
+import '../../../core/widgets/margen_lateral.dart';
 
 enum SortBy { precio, distancia }
 
@@ -52,6 +56,12 @@ class _GasStationListPageState extends State<GasStationListPage> {
   FuelType _fuel = FuelType.g95;
   // «⚡ Eléctrico»: la lista pasa a ser de puntos de recarga.
   bool _electric = false;
+
+  /// Pantalla ancha (iPhone Duo abierto): lista a la izquierda y la ficha
+  /// de lo que se toque a la derecha, en vez de abrirla encima.
+  bool _dosPaneles = false;
+  GasStation? _seleccionada;
+  ChargingPoint? _puntoSeleccionado;
   final _chargingKey = GlobalKey<ChargingListViewState>();
   double _tankLiters = 50;
   Position? _position;
@@ -231,7 +241,71 @@ class _GasStationListPageState extends State<GasStationListPage> {
   }
 
   @override
-  Widget build(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      _dosPaneles = constraints.maxWidth >= 840;
+      final lista = _lista(context);
+      if (!_dosPaneles) return MargenLateral(child: lista);
+      return Row(
+        children: [
+          SizedBox(width: min(440, constraints.maxWidth * 0.45), child: lista),
+          const VerticalDivider(width: 1, thickness: 1),
+          Expanded(child: _detalle(context)),
+        ],
+      );
+    },
+  );
+
+  /// Panel derecho en pantalla ancha: la ficha elegida o un aviso.
+  Widget _detalle(BuildContext context) {
+    final l10n = context.l10n;
+    if (_electric) {
+      final point = _puntoSeleccionado;
+      if (point != null) {
+        return ChargingDetailPage(key: ValueKey(point.id), point: point);
+      }
+      return _eligeUna(Icons.ev_station_outlined, l10n.evPickOne);
+    }
+    final station = _seleccionada;
+    if (station != null) {
+      return GasStationDetailPage(
+        key: ValueKey(station.id),
+        station: station,
+        favoriteRepository: _favorites,
+        directionsRepository: DirectionsService(AppConfig.googleMapsApiKey),
+        preferredFuel: _fuel,
+        tankLiters: _tankLiters,
+      );
+    }
+    return _eligeUna(Icons.local_gas_station_outlined, l10n.stationPickOne);
+  }
+
+  Widget _eligeUna(IconData icon, String text) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(height: 12),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _lista(
     BuildContext context,
   ) => BlocBuilder<GasStationBloc, GasStationState>(
     bloc: _bloc,
@@ -422,6 +496,10 @@ class _GasStationListPageState extends State<GasStationListPage> {
                       _query.trim().isEmpty &&
                       _position != null,
                   sortByPrice: _sort == SortBy.precio,
+                  onSelect: _dosPaneles
+                      ? (point) => setState(() => _puntoSeleccionado = point)
+                      : null,
+                  selected: _dosPaneles ? _puntoSeleccionado : null,
                 ),
               ),
             if (!_electric && state is GasStationLoaded && state.offline)
@@ -475,6 +553,9 @@ class _GasStationListPageState extends State<GasStationListPage> {
                               FocusScope.of(context).unfocus();
                               Navigator.of(context).push(
                                 MaterialPageRoute(
+                                  settings: const RouteSettings(
+                                    name: rutaATodoElAncho,
+                                  ),
                                   builder: (_) => GasStationMapPage(
                                     stations: filtered,
                                     preferredFuel: _fuel,
@@ -568,21 +649,26 @@ class _GasStationListPageState extends State<GasStationListPage> {
         DateTime.now().difference(station.lastUpdate!).inHours >= 48;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      color: _dosPaneles && _seleccionada?.id == station.id
+          ? Theme.of(context).colorScheme.secondaryContainer
+          : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => GasStationDetailPage(
-              station: station,
-              favoriteRepository: _favorites,
-              directionsRepository: DirectionsService(
-                AppConfig.googleMapsApiKey,
+        onTap: () => _dosPaneles
+            ? setState(() => _seleccionada = station)
+            : Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => GasStationDetailPage(
+                    station: station,
+                    favoriteRepository: _favorites,
+                    directionsRepository: DirectionsService(
+                      AppConfig.googleMapsApiKey,
+                    ),
+                    preferredFuel: _fuel,
+                    tankLiters: _tankLiters,
+                  ),
+                ),
               ),
-              preferredFuel: _fuel,
-              tankLiters: _tankLiters,
-            ),
-          ),
-        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(

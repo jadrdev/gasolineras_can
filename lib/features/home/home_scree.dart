@@ -79,11 +79,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final isLoggedIn = user != null;
     final pages = <Widget>[
       GasStationListPage(key: ValueKey('stations-${user?.id}')),
-      FavoritesPage(
-        key: ValueKey('favorites-${user?.id}'),
-        repository: _favorites,
+      // Gasolineras decide su ancho (dos paneles en pantalla ancha); las
+      // demás van en la columna centrada.
+      MargenLateral(
+        child: FavoritesPage(
+          key: ValueKey('favorites-${user?.id}'),
+          repository: _favorites,
+        ),
       ),
-      ProfilePage(key: ValueKey('profile-${user?.id}')),
+      MargenLateral(child: ProfilePage(key: ValueKey('profile-${user?.id}'))),
     ];
 
     // Los títulos van traducidos; en iOS la barra nativa los recibe de aquí.
@@ -130,6 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final franjaDerecha = safe.right >= 60;
     final franja = franjaDerecha ? safe.right : safe.left;
     final enFranja = floating && franja >= 60 && size.height > size.width;
+    // En pantallas anchas (Duo abierto, iPhone en horizontal) la cápsula no
+    // se estira: como mucho 440 pt, centrada.
+    final anchoBarra = size.width - 2 * (21 + lateral);
+    final sobra = anchoBarra > 440 ? (anchoBarra - 440) / 2 : 0.0;
     final abajo = safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 21.0;
     final textExtra = (MediaQuery.textScalerOf(context).scale(10) - 10).clamp(
       0.0,
@@ -146,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           MargenLateral(
+            anchoMaximo: null,
             child: IndexedStack(index: pageIndex, children: pages),
           ),
           if (enFranja)
@@ -177,9 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? EdgeInsets.fromLTRB(
                       // Igual a los dos lados: centrada en la pantalla
                       // aunque solo haya margen en uno (iPhone Duo cerrado).
-                      21 + lateral,
+                      21 + lateral + sobra,
                       0,
-                      21 + lateral,
+                      21 + lateral + sobra,
                       safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 8,
                     )
                   : EdgeInsets.zero,

@@ -882,4 +882,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get evSwitchToFuel => 'Tankstellen anzeigen';
+
+  @override
+  String get stationPickOne =>
+      'Wähle eine Tankstelle, um die Details zu sehen.';
+
+  @override
+  String get evPickOne => 'Wähle einen Ladepunkt, um die Details zu sehen.';
 }

@@ -875,4 +875,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get evSwitchToFuel => 'Show petrol stations';
+
+  @override
+  String get stationPickOne => 'Pick a petrol station to see its details.';
+
+  @override
+  String get evPickOne => 'Pick a charging point to see its details.';
 }

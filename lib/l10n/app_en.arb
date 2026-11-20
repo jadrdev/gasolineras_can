@@ -233,5 +233,7 @@
   "evBusyCount": "{count, plural, =1{1 in use} other{{count} in use}}",
   "evBrokenCount": "{count, plural, =1{1 out of order} other{{count} out of order}}",
   "evSwitchToElectric": "Show charging points",
-  "evSwitchToFuel": "Show petrol stations"
+  "evSwitchToFuel": "Show petrol stations",
+  "stationPickOne": "Pick a petrol station to see its details.",
+  "evPickOne": "Pick a charging point to see its details."
 }

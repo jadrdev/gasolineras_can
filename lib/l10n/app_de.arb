@@ -233,5 +233,7 @@
   "evBusyCount": "{count, plural, =1{1 belegt} other{{count} belegt}}",
   "evBrokenCount": "{count, plural, =1{1 defekt} other{{count} defekt}}",
   "evSwitchToElectric": "Ladepunkte anzeigen",
-  "evSwitchToFuel": "Tankstellen anzeigen"
+  "evSwitchToFuel": "Tankstellen anzeigen",
+  "stationPickOne": "Wähle eine Tankstelle, um die Details zu sehen.",
+  "evPickOne": "Wähle einen Ladepunkt, um die Details zu sehen."
 }
