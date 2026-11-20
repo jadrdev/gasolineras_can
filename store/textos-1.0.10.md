@@ -48,5 +48,5 @@ Nombre, subtítulo, palabras clave y capturas: los mismos de la 1.0.8 (`store/te
 
 ## Estado
 
-- **App Store:** build 26 subida el 20/11 (procesándose); versión 1.0.10 creada con novedades, descripción y nota para el revisor en es/en-GB/de. **Sin enviar a revisión.**
-- **Google Play:** AAB 1.0.10 (26) compilado el 20/11 (`build/app/outputs/bundle/release/app-release.aab`, 62,5 MB, con `.env`). Falta subirlo a Producción con las notas.
+- **App Store:** build 27 (con el iPhone Duo) en la versión 1.0.10, novedades en es/en-GB/de, descripción y nota para el revisor actualizadas, 3 capturas del iPhone Duo. **Enviada a revisión por Joshua el 20/11 a las 10:18.** (La build 26 quedó sin usar.)
+- **Google Play:** AAB 27 (1.0.10) en un borrador de Producción con notas en es-ES/en-GB/de-DE («Ya se puede publicar», mismos dispositivos). Guardado en Resumen de publicación, **sin enviar**.
