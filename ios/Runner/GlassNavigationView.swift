@@ -21,24 +21,39 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
   private let channel: FlutterMethodChannel
   private var configuration: [String: Any]
   private var accessibilityObserver: NSObjectProtocol?
+  private let separator = UIView()
+  private var stackBottom: NSLayoutConstraint!
 
   init(frame: CGRect, id: Int64, messenger: FlutterBinaryMessenger, configuration: [String: Any]) {
-    root = UIView(frame: frame)
+    let rootView = RootView(frame: frame)
+    root = rootView
     channel = FlutterMethodChannel(name: "gasocan/glass-navigation/\(id)", binaryMessenger: messenger)
     self.configuration = configuration
     super.init()
+    rootView.onLayout = { [weak self] in
+      guard let self else { return }
+      let floating = self.configuration["floating"] as? Bool ?? true
+      self.surface.layer.cornerRadius = floating ? self.root.bounds.height / 2 : 0
+    }
     root.backgroundColor = .clear
     surface.translatesAutoresizingMaskIntoConstraints = false
-    surface.layer.cornerRadius = 26
     surface.layer.cornerCurve = .continuous
     surface.clipsToBounds = true
     root.addSubview(surface)
+    separator.translatesAutoresizingMaskIntoConstraints = false
+    separator.backgroundColor = .separator
+    root.addSubview(separator)
     stack.axis = .horizontal
     stack.distribution = .fillEqually
-    stack.spacing = 4
+    stack.spacing = 0
     stack.translatesAutoresizingMaskIntoConstraints = false
     surface.contentView.addSubview(stack)
+    stackBottom = stack.bottomAnchor.constraint(equalTo: surface.contentView.bottomAnchor, constant: -4)
     NSLayoutConstraint.activate([
+      separator.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+      separator.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+      separator.topAnchor.constraint(equalTo: root.topAnchor),
+      separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
       surface.leadingAnchor.constraint(equalTo: root.leadingAnchor),
       surface.trailingAnchor.constraint(equalTo: root.trailingAnchor),
       surface.topAnchor.constraint(equalTo: root.topAnchor),
@@ -46,7 +61,7 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       stack.leadingAnchor.constraint(equalTo: surface.contentView.leadingAnchor, constant: 6),
       stack.trailingAnchor.constraint(equalTo: surface.contentView.trailingAnchor, constant: -6),
       stack.topAnchor.constraint(equalTo: surface.contentView.topAnchor, constant: 4),
-      stack.bottomAnchor.constraint(equalTo: surface.contentView.bottomAnchor, constant: -4),
+      stackBottom,
     ])
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self else { result(nil); return }
@@ -66,7 +81,21 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
 
   func view() -> UIView { root }
 
+  /// La cápsula siempre redonda, aunque cambie el alto con el tamaño de texto.
+  private final class RootView: UIView {
+    var onLayout: (() -> Void)?
+    override func layoutSubviews() { super.layoutSubviews(); onLayout?() }
+  }
+
   private func update() {
+    // Medidas de la barra de pestañas de Apple. iOS 26: cápsula flotante de
+    // 62 pt (el margen lo pone Flutter). Antes: barra de 49 pt de lado a lado
+    // con línea fina arriba y el hueco del indicador de inicio debajo.
+    let floating = configuration["floating"] as? Bool ?? true
+    let bottomInset = CGFloat((configuration["bottomInset"] as? NSNumber)?.doubleValue ?? 0)
+    surface.layer.cornerRadius = floating ? root.bounds.height / 2 : 0
+    separator.isHidden = floating
+    stackBottom.constant = floating ? -4 : -(bottomInset + 1)
     root.overrideUserInterfaceStyle = configuration["dark"] as? Bool == true ? .dark : .light
     let opaque = UIAccessibility.isReduceTransparencyEnabled || configuration["highContrast"] as? Bool == true
     if opaque {
@@ -95,17 +124,20 @@ final class GlassNavigationView: NSObject, FlutterPlatformView {
       style.title = label
       style.image = UIImage(systemName: index < symbols.count ? symbols[index] : "circle")
       style.imagePlacement = .top
-      style.imagePadding = 2
-      style.contentInsets = NSDirectionalEdgeInsets(top: 3, leading: 8, bottom: 3, trailing: 8)
-      style.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+      style.imagePadding = floating ? 3 : 2
+      style.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 6, bottom: 4, trailing: 6)
+      style.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
       style.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
         var outgoing = incoming
-        outgoing.font = UIFont.preferredFont(forTextStyle: .caption2)
+        // 10 pt como las pestañas del sistema, y crece con el tamaño de texto.
+        outgoing.font = UIFontMetrics(forTextStyle: .caption2)
+          .scaledFont(for: .systemFont(ofSize: 10, weight: .medium))
         return outgoing
       }
       style.baseForegroundColor = index == selected ? tint : .secondaryLabel
-      style.background.backgroundColor = index == selected ? tint.withAlphaComponent(0.14) : .clear
-      style.background.cornerRadius = 21
+      // En iOS 26 la pestaña elegida lleva una píldora; antes, solo el color.
+      style.background.backgroundColor = floating && index == selected ? tint.withAlphaComponent(0.12) : .clear
+      style.background.cornerRadius = 27
       button.configuration = style
       button.titleLabel?.adjustsFontForContentSizeCategory = true
       button.accessibilityLabel = label

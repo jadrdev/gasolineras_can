@@ -498,5 +498,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "evSwitchToElectric": "Ver puntos de carga",
+  "evSwitchToFuel": "Ver gasolineras"
 }

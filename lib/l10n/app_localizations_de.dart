@@ -876,4 +876,10 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get evSwitchToElectric => 'Ladepunkte anzeigen';
+
+  @override
+  String get evSwitchToFuel => 'Tankstellen anzeigen';
 }

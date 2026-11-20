@@ -8,12 +8,20 @@ class IosGlassNavigationBar extends StatefulWidget {
   final List<String> symbols;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+
+  /// Cápsula de iOS 26 (true) o barra clásica de lado a lado (false).
+  final bool floating;
+
+  /// Hueco del indicador de inicio dentro de la barra clásica.
+  final double bottomInset;
   const IosGlassNavigationBar({
     super.key,
     required this.labels,
     required this.symbols,
     required this.selectedIndex,
     required this.onSelected,
+    this.floating = true,
+    this.bottomInset = 0,
   });
   @override
   State<IosGlassNavigationBar> createState() => _IosGlassNavigationBarState();
@@ -29,6 +37,8 @@ class _IosGlassNavigationBarState extends State<IosGlassNavigationBar> {
     'dark': Theme.of(context).brightness == Brightness.dark,
     'highContrast': MediaQuery.highContrastOf(context),
     'tint': Theme.of(context).colorScheme.primary.toARGB32(),
+    'floating': widget.floating,
+    'bottomInset': widget.bottomInset,
   };
 
   @override

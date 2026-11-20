@@ -141,6 +141,17 @@ class _GasStationListPageState extends State<GasStationListPage> {
     if (Enlaces.consumirElectricos()) _abrirElectricos();
   }
 
+  /// Botón ⚡/⛽ de arriba: pasa de gasolineras a puntos de carga y vuelta
+  /// (al volver, con el combustible que tenía elegido).
+  /// El título de arriba ya dice dónde está, sin más avisos.
+  void _alternarElectrico() {
+    setState(() {
+      _electric = !_electric;
+      if (_electric && _zone.startsWith('municipio:')) _zone = 'all';
+    });
+    _savePreferences();
+  }
+
   void _abrirElectricos() {
     if (!mounted || _electric) return;
     setState(() {
@@ -246,6 +257,15 @@ class _GasStationListPageState extends State<GasStationListPage> {
         appBar: AppBar(
           title: Text(_electric ? l10n.evListTitle : l10n.stationListTitle),
           actions: [
+            IconButton(
+              tooltip: _electric
+                  ? l10n.evSwitchToFuel
+                  : l10n.evSwitchToElectric,
+              onPressed: _alternarElectrico,
+              icon: Icon(
+                _electric ? Icons.local_gas_station : Icons.ev_station,
+              ),
+            ),
             if (_position == null)
               IconButton(
                 tooltip: l10n.stationUseMyLocation,
@@ -323,52 +343,40 @@ class _GasStationListPageState extends State<GasStationListPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  PopupMenuButton<String>(
-                    tooltip: l10n.stationFuelTooltip(
-                      _electric ? l10n.evFuelLabel : _fuel.label(l10n),
-                    ),
-                    initialValue: _electric ? 'electric' : _fuel.name,
-                    itemBuilder: (_) => [
-                      ...FuelType.values.map(
-                        (fuel) => PopupMenuItem(
-                          value: fuel.name,
-                          child: Text(fuel.label(l10n)),
+                  // Tipo de gasolina. Eléctrico va en el botón de arriba.
+                  if (!_electric)
+                    PopupMenuButton<String>(
+                      tooltip: l10n.stationFuelTooltip(_fuel.label(l10n)),
+                      initialValue: _fuel.name,
+                      itemBuilder: (_) => [
+                        ...FuelType.values.map(
+                          (fuel) => PopupMenuItem(
+                            value: fuel.name,
+                            child: Text(fuel.label(l10n)),
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        setState(() => _fuel = FuelType.values.byName(value));
+                        _savePreferences();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _fuel.shortLabel,
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            const Icon(Icons.arrow_drop_down),
+                          ],
                         ),
                       ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: 'electric',
-                        child: Text(l10n.evFuelLabel),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      setState(() {
-                        _electric = value == 'electric';
-                        if (_electric) {
-                          if (_zone.startsWith('municipio:')) _zone = 'all';
-                        } else {
-                          _fuel = FuelType.values.byName(value);
-                        }
-                      });
-                      _savePreferences();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _electric ? '⚡' : _fuel.shortLabel,
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          const Icon(Icons.arrow_drop_down),
-                        ],
-                      ),
                     ),
-                  ),
                   PopupMenuButton<SortBy>(
                     tooltip: l10n.stationSortTooltip,
                     initialValue: _sort,

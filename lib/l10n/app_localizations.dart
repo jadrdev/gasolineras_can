@@ -1491,6 +1491,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{count, plural, =1{1 averiado} other{{count} averiados}}'**
   String evBrokenCount(int count);
+
+  /// No description provided for @evSwitchToElectric.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver puntos de carga'**
+  String get evSwitchToElectric;
+
+  /// No description provided for @evSwitchToFuel.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver gasolineras'**
+  String get evSwitchToFuel;
 }
 
 class _AppLocalizationsDelegate

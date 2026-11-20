@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import '../../core/widgets/ios_glass_navigation_bar.dart';
 import 'package:material_ui/material_ui.dart';
@@ -113,6 +115,15 @@ class _HomeScreenState extends State<HomeScreen> {
         : (pageIndex == 2 ? 1 : 0);
 
     final ios = !kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
+    // Medidas de la barra de pestañas de Apple: en iOS 26 cápsula flotante
+    // de 62 pt a 21 pt de los lados y del borde de abajo; antes, la clásica
+    // de 49 pt de lado a lado más el hueco del indicador de inicio.
+    final floating = ios && _iosMajor() >= 26;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final textExtra = (MediaQuery.textScalerOf(context).scale(10) - 10).clamp(
+      0.0,
+      24.0,
+    );
     void select(int index) {
       setState(() => _currentIndex = isLoggedIn ? index : (index == 1 ? 2 : 0));
     }
@@ -121,16 +132,17 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: ios,
       body: IndexedStack(index: pageIndex, children: pages),
       bottomNavigationBar: ios
-          ? SafeArea(
-              top: false,
-              minimum: const EdgeInsets.fromLTRB(40, 0, 40, 8),
-              child: SizedBox(
-                height:
-                    52 +
-                    (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
+          ? Padding(
+              padding: floating
+                  ? EdgeInsets.fromLTRB(
+                      21,
                       0,
-                      32,
-                    ),
+                      21,
+                      safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 8,
+                    )
+                  : EdgeInsets.zero,
+              child: SizedBox(
+                height: floating ? 62 + textExtra : 49 + textExtra + safeBottom,
                 child: IosGlassNavigationBar(
                   labels: items.map((item) => item.label!).toList(),
                   symbols: [
@@ -139,6 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     'person.crop.circle',
                   ],
                   selectedIndex: bottomNavIndex,
+                  floating: floating,
+                  bottomInset: floating ? 0 : safeBottom,
                   onSelected: select,
                 ),
               ),
@@ -157,4 +171,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
     );
   }
+}
+
+/// Versión principal de iOS («Version 26.1 (Build …)» → 26).
+int _iosMajor() {
+  final match = RegExp(r'(\d+)').firstMatch(Platform.operatingSystemVersion);
+  return int.tryParse(match?.group(1) ?? '') ?? 0;
 }

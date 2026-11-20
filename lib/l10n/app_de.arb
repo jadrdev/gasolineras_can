@@ -231,5 +231,7 @@
   "evUpdatedAt": "Aktualisiert · {date}",
   "evFreeCount": "{count, plural, =1{1 frei} other{{count} frei}}",
   "evBusyCount": "{count, plural, =1{1 belegt} other{{count} belegt}}",
-  "evBrokenCount": "{count, plural, =1{1 defekt} other{{count} defekt}}"
+  "evBrokenCount": "{count, plural, =1{1 defekt} other{{count} defekt}}",
+  "evSwitchToElectric": "Ladepunkte anzeigen",
+  "evSwitchToFuel": "Tankstellen anzeigen"
 }
