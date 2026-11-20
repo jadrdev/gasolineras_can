@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/margen_lateral.dart';
+
 /// Tema centralizado de la app (Material 3 + ColorScheme por semilla).
 /// Mantener aquí los colores evita que cada pantalla defina los suyos
 /// y que se rompan al cambiar entre modo claro y oscuro.
@@ -29,6 +31,7 @@ class AppTheme {
           ? base.textTheme
           : GoogleFonts.beVietnamProTextTheme(base.textTheme),
       scaffoldBackgroundColor: colorScheme.surfaceContainerLowest,
+      pageTransitionsTheme: TransicionConMargenLateral.tema,
       cardTheme: CardThemeData(
         elevation: 0,
         color: colorScheme.surfaceContainerLow,

@@ -298,11 +298,13 @@ class ProfilePage extends StatelessWidget {
   );
 
   Widget _buildLoginPrompt(BuildContext context, ColorScheme colorScheme) {
+    // Desplazable: en pantallas bajas (iPhone SE, iPhone Duo cerrado) no cabe
+    // entero. Abajo deja hueco para la barra de pestañas flotante.
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.person_outline,

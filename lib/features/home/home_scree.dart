@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import '../../core/widgets/ios_glass_navigation_bar.dart';
+import '../../core/widgets/margen_lateral.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/features/auth/profile_page.dart';
 import 'package:gasolineras_can/features/favoritos/favoritos_page.dart';
@@ -121,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final floating = ios && _iosMajor() >= 26;
     final safe = MediaQuery.paddingOf(context);
     final safeBottom = safe.bottom;
+    final lateral = safe.left < safe.right ? safe.left : safe.right;
     final textExtra = (MediaQuery.textScalerOf(context).scale(10) - 10).clamp(
       0.0,
       24.0,
@@ -131,14 +133,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       extendBody: ios,
-      body: IndexedStack(index: pageIndex, children: pages),
+      // La lista se aparta de la cámara (iPhone Duo cerrado); la barra de
+      // abajo no, para quedar centrada en la pantalla entera.
+      body: MargenLateral(
+        child: IndexedStack(index: pageIndex, children: pages),
+      ),
       bottomNavigationBar: ios
           ? Padding(
               padding: floating
                   ? EdgeInsets.fromLTRB(
-                      21 + safe.left,
+                      // Igual a los dos lados: centrada en la pantalla
+                      // aunque solo haya margen en uno (iPhone Duo cerrado).
+                      21 + lateral,
                       0,
-                      21 + safe.right,
+                      21 + lateral,
                       safeBottom > 0 ? (safeBottom - 13).clamp(8.0, 40.0) : 8,
                     )
                   : EdgeInsets.zero,

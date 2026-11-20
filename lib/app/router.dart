@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:gasolineras_can/core/enlaces.dart';
 import 'package:gasolineras_can/core/splash_screen.dart';
+import 'package:gasolineras_can/core/widgets/margen_lateral.dart';
 import 'package:gasolineras_can/features/auth/auth_bloc.dart';
 import 'package:gasolineras_can/features/auth/presentacion.dart';
 import 'package:gasolineras_can/features/home/home_scree.dart';
@@ -44,7 +45,7 @@ GoRouter createRouter(AuthBloc authBloc) {
         path: '/login',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const LoginScreen(),
+          child: const MargenLateral(child: LoginScreen()),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
@@ -53,7 +54,7 @@ GoRouter createRouter(AuthBloc authBloc) {
         path: '/register',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const RegisterScreen(),
+          child: const MargenLateral(child: RegisterScreen()),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
