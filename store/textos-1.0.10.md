@@ -20,13 +20,13 @@ Apple no acepta emojis en las novedades.
 **Google Play**
 ```
 <es-ES>
-Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En iPhone, barra de abajo renovada. En pantallas grandes y plegables, la lista y la ficha a la vez.
+Puntos de carga con datos oficiales de Red Eléctrica: precio de cada operador y si los cargadores están libres, ocupados o averiados. Nuevo botón arriba para pasar de gasolineras a puntos de carga con un toque. En pantallas grandes y plegables, la lista y la ficha a la vez.
 </es-ES>
 <en-GB>
-Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On iPhone, a refreshed bottom bar. On large and foldable screens, the list and the details side by side.
+Charging points with official data from Red Eléctrica: each operator's price and whether chargers are free, in use or out of order. New button at the top to switch between petrol stations and charging points with one tap. On large and foldable screens, the list and the details side by side.
 </en-GB>
 <de-DE>
-Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf dem iPhone eine überarbeitete untere Leiste. Auf großen und faltbaren Bildschirmen Liste und Details nebeneinander.
+Ladepunkte mit offiziellen Daten von Red Eléctrica: Preis jedes Betreibers und ob die Ladesäulen frei, belegt oder defekt sind. Neue Taste oben, um mit einem Tipp zwischen Tankstellen und Ladepunkten zu wechseln. Auf großen und faltbaren Bildschirmen Liste und Details nebeneinander.
 </de-DE>
 ```
 
